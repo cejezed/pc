@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Settings as SettingsIcon, 
-  Upload, 
-  Download, 
-  User, 
-  Bell, 
+import {
+  Settings as SettingsIcon,
+  Upload,
+  Download,
+  User,
+  Bell,
   Link as LinkIcon,
   Save,
   FileText,
   Calendar,
   Check,
-  X,
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
@@ -18,7 +17,15 @@ import {
 // Types
 type TabType = 'import-export' | 'profile' | 'notifications' | 'integrations';
 
-type DataType = 'time-entries' | 'projects' | 'invoices' | 'ideas' | 'tasks' | 'habits' | 'journal' | 'goals';
+type DataType =
+  | 'time-entries'
+  | 'projects'
+  | 'invoices'
+  | 'ideas'
+  | 'tasks'
+  | 'habits'
+  | 'journal'
+  | 'goals';
 
 type ExportFormat = 'csv' | 'json' | 'excel';
 
@@ -55,7 +62,7 @@ type NotificationSettings = {
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<TabType>('import-export');
-  
+
   // Import/Export state
   const [importDataType, setImportDataType] = useState<DataType>('time-entries');
   const [exportDataType, setExportDataType] = useState<DataType>('time-entries');
@@ -76,7 +83,7 @@ const Settings = () => {
     logo_url: '',
     name: 'Jan Brikx',
     email: 'jan@brikx.nl',
-    phone: '+31 6 12345678'
+    phone: '+31 6 12345678',
   });
 
   // Notifications state
@@ -85,18 +92,18 @@ const Settings = () => {
       budget_alerts: true,
       invoice_due: true,
       subscription_cancel: true,
-      weekly_summary: true
+      weekly_summary: true,
     },
     push: {
       affirmation_reminders: true,
       habit_checkins: true,
       task_deadlines: true,
-      journal_reminder: true
+      journal_reminder: true,
     },
     quiet_hours: {
       start: '22:00',
-      end: '08:00'
-    }
+      end: '08:00',
+    },
   });
 
   // Integrations state
@@ -112,9 +119,8 @@ const Settings = () => {
 
   const handleImport = () => {
     if (!uploadedFile) return;
-    
+
     setImporting(true);
-    // Simulate import
     setTimeout(() => {
       setImporting(false);
       setImportSuccess(true);
@@ -124,9 +130,9 @@ const Settings = () => {
   };
 
   const handleExport = () => {
-    // Simulate export download
-    const filename = `${exportDataType}-export-${new Date().toISOString().split('T')[0]}.${exportFormat}`;
-    console.log('Downloading:', filename);
+    const filename = `${exportDataType}-export-${
+      new Date().toISOString().split('T')[0]
+    }.${exportFormat}`;
     alert(`Export gestart: ${filename}`);
   };
 
@@ -144,20 +150,20 @@ const Settings = () => {
 
   const dataTypeLabels: Record<DataType, string> = {
     'time-entries': 'Uren',
-    'projects': 'Projecten',
-    'invoices': 'Facturen',
-    'ideas': 'Ideeën',
-    'tasks': 'Taken',
-    'habits': 'Gewoontes',
-    'journal': 'Dagboek',
-    'goals': 'Doelen'
+    projects: 'Projecten',
+    invoices: 'Facturen',
+    ideas: 'Ideeën',
+    tasks: 'Taken',
+    habits: 'Gewoontes',
+    journal: 'Dagboek',
+    goals: 'Doelen',
   };
 
   const tabs = [
     { id: 'import-export', label: 'Import/Export', icon: Upload },
     { id: 'profile', label: 'Profiel', icon: User },
     { id: 'notifications', label: 'Notificaties', icon: Bell },
-    { id: 'integrations', label: 'Integraties', icon: LinkIcon }
+    { id: 'integrations', label: 'Integraties', icon: LinkIcon },
   ] as const;
 
   return (
@@ -210,7 +216,9 @@ const Settings = () => {
                   className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
                 >
                   {Object.entries(dataTypeLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -298,7 +306,9 @@ const Settings = () => {
                   className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
                 >
                   {Object.entries(dataTypeLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -342,7 +352,9 @@ const Settings = () => {
                         onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
                         className="w-4 h-4 text-[#2D9CDB] focus:ring-[#2D9CDB]"
                       />
-                      <span className="text-sm font-medium text-gray-700 uppercase">{format}</span>
+                      <span className="text-sm font-medium text-gray-700 uppercase">
+                        {format}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -375,13 +387,13 @@ const Settings = () => {
                   <Download className="w-4 h-4" />
                   Download Alle Data (ZIP)
                 </button>
-                <p className="text-xs text-gray-500 mt-2">
-                  Laatste backup: 25 Sep 2024 14:32
-                </p>
+                <p className="text-xs text-gray-500 mt-2">Laatste backup: 25 Sep 2024 14:32</p>
               </div>
 
               <div className="border-t border-gray-200 pt-4">
-                <p className="text-sm font-medium text-gray-700 mb-3">Restore from backup:</p>
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  Restore from backup:
+                </p>
                 <input
                   type="file"
                   accept=".zip"
@@ -403,14 +415,16 @@ const Settings = () => {
       {activeTab === 'profile' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">Bedrijfsgegevens (voor facturen)</h2>
+            <h2 className="text-xl font-bold text-[#0A2540] mb-4">
+              Bedrijfsgegevens (voor facturen)
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Bedrijfsnaam</label>
                 <input
                   type="text"
                   value={profile.company_name}
-                  onChange={(e) => setProfile({...profile, company_name: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -419,7 +433,7 @@ const Settings = () => {
                 <input
                   type="text"
                   value={profile.kvk_number}
-                  onChange={(e) => setProfile({...profile, kvk_number: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, kvk_number: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -428,7 +442,7 @@ const Settings = () => {
                 <input
                   type="text"
                   value={profile.btw_number}
-                  onChange={(e) => setProfile({...profile, btw_number: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, btw_number: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -437,7 +451,7 @@ const Settings = () => {
                 <input
                   type="text"
                   value={profile.iban}
-                  onChange={(e) => setProfile({...profile, iban: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -446,7 +460,7 @@ const Settings = () => {
                 <input
                   type="text"
                   value={profile.address}
-                  onChange={(e) => setProfile({...profile, address: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -469,7 +483,7 @@ const Settings = () => {
                 <input
                   type="text"
                   value={profile.name}
-                  onChange={(e) => setProfile({...profile, name: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -478,7 +492,7 @@ const Settings = () => {
                 <input
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile({...profile, email: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -487,7 +501,7 @@ const Settings = () => {
                 <input
                   type="tel"
                   value={profile.phone}
-                  onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
                 />
               </div>
@@ -515,10 +529,12 @@ const Settings = () => {
                   <input
                     type="checkbox"
                     checked={value}
-                    onChange={(e) => setNotifications({
-                      ...notifications,
-                      email: { ...notifications.email, [key]: e.target.checked }
-                    })}
+                    onChange={(e) =>
+                      setNotifications({
+                        ...notifications,
+                        email: { ...notifications.email, [key]: e.target.checked },
+                      })
+                    }
                     className="w-5 h-5 text-[#2D9CDB] rounded focus:ring-[#2D9CDB]"
                   />
                   <span className="text-sm font-medium text-gray-700 group-hover:text-[#2D9CDB]">
@@ -540,10 +556,12 @@ const Settings = () => {
                   <input
                     type="checkbox"
                     checked={value}
-                    onChange={(e) => setNotifications({
-                      ...notifications,
-                      push: { ...notifications.push, [key]: e.target.checked }
-                    })}
+                    onChange={(e) =>
+                      setNotifications({
+                        ...notifications,
+                        push: { ...notifications.push, [key]: e.target.checked },
+                      })
+                    }
                     className="w-5 h-5 text-[#2D9CDB] rounded focus:ring-[#2D9CDB]"
                   />
                   <span className="text-sm font-medium text-gray-700 group-hover:text-[#2D9CDB]">
@@ -563,20 +581,24 @@ const Settings = () => {
               <input
                 type="time"
                 value={notifications.quiet_hours.start}
-                onChange={(e) => setNotifications({
-                  ...notifications,
-                  quiet_hours: { ...notifications.quiet_hours, start: e.target.value }
-                })}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    quiet_hours: { ...notifications.quiet_hours, start: e.target.value },
+                  })
+                }
                 className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
               />
               <span className="text-gray-500">tot</span>
               <input
                 type="time"
                 value={notifications.quiet_hours.end}
-                onChange={(e) => setNotifications({
-                  ...notifications,
-                  quiet_hours: { ...notifications.quiet_hours, end: e.target.value }
-                })}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    quiet_hours: { ...notifications.quiet_hours, end: e.target.value },
+                  })
+                }
                 className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
               />
             </div>
@@ -604,11 +626,11 @@ const Settings = () => {
                   <p className="text-sm text-gray-500">Sync je agenda met Brikx</p>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                calendarConnected 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-gray-100 text-gray-600'
-              }`}>
+              <span
+                className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                  calendarConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                }`}
+              >
                 {calendarConnected ? '✓ Geactiveerd' : 'Niet verbonden'}
               </span>
             </div>
@@ -630,4 +652,32 @@ const Settings = () => {
                   </button>
                   <button
                     onClick={() => setCalendarConnected(false)}
-                    className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-4
+                    className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                  >
+                    Ontkoppelen
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!calendarConnected && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setCalendarConnected(true)}
+                  className="bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                >
+                  Opnieuw verbinden
+                </button>
+                <span className="text-sm text-gray-600">
+                  Verbind je Google Calendar via ICS.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Settings;

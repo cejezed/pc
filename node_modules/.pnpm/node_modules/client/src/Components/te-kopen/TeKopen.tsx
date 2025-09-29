@@ -1,6 +1,7 @@
 import React from "react";
 import { Plus, Filter } from "lucide-react";
-import type { useShoppingItems, ShoppingItem } from "./hooks";
+import { useShoppingItems } from "./hooks";
+import type { ShoppingItem } from "./hooks";
 import { EmptyState, CATEGORIES, PRIORITIES } from "./basis-componenten";
 import { ShoppingItemCard } from "./shopping-item-card";
 import { ShoppingModal } from "./shopping-modal";
@@ -126,10 +127,10 @@ export default function TeKopen() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Te Kopen</h1>
+        <h1 className="text-3xl font-bold text-brikx-dark">Te Kopen</h1>
         <button
           onClick={handleAddClick}
-          className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-brikx flex items-center gap-2 font-semibold shadow-lg hover:shadow-brikx transition-all"
+          className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-semibold shadow-lg hover:shadow-brikx transition-all"
         >
           <Plus className="w-4 h-4" />
           Nieuw item
@@ -141,7 +142,7 @@ export default function TeKopen() {
 
       {/* Filters & Sort */}
       {filteredItems.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-brikx p-4 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="w-4 h-4 text-brikx-teal" />
             <span className="font-semibold text-gray-700">Filters & Sortering</span>
@@ -155,7 +156,7 @@ export default function TeKopen() {
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
               >
                 <option value="">Alle categorieën</option>
                 {CATEGORIES.map((cat) => (
@@ -173,7 +174,7 @@ export default function TeKopen() {
               <select
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
               >
                 <option value="">Alle prioriteiten</option>
                 {PRIORITIES.map((pri) => (
@@ -191,7 +192,7 @@ export default function TeKopen() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
               >
                 <option value="date">Datum (nieuwste eerst)</option>
                 <option value="price">Prijs (hoogste eerst)</option>

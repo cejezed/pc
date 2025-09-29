@@ -1,9 +1,10 @@
+// src/components/ideas/Ideas.tsx
 import React from "react";
 import { Plus } from "lucide-react";
 import type { Idea } from "./types";
 import { useIdeas } from "./hooks";
 import { IdeaCard, IdeaListItem } from "./idea-card-componenten";
-import { IdeaFormModal } from "./idea-modal-componenten";  // ✅ Alleen IdeaFormModal
+import { IdeaFormModal } from "./idea-modal-componenten";
 import { SearchBar, FilterBar, ViewToggle, SortSelect } from "./filter-componenten";
 
 export default function Ideas() {
@@ -14,17 +15,10 @@ export default function Ideas() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [priorityFilter, setPriorityFilter] = React.useState("all");
-  const [categoryFilter, setCategoryFilter] = React.useState("all");
   const [sortBy, setSortBy] = React.useState("newest");
   const [view, setView] = React.useState<"grid" | "list">("grid");
 
-  // Extract unique categories
-  const categories = React.useMemo(() => {
-    const cats = ideas
-      .map(i => i.category)
-      .filter((c): c is string => !!c);
-    return Array.from(new Set(cats)).sort();
-  }, [ideas]);
+  // Extract unique categories - REMOVED (geen categories in database)
 
   // Filter and sort ideas
   const filteredIdeas = React.useMemo(() => {
@@ -33,19 +27,16 @@ export default function Ideas() {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = idea.title.toLowerCase().includes(query);
-        const matchesDescription = idea.description?.toLowerCase().includes(query);
+        const matchesNote = idea.note?.toLowerCase().includes(query);
         const matchesTags = idea.tags?.some(tag => tag.toLowerCase().includes(query));
-        if (!matchesTitle && !matchesDescription && !matchesTags) return false;
+        if (!matchesTitle && !matchesNote && !matchesTags) return false;
       }
 
       // Status filter
       if (statusFilter !== "all" && idea.status !== statusFilter) return false;
 
-      // Priority filter
-      if (priorityFilter !== "all" && idea.priority !== priorityFilter) return false;
-
-      // Category filter
-      if (categoryFilter !== "all" && idea.category !== categoryFilter) return false;
+      // Priority filter (nu een nummer)
+      if (priorityFilter !== "all" && idea.priority.toString() !== priorityFilter) return false;
 
       return true;
     });
@@ -57,10 +48,8 @@ export default function Ideas() {
           return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         case "oldest":
           return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
-        case "priority": {
-          const priorityOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
-          return (priorityOrder[a.priority] ?? 99) - (priorityOrder[b.priority] ?? 99);
-        }
+        case "priority":
+          return b.priority - a.priority; // Hogere nummer = hogere prioriteit
         case "title":
           return a.title.localeCompare(b.title);
         default:
@@ -69,7 +58,7 @@ export default function Ideas() {
     });
 
     return result;
-  }, [ideas, searchQuery, statusFilter, priorityFilter, categoryFilter, sortBy]);
+  }, [ideas, searchQuery, statusFilter, priorityFilter, sortBy]);
 
   const handleEdit = (idea: Idea) => {
     setEditIdea(idea);
@@ -85,7 +74,6 @@ export default function Ideas() {
     setSearchQuery("");
     setStatusFilter("all");
     setPriorityFilter("all");
-    setCategoryFilter("all");
   };
 
   if (isLoading) {
@@ -112,7 +100,7 @@ export default function Ideas() {
               setEditIdea(undefined);
               setShowModal(true);
             }}
-            className="btn-brikx-primary inline-flex items-center gap-2"
+            className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-brikx transition-all inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Nieuw idee
@@ -131,30 +119,27 @@ export default function Ideas() {
         </div>
 
         {/* Filters */}
-        <div className="card-brikx">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <FilterBar
             statusFilter={statusFilter}
             priorityFilter={priorityFilter}
-            categoryFilter={categoryFilter}
-            categories={categories}
             onStatusChange={setStatusFilter}
             onPriorityChange={setPriorityFilter}
-            onCategoryChange={setCategoryFilter}
             onReset={resetFilters}
           />
         </div>
 
         {/* Ideas Grid/List */}
         {filteredIdeas.length === 0 ? (
-          <div className="card-brikx text-center py-12">
+          <div className="bg-white rounded-lg border border-gray-200 p-12 shadow-sm text-center">
             {ideas.length === 0 ? (
               <div className="text-gray-500">
-                <div className="text-4xl mb-3">💡</div>
-                <p className="text-lg mb-2">Nog geen ideeën</p>
-                <p className="text-sm mb-4">Klik op "Nieuw idee" om te beginnen!</p>
+                <div className="text-6xl mb-4">💡</div>
+                <p className="text-xl font-semibold mb-2">Nog geen ideeën</p>
+                <p className="text-sm mb-6">Klik op "Nieuw idee" om te beginnen!</p>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="btn-brikx-primary inline-flex items-center gap-2"
+                  className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-brikx transition-all inline-flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   Eerste idee toevoegen
@@ -162,8 +147,8 @@ export default function Ideas() {
               </div>
             ) : (
               <div className="text-gray-500">
-                <div className="text-4xl mb-3">🔍</div>
-                <p className="text-lg mb-2">Geen ideeën gevonden</p>
+                <div className="text-6xl mb-4">🔍</div>
+                <p className="text-xl font-semibold mb-2">Geen ideeën gevonden</p>
                 <p className="text-sm">Pas je filters aan om meer resultaten te zien</p>
               </div>
             )}
@@ -183,7 +168,6 @@ export default function Ideas() {
         )}
 
         {/* Modal */}
-        {/* ✅ Changed from editIdea prop to idea */}
         <IdeaFormModal
           isOpen={showModal}
           onClose={handleCloseModal}

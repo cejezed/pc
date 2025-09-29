@@ -1,23 +1,18 @@
-// src/Components/ideas/types.ts
+// src/components/ideas/types.ts - Voor bestaande database schema
 
 export interface Idea {
   id: string;
+  owner_id: string;
   title: string;
-  description?: string;
-  category: 'business' | 'product' | 'feature' | 'improvement' | 'other';
-  status: 'new' | 'in_progress' | 'implemented' | 'archived' | 'rejected';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  note?: string; // Was "description" in mijn code
+  status: string; // Vrij tekstveld in jouw database
   tags?: string[];
-  estimated_effort?: 'small' | 'medium' | 'large' | 'extra_large';
-  estimated_value?: 'low' | 'medium' | 'high';
-  notes?: string;
-  source?: string; // Where the idea came from
+  priority: number; // Integer in jouw database (was enum in mijn code)
   created_at: string;
   updated_at?: string;
-  implemented_at?: string;
-  archived_at?: string;
 }
 
+// Comments worden NIET ondersteund (tabel bestaat niet)
 export interface IdeaComment {
   id: string;
   idea_id: string;
@@ -36,59 +31,38 @@ export interface IdeaStats {
   by_priority: Record<string, number>;
 }
 
-// Form types
+// Form types - aangepast voor jouw schema
 export interface IdeaFormData {
   title: string;
-  description: string;
-  category: 'business' | 'product' | 'feature' | 'improvement' | 'other';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  note: string; // Was "description"
+  status: string;
+  priority: number; // Integer
   tags: string[];
-  estimated_effort: 'small' | 'medium' | 'large' | 'extra_large';
-  estimated_value: 'low' | 'medium' | 'high';
-  notes: string;
-  source: string;
 }
 
-// Constants
-export const IDEA_CATEGORIES = [
-  { value: 'business', label: 'Business Idee', icon: '💼', color: '#3B82F6' },
-  { value: 'product', label: 'Product Idee', icon: '📦', color: '#10B981' },
-  { value: 'feature', label: 'Feature Idee', icon: '⚡', color: '#F59E0B' },
-  { value: 'improvement', label: 'Verbetering', icon: '🔧', color: '#8B5CF6' },
-  { value: 'other', label: 'Overig', icon: '💡', color: '#6B7280' },
-];
-
+// Status opties - aanpasbaar aan jouw gebruik
 export const IDEA_STATUSES = [
   { value: 'new', label: 'Nieuw', icon: '🆕', color: '#3B82F6' },
+  { value: 'idea', label: 'Idee', icon: '💡', color: '#8B5CF6' },
+  { value: 'planning', label: 'Planning', icon: '📋', color: '#F59E0B' },
   { value: 'in_progress', label: 'In Progress', icon: '🔄', color: '#F59E0B' },
+  { value: 'done', label: 'Klaar', icon: '✅', color: '#10B981' },
   { value: 'implemented', label: 'Geïmplementeerd', icon: '✅', color: '#10B981' },
   { value: 'archived', label: 'Gearchiveerd', icon: '📁', color: '#6B7280' },
   { value: 'rejected', label: 'Afgewezen', icon: '❌', color: '#EF4444' },
 ];
 
+// Priority als nummer (1-5)
 export const IDEA_PRIORITIES = [
-  { value: 'low', label: 'Laag', icon: '🟢', color: '#10B981' },
-  { value: 'medium', label: 'Gemiddeld', icon: '🟡', color: '#F59E0B' },
-  { value: 'high', label: 'Hoog', icon: '🟠', color: '#F97316' },
-  { value: 'urgent', label: 'Urgent', icon: '🔴', color: '#EF4444' },
+  { value: 1, label: 'Laag', icon: '🟢', color: '#10B981' },
+  { value: 2, label: 'Gemiddeld', icon: '🟡', color: '#F59E0B' },
+  { value: 3, label: 'Hoog', icon: '🟠', color: '#F97316' },
+  { value: 4, label: 'Urgent', icon: '🔴', color: '#EF4444' },
+  { value: 5, label: 'Kritiek', icon: '🔴🔴', color: '#DC2626' },
 ];
 
-export const EFFORT_ESTIMATES = [
-  { value: 'small', label: 'Klein (1-2 dagen)', icon: '🟢', color: '#10B981' },
-  { value: 'medium', label: 'Gemiddeld (1 week)', icon: '🟡', color: '#F59E0B' },
-  { value: 'large', label: 'Groot (1 maand)', icon: '🟠', color: '#F97316' },
-  { value: 'extra_large', label: 'Extra Groot (3+ maanden)', icon: '🔴', color: '#EF4444' },
-];
+// Geen categories in jouw database, dus verwijderd
+// Geen effort/value estimates, dus verwijderd
 
-export const VALUE_ESTIMATES = [
-  { value: 'low', label: 'Lage waarde', icon: '💰', color: '#6B7280' },
-  { value: 'medium', label: 'Gemiddelde waarde', icon: '💰💰', color: '#F59E0B' },
-  { value: 'high', label: 'Hoge waarde', icon: '💰💰💰', color: '#10B981' },
-];
-
-// Helper types
-export type IdeaCategory = 'business' | 'product' | 'feature' | 'improvement' | 'other';
-export type IdeaStatus = 'new' | 'in_progress' | 'implemented' | 'archived' | 'rejected';
-export type IdeaPriority = 'low' | 'medium' | 'high' | 'urgent';
-export type EffortEstimate = 'small' | 'medium' | 'large' | 'extra_large';
-export type ValueEstimate = 'low' | 'medium' | 'high';
+export type IdeaStatus = string; // Vrij tekstveld
+export type IdeaPriority = number; // Integer 1-5

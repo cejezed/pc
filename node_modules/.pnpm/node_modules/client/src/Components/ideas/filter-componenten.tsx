@@ -1,8 +1,7 @@
-// src/Components/ideas/filter-componenten.tsx
+// src/components/ideas/filter-componenten.tsx
 import React from "react";
 import { Search, Grid3X3, List, RotateCcw } from "lucide-react";
 
-// Search Bar Component
 export function SearchBar({ 
   value, 
   onChange 
@@ -18,33 +17,26 @@ export function SearchBar({
         placeholder="Zoek ideeën..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal"
       />
     </div>
   );
 }
 
-// Filter Bar Component
 export function FilterBar({
   statusFilter,
   priorityFilter,
-  categoryFilter,
-  categories,
   onStatusChange,
   onPriorityChange,
-  onCategoryChange,
   onReset,
 }: {
   statusFilter: string;
   priorityFilter: string;
-  categoryFilter: string;
-  categories: string[];
   onStatusChange: (value: string) => void;
   onPriorityChange: (value: string) => void;
-  onCategoryChange: (value: string) => void;
   onReset: () => void;
 }) {
-  const hasActiveFilters = statusFilter !== "all" || priorityFilter !== "all" || categoryFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || priorityFilter !== "all";
 
   return (
     <div className="flex flex-wrap gap-3 items-center">
@@ -52,11 +44,14 @@ export function FilterBar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
       >
         <option value="all">Alle statussen</option>
         <option value="new">Nieuw</option>
+        <option value="idea">Idee</option>
+        <option value="planning">Planning</option>
         <option value="in_progress">In Progress</option>
+        <option value="done">Klaar</option>
         <option value="implemented">Geïmplementeerd</option>
         <option value="archived">Gearchiveerd</option>
         <option value="rejected">Afgewezen</option>
@@ -66,38 +61,21 @@ export function FilterBar({
       <select
         value={priorityFilter}
         onChange={(e) => onPriorityChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
       >
         <option value="all">Alle prioriteiten</option>
-        <option value="urgent">Urgent</option>
-        <option value="high">Hoog</option>
-        <option value="medium">Gemiddeld</option>
-        <option value="low">Laag</option>
-      </select>
-
-      {/* Category Filter */}
-      <select
-        value={categoryFilter}
-        onChange={(e) => onCategoryChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="all">Alle categorieën</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category === 'business' && '💼 Business'}
-            {category === 'product' && '📦 Product'}
-            {category === 'feature' && '⚡ Feature'}
-            {category === 'improvement' && '🔧 Verbetering'}
-            {category === 'other' && '💡 Overig'}
-          </option>
-        ))}
+        <option value="1">Laag</option>
+        <option value="2">Gemiddeld</option>
+        <option value="3">Hoog</option>
+        <option value="4">Urgent</option>
+        <option value="5">Kritiek</option>
       </select>
 
       {/* Reset Button */}
       {hasActiveFilters && (
         <button
           onClick={onReset}
-          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 text-sm"
+          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 text-sm transition-colors"
           title="Filters resetten"
         >
           <RotateCcw className="w-4 h-4" />
@@ -108,7 +86,6 @@ export function FilterBar({
   );
 }
 
-// View Toggle Component
 export function ViewToggle({ 
   view, 
   onChange 
@@ -122,7 +99,7 @@ export function ViewToggle({
         onClick={() => onChange("grid")}
         className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
           view === "grid"
-            ? "bg-blue-500 text-white"
+            ? "bg-brikx-teal text-white"
             : "bg-white text-gray-700 hover:bg-gray-50"
         }`}
         title="Grid weergave"
@@ -134,7 +111,7 @@ export function ViewToggle({
         onClick={() => onChange("list")}
         className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors border-l ${
           view === "list"
-            ? "bg-blue-500 text-white border-blue-500"
+            ? "bg-brikx-teal text-white border-brikx-teal"
             : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
         }`}
         title="Lijst weergave"
@@ -146,7 +123,6 @@ export function ViewToggle({
   );
 }
 
-// Sort Select Component
 export function SortSelect({ 
   value, 
   onChange 
@@ -158,7 +134,7 @@ export function SortSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
     >
       <option value="newest">Nieuwste eerst</option>
       <option value="oldest">Oudste eerst</option>

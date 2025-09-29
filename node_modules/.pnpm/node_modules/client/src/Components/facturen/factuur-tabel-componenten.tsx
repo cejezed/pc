@@ -1,18 +1,18 @@
 import React, { useMemo, useState } from "react";
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  Download, 
-  Mail, 
-  Trash2 
+import {
+  ChevronUp,
+  ChevronDown,
+  Download,
+  Mail,
+  Trash2,
 } from "lucide-react";
 import { StatusBadge, centsToMoney } from "./basis-componenten";
 import { fmtDate, parseDate } from "./hooks";
 import { api } from "@/lib/api";
 import type { Invoice } from "./types";
 
-type Sort = { 
-  key: keyof Invoice | "client"; 
+type Sort = {
+  key: keyof Invoice | "client";
   dir: "asc" | "desc";
 };
 
@@ -31,10 +31,7 @@ export function InvoicesTable({
   onRowClick: (inv: Invoice) => void;
   onDelete: (inv: Invoice) => void;
 }) {
-  const [sort, setSort] = useState<Sort>({ 
-    key: "invoice_date", 
-    dir: "desc" 
-  });
+  const [sort, setSort] = useState<Sort>({ key: "invoice_date", dir: "desc" });
 
   const filtered = useMemo(() => {
     let list = invoices.slice();
@@ -42,7 +39,7 @@ export function InvoicesTable({
     if (filterStatus !== "all") {
       list = list.filter((i) => i.status === filterStatus);
     }
-    
+
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -52,32 +49,31 @@ export function InvoicesTable({
           (i.project?.client_name || "").toLowerCase().includes(q)
       );
     }
-    
+
     if (dateRange.from) {
       const from = parseDate(dateRange.from)!;
       list = list.filter((i) => parseDate(i.invoice_date)! >= from);
     }
-    
+
     if (dateRange.to) {
       const to = parseDate(dateRange.to)!;
       list = list.filter((i) => parseDate(i.invoice_date)! <= to);
     }
 
-    // Sorting
     list.sort((a, b) => {
       const dir = sort.dir === "asc" ? 1 : -1;
       let av: any = a[sort.key as keyof Invoice];
       let bv: any = b[sort.key as keyof Invoice];
-      
+
       if (sort.key === "client") {
         av = a.project?.client_name || "";
         bv = b.project?.client_name || "";
       }
-      
+
       if (sort.key === "amount_cents") {
         return (av - bv) * dir;
       }
-      
+
       return String(av).localeCompare(String(bv)) * dir;
     });
 
@@ -86,20 +82,19 @@ export function InvoicesTable({
 
   const header = (key: Sort["key"], label: string) => {
     const active = sort.key === key;
-    const dirIcon = active && sort.dir === "asc" 
-      ? <ChevronUp className="h-3 w-3" />
-      : active && sort.dir === "desc" 
-      ? <ChevronDown className="h-3 w-3" />
-      : null;
+    const dirIcon =
+      active && sort.dir === "asc" ? (
+        <ChevronUp className="h-3 w-3" />
+      ) : active && sort.dir === "desc" ? (
+        <ChevronDown className="h-3 w-3" />
+      ) : null;
 
     return (
       <button
         className="inline-flex items-center gap-1"
         onClick={() =>
           setSort((s) =>
-            s.key === key 
-              ? { key, dir: s.dir === "asc" ? "desc" : "asc" } 
-              : { key, dir: "asc" }
+            s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
           )
         }
       >
@@ -138,7 +133,7 @@ export function InvoicesTable({
           {filtered.map((i) => (
             <tr key={i.id} className="hover:bg-gray-50">
               <td className="px-4 py-2">
-                <button 
+                <button
                   onClick={() => onRowClick(i)}
                   className="text-black underline-offset-2 hover:underline"
                 >
@@ -146,34 +141,28 @@ export function InvoicesTable({
                 </button>
               </td>
               <td className="px-4 py-2">
-                <div className="font-medium">
-                  {i.project?.client_name || "—"}
-                </div>
-                <div className="text-gray-600">
-                  {i.project?.name || "—"}
-                </div>
+                <div className="font-medium">{i.project?.client_name || "—"}</div>
+                <div className="text-gray-600">{i.project?.name || "—"}</div>
               </td>
               <td className="px-4 py-2">{fmtDate(i.invoice_date)}</td>
               <td className="px-4 py-2">
                 <div className="flex items-center gap-2">
                   {fmtDate(i.due_date)}
                   {i.status === "overdue" && (
-                    <span 
-                      className="ml-1 inline-block h-2 w-2 rounded-full bg-red-500" 
-                      title="Overdue" 
+                    <span
+                      className="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"
+                      title="Overdue"
                     />
                   )}
                 </div>
               </td>
-              <td className="px-4 py-2 text-right">
-                {centsToMoney(i.amount_cents)}
-              </td>
+              <td className="px-4 py-2 text-right">{centsToMoney(i.amount_cents)}</td>
               <td className="px-4 py-2">
                 <StatusBadge status={i.status} />
               </td>
               <td className="px-4 py-2">
                 <div className="flex justify-end gap-2">
-                  
+                  <a
                     className="p-2 rounded hover:bg-gray-100"
                     href={`/api/invoices/${i.id}/pdf`}
                     title="PDF downloaden"
@@ -182,13 +171,11 @@ export function InvoicesTable({
                   >
                     <Download className="h-4 w-4" />
                   </a>
-                  <button 
-                    className="p-2 rounded hover:bg-gray-100" 
+                  <button
+                    className="p-2 rounded hover:bg-gray-100"
                     title="Versturen per e-mail"
                     onClick={async () => {
-                      await api(`/api/invoices/${i.id}/send`, { 
-                        method: "POST" 
-                      });
+                      await api(`/api/invoices/${i.id}/send`, { method: "POST" });
                       alert("Verzonden.");
                     }}
                   >
@@ -207,10 +194,7 @@ export function InvoicesTable({
           ))}
           {!filtered.length && (
             <tr>
-              <td 
-                colSpan={7} 
-                className="px-4 py-8 text-center text-gray-600"
-              >
+              <td colSpan={7} className="px-4 py-8 text-center text-gray-600">
                 Geen facturen gevonden met deze filter(s).
               </td>
             </tr>

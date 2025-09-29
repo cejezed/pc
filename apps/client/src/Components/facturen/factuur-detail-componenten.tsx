@@ -1,38 +1,38 @@
 import React, { useState } from "react";
-import { 
-  X, 
-  Download, 
-  Mail, 
-  CheckCircle2, 
-  XCircle, 
-  Send, 
-  FileText 
+import {
+  X,
+  Download,
+  Mail,
+  CheckCircle2,
+  XCircle,
+  Send,
+  FileText,
 } from "lucide-react";
-import { 
-  StatusBadge, 
-  Pill, 
-  TimelineDot, 
-  centsToMoney 
+import {
+  StatusBadge,
+  Pill,
+  TimelineDot,
+  centsToMoney,
 } from "./basis-componenten";
-import { 
-  useSendInvoice, 
-  useMarkPaid, 
-  useCancelInvoice, 
+import {
+  useSendInvoice,
+  useMarkPaid,
+  useCancelInvoice,
   useCreateCreditNote,
   fmtDate,
-  ymd 
+  ymd,
 } from "./hooks";
 import type { Invoice } from "./types";
 
 export function InvoiceDetailDrawer({
   invoice,
-  onClose
+  onClose,
 }: {
   invoice: Invoice | null;
   onClose: () => void;
 }) {
   const [working, setWorking] = useState(false);
-  
+
   const sendMutation = useSendInvoice();
   const markPaidMutation = useMarkPaid();
   const cancelMutation = useCancelInvoice();
@@ -53,12 +53,12 @@ export function InvoiceDetailDrawer({
   const doMarkPaid = async () => {
     const d = prompt("Betaaldatum (YYYY-MM-DD)", ymd(new Date()));
     if (!d) return;
-    
+
     setWorking(true);
     try {
-      await markPaidMutation.mutateAsync({ 
-        id: invoice.id, 
-        payment_date: d 
+      await markPaidMutation.mutateAsync({
+        id: invoice.id,
+        payment_date: d,
       });
       alert("Gemarkeerd als betaald.");
     } finally {
@@ -68,7 +68,7 @@ export function InvoiceDetailDrawer({
 
   const doCancel = async () => {
     if (!confirm("Weet je zeker dat je deze factuur wilt annuleren?")) return;
-    
+
     setWorking(true);
     try {
       await cancelMutation.mutateAsync(invoice.id);
@@ -80,7 +80,7 @@ export function InvoiceDetailDrawer({
 
   const doCredit = async () => {
     if (!confirm("Creditnota aanmaken op basis van deze factuur?")) return;
-    
+
     setWorking(true);
     try {
       await creditMutation.mutateAsync(invoice.id);
@@ -105,10 +105,7 @@ export function InvoiceDetailDrawer({
               {invoice.project?.name} — {invoice.project?.client_name}
             </div>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 rounded hover:bg-gray-100"
-          >
+          <button onClick={onClose} className="p-2 rounded hover:bg-gray-100">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -184,7 +181,7 @@ export function InvoiceDetailDrawer({
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
             {invoice.status === "draft" && (
-              
+              <a
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-gray-50"
                 href={pdfUrl}
                 target="_blank"
@@ -195,7 +192,7 @@ export function InvoiceDetailDrawer({
             )}
 
             {invoice.status !== "cancelled" && (
-              
+              <a
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-gray-50"
                 href={pdfUrl}
                 target="_blank"
@@ -243,4 +240,12 @@ export function InvoiceDetailDrawer({
               disabled={working}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-gray-50"
             >
-              <Send className="h-4 w
+              <Send className="h-4 w-4" />
+              Creditnota
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

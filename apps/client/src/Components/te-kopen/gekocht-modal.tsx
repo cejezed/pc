@@ -19,6 +19,7 @@ export function PurchaseModal({
   isPending,
 }: PurchaseModalProps) {
   const [actualCostEuros, setActualCostEuros] = React.useState("");
+  const [purchasedLocation, setPurchasedLocation] = React.useState("");
 
   React.useEffect(() => {
     if (item?.estimated_cost_cents) {
@@ -26,6 +27,8 @@ export function PurchaseModal({
     } else {
       setActualCostEuros("");
     }
+    // Pre-fill location met store als die er is
+    setPurchasedLocation(item?.store || "");
   }, [item]);
 
   const handleConfirm = () => {
@@ -34,6 +37,7 @@ export function PurchaseModal({
     const data: PurchaseData = {
       actual_cost_cents: Math.round(parseFloat(actualCostEuros) * 100),
       purchased_at: new Date().toISOString(),
+      purchased_location: purchasedLocation.trim() || undefined,
     };
 
     onConfirm(data);
@@ -84,8 +88,21 @@ export function PurchaseModal({
               placeholder="0.00"
               value={actualCostEuros}
               onChange={(e) => setActualCostEuros(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
               autoFocus
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Waar gekocht? (optioneel)
+            </label>
+            <input
+              type="text"
+              placeholder="Bijv. Bol.com, IKEA, Albert Heijn..."
+              value={purchasedLocation}
+              onChange={(e) => setPurchasedLocation(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
             />
           </div>
 
@@ -113,14 +130,14 @@ export function PurchaseModal({
         <div className="flex gap-2 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
           >
             Annuleren
           </button>
           <button
             onClick={handleConfirm}
             disabled={!actualCostEuros || isPending}
-            className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 flex items-center justify-center gap-2"
           >
             <Check className="w-4 h-4" />
             {isPending ? "Opslaan..." : "Bevestigen"}
