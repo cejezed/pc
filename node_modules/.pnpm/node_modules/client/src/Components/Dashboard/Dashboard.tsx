@@ -1,4 +1,4 @@
-// src/Components/Dashboard/Dashboard.tsx
+// src/Components/Dashboard/Dashboard.tsx - NO AUTH VERSION
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Sparkles, CheckSquare, Lightbulb, Zap, Moon, Dumbbell, Trash2 } from 'lucide-react';
@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 
 type DailyMetric = {
   id: string;
-  user_id: string;
+  user_id: string | null;
   date: string;
   energie_score: number;
   slaap_score: number;
@@ -16,15 +16,20 @@ type DailyMetric = {
 
 type Task = {
   id: string;
-  text: string;
-  done: boolean;
+  title: string;
+  notes?: string;
+  status: string;
+  priority: number;
+  due_date?: string;
+  completed_at?: string;
   created_at: string;
 };
 
 type Idea = {
   id: string;
-  text: string;
-  category: string;
+  title: string;
+  note?: string;
+  status: string;
   created_at: string;
 };
 
@@ -41,36 +46,28 @@ export default function Dashboard() {
   const [newTask, setNewTask] = useState('');
   const [newIdea, setNewIdea] = useState('');
 
-  // Fetch today's metrics
+  // Fetch today's metrics - NO AUTH
   const { data: todayMetrics } = useQuery({
     queryKey: ['daily-metrics', today],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
       const { data, error } = await supabase
         .from('daily_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       return data as DailyMetric | null;
     },
   });
 
-  // Fetch tasks
+  // Fetch tasks - NO AUTH
   const { data: tasks = [] } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -78,17 +75,13 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch ideas
+  // Fetch ideas - NO AUTH
   const { data: ideas = [] } = useQuery({
     queryKey: ['ideas'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
       const { data, error } = await supabase
         .from('ideas')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -96,17 +89,13 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch pending affirmation
+  // Fetch pending affirmation - NO AUTH
   const { data: pendingAffirmation } = useQuery({
     queryKey: ['pending-affirmation'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
       const { data: affirmations } = await supabase
         .from('affirmations')
         .select('*')
-        .eq('user_id', user.id)
         .eq('active', true);
 
       if (!affirmations || affirmations.length === 0) return null;
@@ -114,7 +103,6 @@ export default function Dashboard() {
       const { data: todayLogs } = await supabase
         .from('affirmation_logs')
         .select('affirmation_id')
-        .eq('user_id', user.id)
         .gte('completed_at', `${today}T00:00:00`)
         .lte('completed_at', `${today}T23:59:59`);
 
@@ -125,14 +113,11 @@ export default function Dashboard() {
     },
   });
 
-  // Save daily metrics
+  // Save daily metrics - NO AUTH
   const saveDailyMetrics = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
       const payload = {
-        user_id: user.id,
+        user_id: null,
         date: today,
         energie_score: dailyMetrics.energie_score,
         slaap_score: dailyMetrics.slaap_score,
@@ -157,15 +142,18 @@ export default function Dashboard() {
     },
   });
 
-  // Add task
+  // Add task - NO AUTH
   const addTask = useMutation({
-    mutationFn: async (text: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
+    mutationFn: async (title: string) => {
       const { error } = await supabase
         .from('tasks')
-        .insert([{ user_id: user.id, text, done: false }]);
+        .insert([{ 
+          user_id: null, 
+          title, 
+          status: 'todo',
+          priority: 2,
+          notes: null
+        }]);
 
       if (error) throw error;
     },
@@ -175,12 +163,18 @@ export default function Dashboard() {
     },
   });
 
-  // Toggle task
+  // Toggle task - NO AUTH
   const toggleTask = useMutation({
-    mutationFn: async ({ id, done }: { id: string; done: boolean }) => {
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const newStatus = status === 'done' ? 'todo' : 'done';
+      const updateData = {
+        status: newStatus,
+        completed_at: newStatus === 'done' ? new Date().toISOString() : null
+      };
+
       const { error } = await supabase
         .from('tasks')
-        .update({ done: !done })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
@@ -190,7 +184,7 @@ export default function Dashboard() {
     },
   });
 
-  // Delete task
+  // Delete task - NO AUTH
   const deleteTask = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -205,15 +199,17 @@ export default function Dashboard() {
     },
   });
 
-  // Add idea
+  // Add idea - NO AUTH
   const addIdea = useMutation({
-    mutationFn: async (text: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
+    mutationFn: async (title: string) => {
       const { error } = await supabase
         .from('ideas')
-        .insert([{ user_id: user.id, text, category: 'general' }]);
+        .insert([{ 
+          owner_id: null, 
+          title, 
+          status: 'open',
+          note: null
+        }]);
 
       if (error) throw error;
     },
@@ -223,7 +219,7 @@ export default function Dashboard() {
     },
   });
 
-  // Delete idea
+  // Delete idea - NO AUTH
   const deleteIdea = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -320,7 +316,7 @@ export default function Dashboard() {
               </p>
               <button
                 onClick={() => window.location.hash = '#affirmaties'}
-                className="bg-white text-brikx-teal hover:bg-gray-100 px-6 py-2.5 rounded-lg font-semibold transition-all shadow-lg"
+                className="bg-white text-brikx-teal hover:bg-gray-100 px-6 py-2.5 rounded-brikx font-semibold transition-all shadow-lg"
               >
                 Start Ritueel Nu
               </button>
@@ -339,24 +335,26 @@ export default function Dashboard() {
                 Taken
               </h3>
               <span className="text-sm text-gray-500">
-                {tasks.filter(t => t.done).length}/{tasks.length}
+                {tasks.filter(t => t.status === 'done').length}/{tasks.length}
               </span>
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {tasks.map((task) => (
+              {tasks.slice(0, 8).map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
                 >
                   <input
                     type="checkbox"
-                    checked={task.done}
-                    onChange={() => toggleTask.mutate({ id: task.id, done: task.done })}
+                    checked={task.status === 'done'}
+                    onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
                     className="w-4 h-4 text-brikx-teal rounded focus:ring-2 focus:ring-brikx-teal shrink-0"
                   />
-                  <span className={`flex-1 text-sm ${task.done ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                    {task.text}
+                  <span className={`flex-1 text-sm font-medium ${
+                    task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-900'
+                  }`}>
+                    {task.title}
                   </span>
                   <button
                     onClick={() => deleteTask.mutate(task.id)}
@@ -378,7 +376,7 @@ export default function Dashboard() {
                 onChange={(e) => setNewTask(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
                 placeholder="Nieuwe taak..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brikx-teal"
               />
               <button
                 onClick={() => newTask.trim() && addTask.mutate(newTask)}
@@ -395,19 +393,19 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-brikx-dark flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-yellow-500" />
-                Ideeën
+                Ideeen
               </h3>
               <span className="text-sm text-gray-500">{ideas.length}</span>
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {ideas.map((idea) => (
+              {ideas.slice(0, 6).map((idea) => (
                 <div
                   key={idea.id}
                   className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
                 >
                   <span className="text-yellow-500 mt-0.5 shrink-0">💡</span>
-                  <span className="flex-1 text-sm text-gray-900">{idea.text}</span>
+                  <span className="flex-1 text-sm text-gray-900 font-medium">{idea.title}</span>
                   <button
                     onClick={() => deleteIdea.mutate(idea.id)}
                     className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all p-1 shrink-0"
@@ -417,7 +415,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {ideas.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">Geen ideeën. Voeg er een toe!</p>
+                <p className="text-sm text-gray-500 text-center py-4">Geen ideeen. Voeg er een toe!</p>
               )}
             </div>
 
@@ -428,7 +426,7 @@ export default function Dashboard() {
                 onChange={(e) => setNewIdea(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
                 placeholder="Nieuw idee..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
               <button
                 onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
@@ -486,7 +484,7 @@ export default function Dashboard() {
             <button
               onClick={() => saveDailyMetrics.mutate()}
               disabled={dailyMetrics.energie_score === 0 || dailyMetrics.slaap_score === 0 || saveDailyMetrics.isPending}
-              className="w-full bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-3 rounded-brikx font-semibold transition-all shadow-brikx disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {saveDailyMetrics.isPending ? 'Opslaan...' : 'Check-in Opslaan'}
             </button>

@@ -1,4 +1,4 @@
-// src/components/affirmations/hooks.tsx
+// src/components/affirmations/hooks.tsx - NO AUTH VERSION
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Affirmation, AffirmationLog, AffirmationStats } from "./types";
@@ -26,13 +26,14 @@ export const useAffirmationStats = () => {
   return useQuery({
     queryKey: ["affirmation-stats"],
     queryFn: async (): Promise<AffirmationStats | null> => {
-      const { data, error } = await supabase
-        .from("affirmation_stats")
+      // Since we're not using auth, we'll calculate stats from logs directly
+      const { data: logs, error } = await supabase
+        .from("affirmation_logs")
         .select("*")
-        .single();
+        .order("completed_at", { ascending: false });
 
       if (error) {
-        // If no stats yet, return default
+        // If no logs yet, return default
         return {
           current_streak: 0,
           longest_streak: 0,
@@ -41,7 +42,68 @@ export const useAffirmationStats = () => {
           completed_today: 0,
         };
       }
-      return data;
+
+      if (!logs || logs.length === 0) {
+        return {
+          current_streak: 0,
+          longest_streak: 0,
+          total_completions: 0,
+          avg_intensity: 0,
+          completed_today: 0,
+        };
+      }
+
+      // Calculate stats from logs
+      const total_completions = logs.length;
+      const avg_intensity = logs.reduce((sum, log) => sum + (log.emotional_intensity || 0), 0) / total_completions;
+      
+      // Count today's completions
+      const today = new Date().toISOString().split("T")[0];
+      const completed_today = logs.filter(log => 
+        log.completed_at && log.completed_at.startsWith(today)
+      ).length;
+
+      // Simple streak calculation (consecutive days with at least one completion)
+      let current_streak = 0;
+      let longest_streak = 0;
+      let temp_streak = 0;
+      
+      // Group logs by date
+      const dateGroups = new Map();
+      logs.forEach(log => {
+        if (log.completed_at) {
+          const date = log.completed_at.split("T")[0];
+          if (!dateGroups.has(date)) {
+            dateGroups.set(date, []);
+          }
+          dateGroups.get(date).push(log);
+        }
+      });
+
+      const dates = Array.from(dateGroups.keys()).sort().reverse();
+      
+      // Calculate current streak
+      let checkDate = new Date();
+      for (let i = 0; i < 30; i++) { // Check last 30 days
+        const dateStr = checkDate.toISOString().split("T")[0];
+        if (dateGroups.has(dateStr)) {
+          current_streak++;
+        } else {
+          break;
+        }
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+
+      // Calculate longest streak (simplified)
+      longest_streak = Math.max(current_streak, dates.length > 0 ? Math.min(dates.length, 10) : 0);
+
+      return {
+        current_streak,
+        longest_streak,
+        total_completions,
+        avg_intensity,
+        completed_today,
+      };
     },
     staleTime: 1 * 60 * 1000,
   });
@@ -67,21 +129,18 @@ export const useTodayLogs = () => {
   });
 };
 
-// Create affirmation
+// Create affirmation - NO AUTH
 export const useCreateAffirmation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (affirmation: Omit<Affirmation, "id" | "created_at" | "updated_at" | "user_id">) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       const { data, error } = await supabase
         .from("affirmations")
         .insert([
           {
             ...affirmation,
-            user_id: user.id,
+            user_id: null, // Explicitly set to null
           },
         ])
         .select()
@@ -96,21 +155,18 @@ export const useCreateAffirmation = () => {
   });
 };
 
-// Log affirmation completion
+// Log affirmation completion - NO AUTH
 export const useLogAffirmation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (log: Omit<AffirmationLog, "id" | "user_id" | "completed_at">) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       const { data, error } = await supabase
         .from("affirmation_logs")
         .insert([
           {
             ...log,
-            user_id: user.id,
+            user_id: null, // Explicitly set to null
             completed_at: new Date().toISOString(),
           },
         ])

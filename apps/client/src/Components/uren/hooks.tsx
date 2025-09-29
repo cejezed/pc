@@ -103,12 +103,23 @@ export function useAddTimeEntry() {
       hours: string | number;
       notes?: string;
     }) => {
+      const hours = Number(payload.hours || 0);
+      const minutes = Math.round(hours * 60);
+      
       const toInsert = {
-        ...payload,
-        hours: Number(payload.hours || 0),
+        project_id: payload.project_id,
+        phase_code: payload.phase_code,
+        occurred_on: payload.occurred_on,
+        minutes: minutes,
+        hours: hours,
+        notes: payload.notes || null,
       };
-      const { error } = await supabase.from("time_entries").insert(toInsert).single();
-      if (error) throw error;
+      
+      const { error } = await supabase.from("time_entries").insert(toInsert);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["time-entries"] });

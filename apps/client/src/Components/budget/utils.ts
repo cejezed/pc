@@ -245,7 +245,50 @@ export const generateCategoryColor = (index: number): string => {
   return colors[index % colors.length];
 };
 
+// src/components/budget/utils.ts (vervolg)
+
 /**
  * Group transactions by date
  */
 export const groupTransactionsByDate = (transactions: any[]): Record<string, any[]> => {
+  return transactions.reduce((groups, transaction) => {
+    const date = transaction.transaction_date || transaction.date;
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(transaction);
+    return groups;
+  }, {} as Record<string, any[]>);
+};
+
+/**
+ * Sort transactions by date (newest first)
+ */
+export const sortTransactionsByDate = (transactions: any[]): any[] => {
+  return [...transactions].sort((a, b) => {
+    const dateA = new Date(a.transaction_date || a.date);
+    const dateB = new Date(b.transaction_date || b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+};
+
+/**
+ * Calculate total for transactions
+ */
+export const calculateTotal = (transactions: any[]): number => {
+  return transactions.reduce((sum, t) => sum + (t.amount_cents || 0), 0);
+};
+
+/**
+ * Filter transactions by date range
+ */
+export const filterTransactionsByDateRange = (
+  transactions: any[],
+  from: string,
+  to: string
+): any[] => {
+  return transactions.filter(t => {
+    const date = t.transaction_date || t.date;
+    return date >= from && date <= to;
+  });
+};

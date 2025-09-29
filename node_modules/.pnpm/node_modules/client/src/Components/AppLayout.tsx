@@ -14,6 +14,7 @@ import {
   LogOut,
   X,
   Sparkles,
+  FileText,
 } from "lucide-react";
 
 type Page =
@@ -21,6 +22,7 @@ type Page =
   | "analytics"
   | "uren"
   | "budget"
+  | "facturen"
   | "taken"
   | "ideas"
   | "health"
@@ -38,6 +40,7 @@ const NAV: Array<{ key: Page; label: string; icon: React.ReactNode }> = [
   { key: "home", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
   { key: "analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
   { key: "uren", label: "Uren", icon: <Clock size={18} /> },
+  { key: "facturen", label: "Facturen", icon: <FileText size={18} /> },
   { key: "budget", label: "Budget", icon: <Wallet size={18} /> },
   { key: "taken", label: "Taken", icon: <CheckSquare size={18} /> },
   { key: "ideas", label: "Ideeën", icon: <Lightbulb size={18} /> },
@@ -55,30 +58,30 @@ export default function AppLayout({
 }: AppLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
- const NavList = ({ onClickItem }: { onClickItem?: () => void }) => (
-  <nav className="mt-3 space-y-1">
-    {NAV.map((item) => {
-      const active = currentPage === item.key;
-      return (
-        <button
-          key={item.key}
-          onClick={() => {
-            onNavigate(item.key);
-            onClickItem?.();
-          }}
-          className={
-            active
-              ? "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all bg-brikx-teal text-white shadow-lg rounded-brikx"
-              : "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all text-white/800 hover:text-white hover:bg-white/100 rounded-brikx"
-          }
-        >
-          <span className="shrink-0">{item.icon}</span>
-          <span className="truncate">{item.label}</span>
-        </button>
-      );
-    })}
-  </nav>
-);
+  const NavList = ({ onClickItem }: { onClickItem?: () => void }) => (
+    <nav className="mt-3 space-y-1">
+      {NAV.map((item) => {
+        const active = currentPage === item.key;
+        return (
+          <button
+            key={item.key}
+            onClick={() => {
+              onNavigate(item.key);
+              onClickItem?.();
+            }}
+            className={
+              active
+                ? "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all bg-brikx-teal text-white shadow-lg rounded-brikx"
+                : "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all text-white/800 hover:text-white hover:bg-white/100 rounded-brikx"
+            }
+          >
+            <span className="shrink-0">{item.icon}</span>
+            <span className="truncate">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
 
   return (
     <div className="min-h-screen text-gray-900" style={{ background: '#F5F7FA' }}>
