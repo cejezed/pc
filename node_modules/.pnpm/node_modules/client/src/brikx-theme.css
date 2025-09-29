@@ -1,0 +1,319 @@
+/* Brikx Theme - Vereenvoudigd voor Tailwind v4 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Button styles */
+.btn-brikx-primary {
+  background: #2D9CDB;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(45, 156, 219, 0.2);
+}
+
+.btn-brikx-primary:hover {
+  background: #1D7AAC;
+  box-shadow: 0 8px 24px rgba(45, 156, 219, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-brikx-primary:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-brikx-secondary {
+  background: white;
+  border: 1px solid #D1D5DB;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-brikx-secondary:hover {
+  background: #F9FAFB;
+  border-color: #2D9CDB;
+}
+
+.btn-brikx-danger {
+  background: #EF4444;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-brikx-danger:hover {
+  background: #DC2626;
+}
+
+/* Card styles */
+.card-brikx {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.card-brikx:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-brikx-interactive {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.card-brikx-interactive:hover {
+  background: #F9FAFB;
+  border-color: #2D9CDB;
+  box-shadow: 0 4px 12px rgba(45, 156, 219, 0.3);
+}
+
+.card-brikx-dark {
+  background: linear-gradient(135deg, #0A2540 0%, #0A3552 100%);
+  border-radius: 12px;
+  border: 1px solid #1D3A5C;
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge styles */
+.badge-brikx {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  text-transform: uppercase;
+}
+
+.badge-premium {
+  background: #FFB946;
+  color: #78350F;
+}
+
+.badge-draft {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.badge-success {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.badge-warning {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.badge-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Input styles */
+.input-brikx {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 12px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.input-brikx:focus {
+  outline: none;
+  border-color: #2D9CDB;
+  box-shadow: 0 0 0 3px rgba(45, 156, 219, 0.1);
+}
+
+.select-brikx {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 12px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: white;
+}
+
+.select-brikx:focus {
+  outline: none;
+  border-color: #2D9CDB;
+  box-shadow: 0 0 0 3px rgba(45, 156, 219, 0.1);
+}
+
+.textarea-brikx {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 12px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  resize: none;
+}
+
+.textarea-brikx:focus {
+  outline: none;
+  border-color: #2D9CDB;
+  box-shadow: 0 0 0 3px rgba(45, 156, 219, 0.1);
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar */
+.progress-bar-brikx {
+  height: 0.5rem;
+  background: #E5E7EB;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill-brikx {
+  height: 100%;
+  background: #2D9CDB;
+  transition: width 0.3s ease;
+  border-radius: 9999px;
+}
+
+/* Nav items */
+.nav-item-brikx {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item-brikx:not(.active):hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item-brikx.active {
+  background: #2D9CDB;
+  color: white;
+  box-shadow: 0 4px 12px rgba(45, 156, 219, 0.3);
+}
+
+/* Loading spinner */
+.spinner-brikx {
+  border: 4px solid #F5F7FA;
+  border-top-color: #2D9CDB;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin-brikx 1s linear infinite;
+}
+
+@keyframes spin-brikx {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Table styles */
+.table-brikx {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-brikx thead {
+  background: #F9FAFB;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.table-brikx th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-brikx td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #111827;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.table-brikx tbody tr:hover {
+  background: #F9FAFB;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
