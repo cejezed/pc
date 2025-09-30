@@ -70,7 +70,7 @@ export function ShoppingItemCard({
         )}
 
         {item.product_url && (
-          
+          <a
             href={item.product_url}
             target="_blank"
             rel="noopener noreferrer"
