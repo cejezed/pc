@@ -1,7 +1,7 @@
 // src/components/abonnementen/types.ts
 export type BillingCycle = "monthly" | "yearly" | "quarterly" | "weekly";
 export type SubscriptionStatus = "active" | "cancelled" | "expired" | "paused";
-export type SubscriptionCategory = "streaming" | "software" | "fitness" | "utilities" | "other";
+export type SubscriptionCategory = "streaming" | "software" | "fitness" | "music" | "cloud" | "education" | "other";
 
 export type Subscription = {
   id: string;

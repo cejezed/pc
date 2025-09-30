@@ -50,7 +50,10 @@ export function BudgetPieChart({
           cx="50%"
           cy="50%"
           outerRadius={100}
-          label={(entry: { name: string; value: number }) => `${entry.name}: ${EUR(entry.value)}`}
+          label={(props: any) => {
+            const entry = data[props.index];
+            return `${entry.name}: ${EUR(entry.value)}`;
+          }}
         >
           {data.map((entry, index) => (
             <Cell
@@ -74,7 +77,7 @@ export function BudgetPieChart({
       </PieChart>
     </ResponsiveContainer>
   );
-}
+}}
 
 export function TrendLineChart({
   data,

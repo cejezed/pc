@@ -32,6 +32,11 @@ export function TaskCard({
   const overdue = isOverdue(task.due_date) && task.status !== "done";
   const days = daysUntil(task.due_date);
 
+  // Extract project name as string
+  const projectName = typeof task.project === 'string' 
+    ? task.project 
+    : task.project?.name || '';
+
   return (
     <div className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-shadow ${
       task.status === "done" ? "border-green-200 bg-green-50/50" : 
@@ -85,11 +90,7 @@ export function TaskCard({
           <div className="flex flex-wrap gap-2 mb-2">
             <StatusBadge status={task.status} />
             <PriorityBadge priority={task.priority} />
-            {typeof task.project === 'string' ? (
-              <ProjectBadge project={{ id: task.project, name: task.project, color: 'gray' }} />
-            ) : task.project ? (
-              <ProjectBadge project={task.project} />
-            ) : null}
+            {projectName && <ProjectBadge project={projectName} />}
           </div>
 
           {/* Due Date */}
@@ -163,6 +164,11 @@ export function TaskListItem({
 
   const overdue = isOverdue(task.due_date) && task.status !== "done";
 
+  // Extract project name as string
+  const projectName = typeof task.project === 'string' 
+    ? task.project 
+    : task.project?.name || '';
+
   return (
     <div className={`bg-white border-2 rounded-lg p-3 hover:shadow-sm transition-shadow flex items-center gap-3 ${
       task.status === "done" ? "border-green-200 bg-green-50/50" : 
@@ -199,11 +205,7 @@ export function TaskListItem({
             )}
             <StatusBadge status={task.status} />
             <PriorityBadge priority={task.priority} />
-            {typeof task.project === 'string' ? (
-              <ProjectBadge project={{ id: task.project, name: task.project, color: 'gray' }} />
-            ) : task.project ? (
-              <ProjectBadge project={task.project} />
-            ) : null}
+            {projectName && <ProjectBadge project={projectName} />}
           </div>
         </div>
       </div>
