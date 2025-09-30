@@ -1,8 +1,11 @@
 // src/components/abonnementen/basis-componenten.tsx
 import React from "react";
 import { AlertCircle, Calendar, Euro, Bell } from "lucide-react";
-import type { Subscription } from "./types";
-import { formatCurrency } from "./helpers";
+import type { Subscription, SubscriptionCategory } from "./types";
+import { formatCurrency, getCategoryColor, getCategoryIcon, formatBillingCycle } from "./helpers";
+
+// Helper function for EUR formatting
+const EUR = (cents: number) => formatCurrency(cents);
 
 export function StatCard({
   label,
@@ -27,12 +30,12 @@ export function StatCard({
   );
 }
 
-export function CategoryBadge({ category }: { category?: string }) {
+export function CategoryBadge({ category }: { category?: SubscriptionCategory }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${getCategoryColor(category)}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border ${getCategoryColor(category || "other")}`}
     >
-      <span>{getCategoryIcon(category)}</span>
+      <span>{getCategoryIcon(category || "other")}</span>
       <span className="capitalize">{category || "other"}</span>
     </span>
   );

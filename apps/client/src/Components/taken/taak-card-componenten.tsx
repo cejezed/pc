@@ -85,7 +85,11 @@ export function TaskCard({
           <div className="flex flex-wrap gap-2 mb-2">
             <StatusBadge status={task.status} />
             <PriorityBadge priority={task.priority} />
-            {task.project && <ProjectBadge project={task.project} />}
+            {typeof task.project === 'string' ? (
+              <ProjectBadge project={{ id: task.project, name: task.project, color: 'gray' }} />
+            ) : task.project ? (
+              <ProjectBadge project={task.project} />
+            ) : null}
           </div>
 
           {/* Due Date */}
@@ -195,7 +199,11 @@ export function TaskListItem({
             )}
             <StatusBadge status={task.status} />
             <PriorityBadge priority={task.priority} />
-            {task.project && <ProjectBadge project={task.project} />}
+            {typeof task.project === 'string' ? (
+              <ProjectBadge project={{ id: task.project, name: task.project, color: 'gray' }} />
+            ) : task.project ? (
+              <ProjectBadge project={task.project} />
+            ) : null}
           </div>
         </div>
       </div>

@@ -23,6 +23,8 @@ type Project = {
 
 // Supabase queries
 async function fetchTimeEntries(from?: string, to?: string): Promise<TimeEntry[]> {
+  if (!supabase) throw new Error("Supabase not initialized");
+  
   let query = supabase
     .from("time_entries")
     .select(`
@@ -41,6 +43,8 @@ async function fetchTimeEntries(from?: string, to?: string): Promise<TimeEntry[]
 }
 
 async function fetchProjects(): Promise<Project[]> {
+  if (!supabase) throw new Error("Supabase not initialized");
+  
   const { data, error } = await supabase
     .from("projects")
     .select("id, name, default_rate_cents")
@@ -291,7 +295,7 @@ export default function Analytics() {
               <Calendar className="w-4 h-4 text-gray-500" />
               <select 
                 value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as any)}
+                onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'quarter' | 'custom')}
                 className="select-brikx"
               >
                 <option value="week">Deze week</option>
@@ -432,7 +436,7 @@ export default function Analytics() {
                     />
                     <YAxis fontSize={12} stroke="#6B7280" />
                     <Tooltip 
-                      labelFormatter={(label) => formatDate(label as string)}
+                      labelFormatter={(label) => formatDate(String(label))}
                       formatter={(value: number) => [`${value}u`, 'Uren']}
                     />
                     <Bar dataKey="hours" fill="#2D9CDB" radius={[8, 8, 0, 0]} />
@@ -451,7 +455,7 @@ export default function Analytics() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ project_name, percentage }) => 
+                        label={({ project_name, percentage }: { project_name: string; percentage: number }) => 
                           percentage > 5 ? `${project_name.split(' ')[0]} (${percentage}%)` : ''
                         }
                         outerRadius={100}
@@ -487,7 +491,7 @@ export default function Analytics() {
                   />
                   <YAxis fontSize={12} stroke="#6B7280" />
                   <Tooltip 
-                    labelFormatter={(label) => formatDate(label as string)}
+                    labelFormatter={(label) => formatDate(String(label))}
                     formatter={(value: number) => [`${value}u`, 'Uren']}
                   />
                   <Line 
