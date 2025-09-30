@@ -407,4 +407,61 @@
     color: hsl(var(--accent-foreground)) !important;
     border-color: hsl(var(--border)) !important;
   }
+ /* ============================================
+   BUTTON FIXES - Alleen action buttons, niet nav items
+   ============================================ */
+
+/* Alleen buttons BUITEN de navigatie sidebar */
+main button:not([class*="bg-"]),
+.modal-content button:not([class*="bg-"]),
+.card-brikx button:not([class*="bg-"]) {
+  background-color: #2D9CDB !important;
+  color: white !important;
+}
+
+/* Witte buttons met border (secondary style) */
+main button.bg-white,
+main button[class*="border-gray"] {
+  background-color: white !important;
+  color: #374151 !important;
+  border: 1px solid #D1D5DB !important;
+}
+
+main button.bg-white:hover {
+  background-color: #F9FAFB !important;
+  border-color: #2D9CDB !important;
+}
+
+/* Blue/Teal action buttons */
+main button.bg-blue-500,
+main button.bg-blue-600,
+main button.bg-brikx-teal {
+  background-color: #2D9CDB !important;
+  color: white !important;
+}
+
+main button.bg-blue-500:hover,
+main button.bg-brikx-teal:hover {
+  background-color: #1D7AAC !important;
+}
+
+/* Disabled state */
+main button:disabled,
+main button[disabled] {
+  background-color: #D1D5DB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+/* Plus button bij taken */
+main button[class*="rounded-full"] {
+  background-color: #E5E7EB !important;
+  color: #6B7280 !important;
+}
+
+main button[class*="rounded-full"]:hover {
+  background-color: #2D9CDB !important;
+  color: white !important;
+}
 }

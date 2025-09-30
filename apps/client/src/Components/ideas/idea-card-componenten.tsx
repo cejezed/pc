@@ -1,5 +1,4 @@
 // src/components/ideas/idea-card-componenten.tsx
-import React from "react";
 import { Edit, Clock, Tag } from "lucide-react";
 import type { Idea } from "./types";
 import { IDEA_PRIORITIES, IDEA_STATUSES } from "./types";

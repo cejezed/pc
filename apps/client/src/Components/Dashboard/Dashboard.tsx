@@ -339,8 +339,8 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {tasks.slice(0, 8).map((task) => (
+        <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
+  {tasks.filter(t => t.status !== 'done').slice(0, 8).map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"

@@ -1,5 +1,4 @@
 // invoices/StatusBadge.tsx
-import React from 'react';
 import type { Invoice } from './types';
 
 interface Props {

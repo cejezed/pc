@@ -1,8 +1,8 @@
-// src/components/abonnementen/abonnement-modal.tsx
-import React, { useState, useEffect } from "react";
+// src/Components/abonnementen/abonnement-modal.tsx
+import { useState, useEffect } from "react";
 import { X, Plus } from "lucide-react";
 import type { Subscription, BillingCycle, SubscriptionCategory } from "./types";
-import { EUR, todayISO, getNextBillingDate, getCancellationDeadline } from "./helpers";
+import { EUR } from "./helpers";
 
 type FormData = {
   name: string;
@@ -16,6 +16,36 @@ type FormData = {
   payment_method: string;
   auto_renew: boolean;
   notes: string;
+};
+
+const todayISO = () => new Date().toISOString().split('T')[0];
+
+const calculateNextBillingDate = (startDate: string, cycle: BillingCycle): string => {
+  const date = new Date(startDate);
+  const today = new Date();
+  
+  // Als startdatum in de toekomst is, gebruik die
+  if (date > today) {
+    return startDate;
+  }
+  
+  // Anders bereken volgende datum
+  switch (cycle) {
+    case 'weekly':
+      date.setDate(date.getDate() + 7);
+      break;
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    case 'quarterly':
+      date.setMonth(date.getMonth() + 3);
+      break;
+    case 'yearly':
+      date.setFullYear(date.getFullYear() + 1);
+      break;
+  }
+  
+  return date.toISOString().split('T')[0];
 };
 
 export function SubscriptionModal({
@@ -85,8 +115,7 @@ export function SubscriptionModal({
     if (!form.name.trim() || !form.cost_euros) return;
 
     const costCents = Math.round(parseFloat(form.cost_euros) * 100);
-  const nextBillingDate = formData.next_billing_date || 
-  getNextBillingDate(todayISO(), formData.billing_cycle);
+    const nextBilling = calculateNextBillingDate(form.start_date, form.billing_cycle);
 
     const payload: Partial<Subscription> = {
       name: form.name.trim(),
@@ -165,11 +194,11 @@ export function SubscriptionModal({
                 }
                 className="w-full border rounded-lg px-3 py-2"
               >
-                <option value="streaming">🎬 Streaming</option>
-                <option value="software">💻 Software</option>
-                <option value="fitness">💪 Fitness</option>
-                <option value="utilities">⚡ Utilities</option>
-                <option value="other">📦 Anders</option>
+                <option value="streaming">Streaming</option>
+                <option value="software">Software</option>
+                <option value="fitness">Fitness</option>
+                <option value="utilities">Utilities</option>
+                <option value="other">Anders</option>
               </select>
             </div>
 
@@ -243,7 +272,7 @@ export function SubscriptionModal({
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-              ⏰ Opzegtermijn instelling
+              Opzegtermijn instelling
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -325,7 +354,7 @@ export function SubscriptionModal({
               "Bezig..."
             ) : (
               <>
-                {isEdit ? "💾 Opslaan" : <><Plus className="w-4 h-4" /> Toevoegen</>}
+                {isEdit ? "Opslaan" : <><Plus className="w-4 h-4" /> Toevoegen</>}
               </>
             )}
           </button>

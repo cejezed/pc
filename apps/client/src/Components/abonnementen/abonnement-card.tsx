@@ -1,5 +1,4 @@
 // src/Components/abonnementen/abonnement-card.tsx
-import React from "react";
 import { Edit2, Trash2, AlertCircle, Clock, Euro, Calendar } from "lucide-react";
 import type { Subscription } from "./types";
 import { EUR, formatBillingCycle, getCategoryColor, getCategoryIcon, daysUntil } from "./helpers";

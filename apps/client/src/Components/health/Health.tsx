@@ -1,4 +1,3 @@
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./Tabs";
 import { Dumbbell, Footprints, Battery, Utensils } from "lucide-react";
 import { WorkoutsTab } from "./workout-componenten";

@@ -1,5 +1,4 @@
 // src/components/ideas/filter-componenten.tsx
-import React from "react";
 import { Search, Grid3X3, List, RotateCcw } from "lucide-react";
 
 export function SearchBar({ 

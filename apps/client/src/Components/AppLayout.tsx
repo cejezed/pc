@@ -1,5 +1,6 @@
 // src/components/AppLayout.tsx
-import React, { useState, PropsWithChildren } from "react";
+import { useState } from "react";
+import type { PropsWithChildren } from "react";
 import {
   LayoutDashboard,
   BarChart3,
@@ -69,11 +70,16 @@ export default function AppLayout({
               onNavigate(item.key);
               onClickItem?.();
             }}
-            className={
-              active
-                ? "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all bg-brikx-teal text-white shadow-lg rounded-brikx"
-                : "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all text-white/800 hover:text-white hover:bg-white/100 rounded-brikx"
-            }
+className={
+  active
+    ? "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all rounded-brikx"
+    : "w-full group flex items-center gap-3 px-3 py-2 text-sm font-medium text-left transition-all text-white/80 hover:text-white hover:bg-white/10 rounded-brikx"
+}
+style={
+  active
+    ? { backgroundColor: '#2D9CDB', color: 'white', boxShadow: '0 4px 12px rgba(45, 156, 219, 0.3)' }
+    : undefined
+}
           >
             <span className="shrink-0">{item.icon}</span>
             <span className="truncate">{item.label}</span>
@@ -84,7 +90,7 @@ export default function AppLayout({
   );
 
   return (
-    <div className="min-h-screen text-gray-900" style={{ background: '#F5F7FA' }}>
+    <div className="min-h-screen text-gray-900" style={{ background: '#d9e0ebff' }}>
       {/* Topbar */}
       <header 
         className="sticky top-0 z-40 flex h-14 items-center justify-between text-white px-4 shadow-md"

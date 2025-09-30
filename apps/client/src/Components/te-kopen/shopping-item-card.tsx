@@ -1,4 +1,3 @@
-import React from "react";
 import { ExternalLink, Edit2, Check, Trash2, Tag } from "lucide-react";
 import type { ShoppingItem } from "./hooks";
 import { EUR, CategoryBadge, PriorityBadge } from "./basis-componenten";

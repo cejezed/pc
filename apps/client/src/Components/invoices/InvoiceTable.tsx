@@ -1,5 +1,4 @@
 // invoices/InvoiceTable.tsx
-import React from 'react';
 import { Send, Check, Eye, Trash2, FileText } from 'lucide-react';
 import type { Invoice } from './types';
 import { EUR, formatDate, calculateInvoiceTotal } from './utils';

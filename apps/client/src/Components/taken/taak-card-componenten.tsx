@@ -1,4 +1,3 @@
-import React from "react";
 import { Check, Circle, Clock, Edit2, Trash2, AlertCircle } from "lucide-react";
 import type { Task } from "./types";
 import { useUpdateTask, useDeleteTask } from "./hooks";
