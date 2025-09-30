@@ -444,7 +444,7 @@ export default function Analytics() {
                 </ResponsiveContainer>
               </div>
 
-                        {/* Project Distribution */}
+              {/* Project Distribution */}
               <div className="card-brikx">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Uren per Project</h3>
                 {projectData.length > 0 ? (
@@ -457,9 +457,9 @@ export default function Analytics() {
                         labelLine={false}
                         label={(props: any) => {
                           const entry = projectData[props.index];
-                          return entry.percentage > 5 
-                            ? `${entry.project_name.split(' ')[0]} (${entry.percentage}%)` 
-                            : '';
+                          if (!entry) return '';
+                          const projectNameShort = entry.project_name.split(' ')[0];
+                          return entry.percentage > 5 ? `${projectNameShort} (${entry.percentage}%)` : '';
                         }}
                         outerRadius={100}
                         fill="#8884d8"
@@ -476,8 +476,6 @@ export default function Analytics() {
                   <div className="h-[300px] flex items-center justify-center text-gray-500">
                     Geen project data
                   </div>
-                )}
-              </div>
                 )}
               </div>
             </div>

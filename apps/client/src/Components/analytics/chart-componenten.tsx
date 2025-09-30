@@ -52,6 +52,7 @@ export function BudgetPieChart({
           outerRadius={100}
           label={(props: any) => {
             const entry = data[props.index];
+            if (!entry) return '';
             return `${entry.name}: ${EUR(entry.value)}`;
           }}
         >
@@ -77,7 +78,7 @@ export function BudgetPieChart({
       </PieChart>
     </ResponsiveContainer>
   );
-}}
+}
 
 export function TrendLineChart({
   data,
