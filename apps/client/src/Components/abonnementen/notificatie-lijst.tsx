@@ -2,7 +2,24 @@
 import React from "react";
 import { Bell, X, AlertTriangle, Clock, CheckCircle, Info } from "lucide-react";
 import type { Subscription } from "./types";
-import { daysUntil, formatDate, EUR, formatBillingCycle } from "./helpers";
+import { daysUntil, EUR, formatBillingCycle } from "./helpers";
+
+// Helper function to format date
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Zojuist';
+  if (diffMins < 60) return `${diffMins} min geleden`;
+  if (diffHours < 24) return `${diffHours} uur geleden`;
+  if (diffDays < 7) return `${diffDays} dagen geleden`;
+  
+  return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+};
 
 export interface Notification {
   id: string;

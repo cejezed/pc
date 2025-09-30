@@ -49,9 +49,9 @@ export function getCategoryInfo(category: SubscriptionCategory): CategoryInfo {
     streaming: { icon: '📺', color: 'text-purple-700', bgColor: 'bg-purple-50' },
     software: { icon: '💻', color: 'text-blue-700', bgColor: 'bg-blue-50' },
     fitness: { icon: '🏋️', color: 'text-green-700', bgColor: 'bg-green-50' },
-    muziek: { icon: '🎵', color: 'text-pink-700', bgColor: 'bg-pink-50' },
+    music: { icon: '🎵', color: 'text-pink-700', bgColor: 'bg-pink-50' },
     cloud: { icon: '☁️', color: 'text-cyan-700', bgColor: 'bg-cyan-50' },
-    onderwijs: { icon: '📚', color: 'text-indigo-700', bgColor: 'bg-indigo-50' },
+    education: { icon: '📚', color: 'text-indigo-700', bgColor: 'bg-indigo-50' },
     other: { icon: '📦', color: 'text-gray-700', bgColor: 'bg-gray-50' },
   };
   return categories[category] || categories.other;

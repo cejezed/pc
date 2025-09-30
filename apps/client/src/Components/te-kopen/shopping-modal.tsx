@@ -27,7 +27,6 @@ export function ShoppingModal({
     product_url: string;
     store: string;
     notes: string;
-    tags: string[];
   }>({
     name: "",
     description: "",
@@ -37,10 +36,7 @@ export function ShoppingModal({
     product_url: "",
     store: "",
     notes: "",
-    tags: [],
   });
-
-  const [tagInput, setTagInput] = React.useState("");
 
   React.useEffect(() => {
     if (editItem) {
@@ -55,7 +51,6 @@ export function ShoppingModal({
         product_url: editItem.product_url || "",
         store: editItem.store || "",
         notes: editItem.notes || "",
-        tags: editItem.tags || [],
       });
     } else {
       setForm({
@@ -67,10 +62,8 @@ export function ShoppingModal({
         product_url: "",
         store: "",
         notes: "",
-        tags: [],
       });
     }
-    setTagInput("");
   }, [editItem, isOpen]);
 
   const handleSubmit = () => {
@@ -87,28 +80,9 @@ export function ShoppingModal({
       product_url: form.product_url.trim() || undefined,
       store: form.store.trim() || undefined,
       notes: form.notes.trim() || undefined,
-      tags: form.tags.length > 0 ? form.tags : undefined,
     };
 
     onSubmit(payload);
-  };
-
-  const addTag = () => {
-    if (tagInput.trim() && !form.tags.includes(tagInput.trim())) {
-      setForm((f) => ({ ...f, tags: [...f.tags, tagInput.trim()] }));
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setForm((f) => ({ ...f, tags: f.tags.filter(tag => tag !== tagToRemove) }));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTag();
-    }
   };
 
   if (!isOpen) return null;
@@ -243,47 +217,6 @@ export function ShoppingModal({
               }
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
             />
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tags
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                placeholder="Voeg tag toe..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {form.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 bg-brikx-teal/10 text-brikx-teal px-2 py-1 rounded text-xs font-medium"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="text-brikx-teal hover:text-brikx-teal-dark"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
           </div>
 
           <div>

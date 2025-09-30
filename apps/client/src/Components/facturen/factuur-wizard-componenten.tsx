@@ -102,8 +102,8 @@ export function CreateInvoiceModal({
       const items: InvoiceItem[] = chosen.map((e) => {
         const hours = (e.minutes || 0) / 60;
         return {
-          description: `${e.projects?.name || "Project"} – ${e.occurred_on}${
-            e.notes ? ` – ${e.notes}` : ""
+          description: `${e.projects?.name || "Project"} — ${e.occurred_on}${
+            e.notes ? ` — ${e.notes}` : ""
           }`,
           quantity: Number(hours.toFixed(2)),
           rate_cents: 0,
@@ -556,7 +556,7 @@ export function CreateInvoiceModal({
           {step > 1 && (
             <button
               className="px-3 py-2 rounded-lg border hover:bg-gray-50"
-              onClick={() => setStep(((s) => s - 1) as Step)}
+              onClick={() => setStep((s) => (s - 1) as Step)}
             >
               Terug
             </button>
@@ -564,7 +564,7 @@ export function CreateInvoiceModal({
           {step < 3 && (
             <button
               className="px-3 py-2 rounded-lg bg-black text-white hover:opacity-90"
-              onClick={() => setStep(((s) => s + 1) as Step)}
+              onClick={() => setStep((s) => (s + 1) as Step)}
             >
               Volgende
             </button>

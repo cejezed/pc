@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Flame, Calendar, CheckCircle2 } from "lucide-react";
+import { X, Flame, Calendar, CheckCircle2, Plus } from "lucide-react";
 
 // Utils
 export const classNames = (...xs: (string | false | null | undefined)[]) => 
@@ -23,7 +23,7 @@ export function Header({ onNew }: { onNew: () => void }) {
         <Flame className="w-5 h-5 text-orange-500" /> Habits
       </h1>
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Calendar className="w-4 h-4" /> Vandaag – {label}
+        <Calendar className="w-4 h-4" /> Vandaag — {label}
       </div>
       <button 
         onClick={onNew}

@@ -199,9 +199,8 @@ function AddWorkoutModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: Partial<Workout>) => void;
+  onSubmit: (data: Omit<Workout, "id" | "created_at">) => void;
 }) {
-  // ✅ Controlled states
   const [workoutType, setWorkoutType] =
     useState<"cardio" | "strength" | "flexibility" | "sports" | "other">("other");
   const [intensity, setIntensity] = useState<number>(3);
