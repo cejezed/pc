@@ -82,8 +82,7 @@ export function CreateInvoiceModal({
       
       const totalAmount = filteredEntries.reduce((sum, e) => {
         const hours = (e.minutes || 0) / 60;
-        // ✅ FIX: Gebruik optional chaining en fallback
-        const rate = e.projects?.default_rate_cents ?? e.project?.default_rate_cents ?? 0;
+        const rate = e.projects?.default_rate_cents ?? 0;
         return sum + Math.round(hours * rate);
       }, 0);
 
@@ -133,7 +132,7 @@ export function CreateInvoiceModal({
 
       const items: InvoiceItem[] = chosen.map((e) => {
         const hours = (e.minutes || 0) / 60;
-        const projectName = e.projects?.name ?? e.project?.name ?? "Project";
+        const projectName = e.projects?.name ?? "Project";
         
         return {
           description: `${projectName} – ${e.occurred_on}${
