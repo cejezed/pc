@@ -25,7 +25,7 @@ type CreateForm = {
   project_id?: string;
   items: InvoiceItem[];
   manualMode: boolean;
-  cutoff_date: string; // ✅ NIEUW
+  cutoff_date: string;
 };
 
 const today = ymd(new Date());
@@ -56,7 +56,7 @@ export function CreateInvoiceModal({
     project_id: undefined,
     items: [],
     manualMode: false,
-    cutoff_date: today, // ✅ NIEUW
+    cutoff_date: today,
   });
 
   // Auto-generate invoice number
@@ -69,7 +69,7 @@ export function CreateInvoiceModal({
     }
   }, [form.invoice_number]);
 
-  // ✅ NIEUW: Filter unbilled op cutoff date
+  // Filter unbilled op cutoff date
   const filteredUnbilled = useMemo(() => {
     if (!unbilled || !form.cutoff_date) return unbilled;
     
@@ -82,7 +82,8 @@ export function CreateInvoiceModal({
       
       const totalAmount = filteredEntries.reduce((sum, e) => {
         const hours = (e.minutes || 0) / 60;
-        const rate = (e.projects?.default_rate_cents || 0);
+        // ✅ FIX: Gebruik optional chaining en fallback
+        const rate = e.projects?.default_rate_cents ?? e.project?.default_rate_cents ?? 0;
         return sum + Math.round(hours * rate);
       }, 0);
 
@@ -132,9 +133,11 @@ export function CreateInvoiceModal({
 
       const items: InvoiceItem[] = chosen.map((e) => {
         const hours = (e.minutes || 0) / 60;
+        const projectName = e.projects?.name ?? e.project?.name ?? "Project";
+        
         return {
-          description: `${e.projects?.name || "Project"} — ${e.occurred_on}${
-            e.notes ? ` — ${e.notes}` : ""
+          description: `${projectName} – ${e.occurred_on}${
+            e.notes ? ` – ${e.notes}` : ""
           }`,
           quantity: Number(hours.toFixed(2)),
           rate_cents: 7500,
@@ -237,34 +240,33 @@ export function CreateInvoiceModal({
       {/* Content */}
       <div className="p-4 overflow-auto max-h-[60vh]">
         {/* Step 1 */}
-       {step === 1 && (
-  
+        {step === 1 && (
           <div>
-          {/* Cutoff date - DIRECT HIER */}
-    {!form.manualMode && (
-      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-        <label className="block">
-          <span className="text-sm font-medium text-blue-900 mb-2 block flex items-center gap-2">
-          📅 Factureer alle uren tot en met datum
-          </span>
-          <input
-            type="date"
-            value={form.cutoff_date}
-            onChange={(e) => {
-              setForm((f) => ({ 
-                ...f, 
-                cutoff_date: e.target.value,
-                selectedEntryIds: [],
-              }));
-            }}
-            className="border border-blue-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
-          />
-          <p className="text-xs text-blue-700 mt-2">
-            Alleen ongefactureerde uren tot en met deze datum worden getoond
-          </p>
-        </label>
-      </div>
-    )}
+            {/* Cutoff date */}
+            {!form.manualMode && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <label className="block">
+                  <span className="text-sm font-medium text-blue-900 mb-2 block flex items-center gap-2">
+                    📅 Factureer alle uren tot en met datum
+                  </span>
+                  <input
+                    type="date"
+                    value={form.cutoff_date}
+                    onChange={(e) => {
+                      setForm((f) => ({ 
+                        ...f, 
+                        cutoff_date: e.target.value,
+                        selectedEntryIds: [],
+                      }));
+                    }}
+                    className="border border-blue-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+                  />
+                  <p className="text-xs text-blue-700 mt-2">
+                    Alleen ongefactureerde uren tot en met deze datum worden getoond
+                  </p>
+                </label>
+              </div>
+            )}
 
             {/* Manual mode toggle */}
             <div className="mb-6 p-4 border-2 border-dashed rounded-xl bg-gray-50">
@@ -353,7 +355,7 @@ export function CreateInvoiceModal({
                               <div className="font-medium">
                                 {b.project_name}{" "}
                                 <span className="text-gray-500">
-                                  — {b.client_name}
+                                  – {b.client_name}
                                 </span>
                               </div>
                               <div className="text-sm text-gray-600">
@@ -403,7 +405,7 @@ export function CreateInvoiceModal({
                                       {e.occurred_on} • {hours.toFixed(2)} u
                                     </div>
                                     <div className="text-gray-600">
-                                      {e.notes || "—"} • {e.phase_code}
+                                      {e.notes || "–"} • {e.phase_code}
                                     </div>
                                   </div>
                                 </label>
