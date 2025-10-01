@@ -1,22 +1,31 @@
 import React, { useState } from "react";
-import { Download, DollarSign } from "lucide-react";
+import { Download } from "lucide-react";
 import { useProjects, usePhases, useTimeEntries } from "./hooks";
 import UrenInvoer from "./UrenInvoer";
 import ProjectOverzicht from "./ProjectOverzicht";
 import AlleUren from "./AlleUren";
-import FactureerModal from "./FactureerModal";
 import { EUR } from "./utils";
 
 export default function Uren() {
   const [view, setView] = useState<"entries" | "summary" | "all">("entries");
-  const [showFactureerModal, setShowFactureerModal] = useState(false);
 
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
   const { data: phases = [], isLoading: phasesLoading } = usePhases();
   const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
 
   const exportToCSV = () => {
-    const headers = ["Project", "Fase", "Datum", "Uren", "Omschrijving", "Uurtarief", "Bedrag"];
+    const headers = [
+      "Project", 
+      "Fase", 
+      "Datum", 
+      "Uren", 
+      "Omschrijving", 
+      "Uurtarief", 
+      "Bedrag", 
+      "Gefactureerd", 
+      "Factuurnummer"
+    ];
+    
     const rows = timeEntries.map((e) => {
       const project = e.projects || e.project;
       const phase = e.phases || e.phase;
@@ -32,6 +41,8 @@ export default function Uren() {
         e.notes || "",
         EUR(rate),
         EUR(hours * rate),
+        e.invoiced_at ? "Ja" : "Nee",
+        e.invoice_number || "",
       ];
     });
 
@@ -101,13 +112,6 @@ export default function Uren() {
               Alle uren
             </button>
             <button
-              onClick={() => setShowFactureerModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all inline-flex items-center gap-2"
-            >
-              <DollarSign className="w-4 h-4" />
-              Factureren
-            </button>
-            <button
               onClick={exportToCSV}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all inline-flex items-center gap-2"
             >
@@ -117,7 +121,7 @@ export default function Uren() {
           </div>
         </div>
 
-        {/* Content - GEEN grid meer, gewoon full width */}
+        {/* Content */}
         {view === "entries" && (
           <UrenInvoer
             projects={projects}
@@ -135,16 +139,6 @@ export default function Uren() {
         )}
 
         {view === "all" && <AlleUren timeEntries={timeEntries} />}
-
-        {/* Factureer Modal */}
-        {showFactureerModal && (
-          <FactureerModal
-            projects={projects}
-            phases={phases}
-            timeEntries={timeEntries}
-            onClose={() => setShowFactureerModal(false)}
-          />
-        )}
       </div>
     </div>
   );

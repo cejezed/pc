@@ -1,6 +1,6 @@
 // src/components/ideas/idea-modal-componenten.tsx
 import React from "react";
-import { Plus, X, Save, Lightbulb, Trash2 } from "lucide-react";
+import { Plus, X, Save, Lightbulb, Trash2, Archive } from "lucide-react";
 import type { Idea, IdeaFormData } from "./types";
 import { useAddIdea, useUpdateIdea, useDeleteIdea, useUpdateIdeaStatus } from "./hooks";
 import { IDEA_PRIORITIES, IDEA_STATUSES } from "./types";
@@ -260,7 +260,7 @@ export function IdeaFormModal({
   );
 }
 
-/* Idea Detail Modal - Zonder Comments */
+/* Idea Detail Modal - Met Archive én Delete */
 export function IdeaDetailModal({
   isOpen,
   onClose,
@@ -279,11 +279,25 @@ export function IdeaDetailModal({
     updateStatus.mutate({ id: idea.id, status: newStatus });
   };
 
+  const handleArchive = () => {
+    if (window.confirm("Dit idee archiveren?")) {
+      updateStatus.mutate({ id: idea.id, status: "archived" }, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    }
+  };
+
   const handleDelete = () => {
-    if (window.confirm("Weet je zeker dat je dit idee wilt verwijderen?")) {
+    if (window.confirm("Weet je zeker dat je dit idee definitief wilt verwijderen? Deze actie kan niet ongedaan gemaakt worden.")) {
       deleteIdea.mutate(idea.id, {
         onSuccess: () => {
           onClose();
+        },
+        onError: (error) => {
+          console.error("Delete error:", error);
+          alert("Kon idee niet verwijderen. Check de console voor details.");
         },
       });
     }
@@ -301,6 +315,7 @@ export function IdeaDetailModal({
 
   const statusInfo = getStatusInfo();
   const priorityInfo = getPriorityInfo();
+  const isArchived = idea.status === "archived";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -395,13 +410,26 @@ export function IdeaDetailModal({
           >
             Bewerken
           </button>
+          
+          {!isArchived && (
+            <button
+              onClick={handleArchive}
+              className="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all font-semibold flex items-center gap-2"
+              title="Archiveer dit idee (kan later weer geactiveerd worden)"
+            >
+              <Archive className="w-4 h-4" />
+              Archiveer
+            </button>
+          )}
+          
           <button
             onClick={handleDelete}
             disabled={deleteIdea.isPending}
             className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-300 transition-all font-semibold flex items-center gap-2"
+            title="Definitief verwijderen (kan niet ongedaan gemaakt worden)"
           >
             <Trash2 className="w-4 h-4" />
-            {deleteIdea.isPending ? "Verwijderen..." : "Verwijderen"}
+            {deleteIdea.isPending ? "Verwijderen..." : "Verwijder"}
           </button>
         </div>
       </div>

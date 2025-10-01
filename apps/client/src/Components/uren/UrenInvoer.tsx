@@ -81,11 +81,13 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
 
   return (
     <>
-      <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Nieuwe uren registreren</h2>
+      <div className="bg-white rounded-brikx border border-gray-200 p-4 md:p-6 shadow-sm">
+        <h2 className="text-lg md:text-xl font-semibold mb-4">Nieuwe uren registreren</h2>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-3 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+          {/* RESPONSIVE GRID: 1 kolom mobiel, 3 kolommen desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
             {/* Kolom 1: Project Selectie */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -101,7 +103,8 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                   Nieuw
                 </button>
               </div>
-              <div className="border border-gray-300 rounded-lg h-[320px] overflow-y-auto bg-white">
+              {/* RESPONSIVE HEIGHT: 200px mobiel, 320px desktop */}
+              <div className="border border-gray-300 rounded-lg h-[200px] lg:h-[320px] overflow-y-auto bg-white">
                 {sortedProjects.map((project, index) => {
                   const isRecent = index < 5;
                   const isSelected = selectedProject === project.id;
@@ -110,25 +113,20 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                       key={project.id}
                       type="button"
                       onClick={() => setSelectedProject(project.id)}
-                      className={`w-full text-left px-3 py-2 border-b border-gray-100 transition-colors ${
+                      className={`w-full text-left px-3 py-2.5 md:py-2 border-b border-gray-100 transition-all ${
                         isSelected
-                          ? "font-medium border-l-4"
-                          : "hover:bg-gray-50"
+                          ? "bg-brikx-teal text-white border-l-4 border-l-brikx-teal-dark font-medium"
+                          : "hover:bg-gray-50 text-gray-900"
                       }`}
-                      style={isSelected ? {
-                        backgroundColor: '#2D9CDB',
-                        borderLeftColor: '#1D7AAC',
-                        color: 'white'
-                      } : {}}
                     >
-                      <div className={`text-sm font-medium leading-tight ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                      <div className="text-sm font-medium leading-tight">
                         {project.name}
                         {isRecent && !isSelected && (
                           <span className="ml-2 text-xs text-brikx-teal font-normal">● recent</span>
                         )}
                       </div>
                       {project.city && (
-                        <div className={`text-xs leading-tight ${isSelected ? 'text-white/90' : 'text-gray-500'}`}>
+                        <div className={`text-xs leading-tight ${isSelected ? 'text-white opacity-90' : 'text-gray-500'}`}>
                           {project.city}
                         </div>
                       )}
@@ -148,7 +146,7 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fase *
               </label>
-              <div className="border border-gray-300 rounded-lg h-[320px] overflow-y-auto bg-white">
+              <div className="border border-gray-300 rounded-lg h-[200px] lg:h-[320px] overflow-y-auto bg-white">
                 {phases
                   .slice()
                   .sort((a, b) => a.sort_order - b.sort_order)
@@ -159,18 +157,13 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                         key={phase.code}
                         type="button"
                         onClick={() => setSelectedPhase(phase.code)}
-                        className={`w-full text-left px-3 py-2 border-b border-gray-100 transition-colors ${
+                        className={`w-full text-left px-3 py-2.5 md:py-2 border-b border-gray-100 transition-all ${
                           isSelected
-                            ? "font-medium border-l-4"
-                            : "hover:bg-gray-50"
+                            ? "bg-brikx-teal text-white border-l-4 border-l-brikx-teal-dark font-medium"
+                            : "hover:bg-gray-50 text-gray-900"
                         }`}
-                        style={isSelected ? {
-                          backgroundColor: '#2D9CDB',
-                          borderLeftColor: '#1D7AAC',
-                          color: 'white'
-                        } : {}}
                       >
-                        <div className={`text-sm font-medium leading-tight ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="text-sm font-medium leading-tight">
                           {phase.name}
                         </div>
                       </button>
@@ -180,7 +173,7 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
             </div>
 
             {/* Kolom 3: Datum, Uren, Omschrijving */}
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Datum *
@@ -190,7 +183,7 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full border border-gray-300 rounded-brikx px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all pr-10"
+                    className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all pr-10"
                     required
                   />
                   <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -208,7 +201,7 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                   value={hours}
                   onChange={(e) => setHours(e.target.value)}
                   placeholder="Bijv. 3.5"
-                  className="w-full border border-gray-300 rounded-brikx px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                  className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -221,33 +214,19 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Optionele beschrijving..."
-                  className="w-full border border-gray-300 rounded-brikx px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
-                  rows={4}
+                  className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all resize-none"
+                  rows={3}
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={addTimeEntry.isPending}
-                className="w-full px-6 py-2.5 font-semibold shadow-lg transition-all disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: addTimeEntry.isPending ? '#9CA3AF' : '#2D9CDB',
-                  color: 'white',
-                  borderRadius: '12px',
-                  border: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (!addTimeEntry.isPending) {
-                    e.currentTarget.style.backgroundColor = '#1D7AAC';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(45, 156, 219, 0.4)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!addTimeEntry.isPending) {
-                    e.currentTarget.style.backgroundColor = '#2D9CDB';
-                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-                  }
-                }}
+                className={`w-full px-4 md:px-6 py-2.5 md:py-3 font-semibold shadow-lg transition-all rounded-brikx ${
+                  addTimeEntry.isPending
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-brikx-teal hover:bg-brikx-teal-dark text-white'
+                }`}
               >
                 {addTimeEntry.isPending ? "Bezig..." : "Uren toevoegen"}
               </button>
@@ -256,33 +235,23 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
         </form>
       </div>
 
-      {/* Laatste 10 invoeren */}
+      {/* Laatste 3 invoeren */}
       <div className="bg-white rounded-brikx border border-gray-200 shadow-sm mt-6 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-semibold text-brikx-dark">Laatste 3 invoeren</h3>
+        <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-base md:text-lg font-semibold text-brikx-dark">Laatste 3 invoeren</h3>
         </div>
-        <div className="overflow-x-auto">
+        
+        {/* DESKTOP: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                  Datum
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                  Project
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                  Fase
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
-                  Uren
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                  Notities
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
-                  Bedrag
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Datum</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Project</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fase</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Uren</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Notities</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Bedrag</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -301,19 +270,13 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="font-medium text-gray-900">{project?.name || "Onbekend"}</div>
-                      {project?.city && (
-                        <div className="text-xs text-gray-500">{project.city}</div>
-                      )}
+                      {project?.city && <div className="text-xs text-gray-500">{project.city}</div>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {phase?.name || entry.phase_code}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{phase?.name || entry.phase_code}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
                       {hours.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                      {entry.notes || "-"}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{entry.notes || "-"}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
                       {EUR(amount)}
                     </td>
@@ -330,12 +293,54 @@ export default function UrenInvoer({ projects, phases, timeEntries }: Props) {
             </tbody>
           </table>
         </div>
+
+        {/* MOBILE: Cards */}
+        <div className="md:hidden divide-y divide-gray-200">
+          {timeEntries.slice(0, 3).map(entry => {
+            const project = entry.projects || entry.project;
+            const phase = entry.phases || entry.phase;
+            const hours = entry.minutes ? entry.minutes / 60 : entry.hours || 0;
+            const phaseRates = (project as any)?.phase_rates_cents || {};
+            const rate = (phaseRates[entry.phase_code] ?? project?.default_rate_cents ?? 0) / 100;
+            const amount = hours * rate;
+
+            return (
+              <div key={entry.id} className="p-4 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">{project?.name || "Onbekend"}</div>
+                    {project?.city && <div className="text-xs text-gray-500">{project.city}</div>}
+                  </div>
+                  <div className="text-right ml-3">
+                    <div className="font-semibold text-gray-900">{EUR(amount)}</div>
+                    <div className="text-xs text-gray-500">{hours.toFixed(2)} uur</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-600">{phase?.name || entry.phase_code}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600">
+                    {new Date(entry.occurred_on).toLocaleDateString("nl-NL")}
+                  </span>
+                </div>
+                {entry.notes && (
+                  <div className="text-sm text-gray-600 line-clamp-2">{entry.notes}</div>
+                )}
+              </div>
+            );
+          })}
+          {timeEntries.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              Nog geen uren geregistreerd
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Project status onderaan */}
-      <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm mt-6">
-        <h3 className="text-lg font-semibold mb-4 text-brikx-dark">Project status</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="bg-white rounded-brikx border border-gray-200 p-4 md:p-6 shadow-sm mt-6">
+        <h3 className="text-base md:text-lg font-semibold mb-4 text-brikx-dark">Project status</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {projectStats.map(({ project, totalHours, amount }) => (
             <div key={project.id} className="border border-gray-200 rounded-lg p-3 hover:border-brikx-teal transition-colors">
               <div className="font-medium text-sm text-gray-900 mb-1 truncate">

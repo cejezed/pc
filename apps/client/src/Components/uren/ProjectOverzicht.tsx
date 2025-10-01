@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, ChevronRight, Archive, ArchiveRestore, Trash2, Plus, Edit3, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Archive, ArchiveRestore, Trash2, Plus, Edit3, CheckCircle2, Euro } from "lucide-react";
 import type { Project, Phase, TimeEntry } from "./types";
 import { phaseShortcodes } from "./types";
 import { EUR } from "./utils";
@@ -29,7 +29,28 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
       const invoicedPhases = new Set<string>(((project as any)?.invoiced_phases ?? []) as string[]);
 
       const totalHours = projectEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
-      const totalAmount = totalHours * defaultRate;
+      
+      // Split billed/unbilled
+      const billedEntries = projectEntries.filter(e => e.invoiced_at != null);
+      const unbilledEntries = projectEntries.filter(e => e.invoiced_at == null);
+      
+      const billedHours = billedEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
+      const unbilledHours = unbilledEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
+      
+      // Bereken bedragen per entry (met fase-specifieke tarieven)
+      const billedAmount = billedEntries.reduce((sum, e) => {
+        const phaseRate = (phaseRatesCents[e.phase_code] ?? project.default_rate_cents ?? 0) / 100;
+        const hours = e.minutes ? e.minutes / 60 : e.hours || 0;
+        return sum + (hours * phaseRate);
+      }, 0);
+      
+      const unbilledAmount = unbilledEntries.reduce((sum, e) => {
+        const phaseRate = (phaseRatesCents[e.phase_code] ?? project.default_rate_cents ?? 0) / 100;
+        const hours = e.minutes ? e.minutes / 60 : e.hours || 0;
+        return sum + (hours * phaseRate);
+      }, 0);
+      
+      const totalAmount = billedAmount + unbilledAmount;
 
       const phaseBreakdown = phases.reduce((acc, phase) => {
         const phaseEntries = projectEntries.filter((e) => e.phase_code === phase.code);
@@ -53,6 +74,10 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
         project,
         totalHours,
         totalAmount,
+        billedHours,
+        billedAmount,
+        unbilledHours,
+        unbilledAmount,
         phaseBreakdown,
         hasEntries: projectEntries.length > 0,
         lastActivity: projectEntries.length > 0
@@ -116,7 +141,6 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
       )}
 
       <div className="space-y-4">
-        {/* Header met Project Toevoegen button */}
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-brikx-dark">Projecten</h2>
           <button
@@ -128,9 +152,8 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
           </button>
         </div>
 
-        {/* Actieve Projecten */}
         <div className="space-y-3">
-          {sortedActiveProjects.map(({ project, totalHours, totalAmount, phaseBreakdown, hasEntries }) => {
+          {sortedActiveProjects.map(({ project, totalHours, totalAmount, billedAmount, unbilledAmount, billedHours, unbilledHours, phaseBreakdown, hasEntries }) => {
             const isExpanded = expandedProjects.has(project.id);
             return (
               <div key={project.id} className="bg-white rounded-brikx shadow-sm border border-gray-200">
@@ -144,17 +167,30 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                     ) : (
                       <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg text-brikx-dark">{project.name}</h3>
                       {project.city && <p className="text-sm text-gray-600">{project.city}</p>}
                     </div>
+                    
                     <div className="text-right">
-                      <div className="font-semibold text-lg text-brikx-dark">{EUR(totalAmount)}</div>
-                      <div className="text-sm text-gray-600">{totalHours.toFixed(1)} uur</div>
+                      <div className="font-semibold text-lg text-brikx-dark flex items-center gap-2 justify-end">
+                        <Euro className="w-5 h-5 text-brikx-teal" />
+                        <span>{EUR(totalAmount)}</span>
+                      </div>
+                      <div className="text-sm text-gray-600">{totalHours.toFixed(1)} uur totaal</div>
+                      {unbilledAmount > 0 && (
+                        <div className="text-xs text-orange-600 font-medium mt-1">
+                          {EUR(unbilledAmount)} te factureren
+                        </div>
+                      )}
+                      {billedAmount > 0 && (
+                        <div className="text-xs text-green-600 mt-0.5">
+                          {EUR(billedAmount)} gefactureerd
+                        </div>
+                      )}
                     </div>
                   </button>
 
-                  {/* Action Buttons */}
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => openEdit(project)}
@@ -182,6 +218,24 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
 
                 {isExpanded && (
                   <div className="border-t p-4 bg-gray-50">
+                    <div className="mb-4 grid grid-cols-3 gap-4">
+                      <div className="bg-white rounded-lg p-3 border border-gray-200">
+                        <div className="text-xs text-gray-600 mb-1">Totaal</div>
+                        <div className="text-lg font-semibold text-brikx-dark">{EUR(totalAmount)}</div>
+                        <div className="text-xs text-gray-500">{totalHours.toFixed(1)} uur</div>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                        <div className="text-xs text-green-700 mb-1">Gefactureerd</div>
+                        <div className="text-lg font-semibold text-green-700">{EUR(billedAmount)}</div>
+                        <div className="text-xs text-green-600">{billedHours.toFixed(1)} uur</div>
+                      </div>
+                      <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                        <div className="text-xs text-orange-700 mb-1">Ongefactureerd</div>
+                        <div className="text-lg font-semibold text-orange-700">{EUR(unbilledAmount)}</div>
+                        <div className="text-xs text-orange-600">{unbilledHours.toFixed(1)} uur</div>
+                      </div>
+                    </div>
+
                     <table className="w-full text-sm">
                       <thead className="border-b">
                         <tr>
@@ -264,7 +318,6 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
           })}
         </div>
 
-        {/* Gearchiveerde Projecten */}
         {archivedProjects.length > 0 && (
           <div className="mt-8">
             <button

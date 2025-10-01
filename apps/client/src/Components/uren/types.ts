@@ -26,8 +26,8 @@ export type TimeEntry = {
   minutes?: number;
   hours?: number;
   notes?: string | null;
-  invoiced_at?: string | null;
-  invoice_number?: string | null;
+  invoiced_at?: string | null; // ✅ Datum waarop gefactureerd
+  invoice_number?: string | null; // ✅ Factuurnummer
   projects?: Project;
   project?: Project;
   phases?: Phase;
