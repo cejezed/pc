@@ -1,5 +1,4 @@
 // invoices/InvoiceFilters.tsx
-import React from 'react';
 import type { FilterStatus } from './types';
 
 interface Props {

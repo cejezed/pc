@@ -12,6 +12,8 @@ export const useIdeas = (filters?: {
   return useQuery({
     queryKey: ["ideas", filters],
     queryFn: async (): Promise<Idea[]> => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       let query = supabase
         .from("ideas")
         .select("*")
@@ -37,21 +39,20 @@ export const useIdeas = (filters?: {
   });
 };
 
-// Add new idea
+// Add new idea - NO AUTH VERSION
 export const useAddIdea = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (idea: Omit<Idea, "id" | "created_at" | "updated_at">) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!supabase) throw new Error("Supabase not initialized");
 
       const { data, error } = await supabase
         .from("ideas")
         .insert([
           {
             ...idea,
-            owner_id: user.id,
+            owner_id: null, // NO AUTH: set to null
           },
         ])
         .select()
@@ -72,6 +73,8 @@ export const useUpdateIdea = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Idea> & { id: string }) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("ideas")
         .update(updates)
@@ -94,6 +97,8 @@ export const useDeleteIdea = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { error } = await supabase
         .from("ideas")
         .delete()
@@ -114,6 +119,8 @@ export const useUpdateIdeaStatus = () => {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: Idea['status'] }) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("ideas")
         .update({ 
@@ -164,6 +171,8 @@ export const useIdeaStats = () => {
   return useQuery({
     queryKey: ["idea-stats"],
     queryFn: async (): Promise<IdeaStats> => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data: ideas, error } = await supabase
         .from("ideas")
         .select("*");

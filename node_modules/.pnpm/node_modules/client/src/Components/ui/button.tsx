@@ -4,12 +4,6 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-/**
- * Vereisten:
- * - Zorg dat je semantic tokens via CSS-variabelen hebt (bg-primary, text-primary-foreground, etc.)
- *   → in brikx-theme.css + index.css al toegevoegd.
- */
-
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background " +
@@ -17,32 +11,29 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Primaire knop: altijd leesbaar, ook actief
+        // Primary button - Brikx Teal met witte tekst
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
+          "bg-brikx-teal hover:bg-brikx-teal-dark text-white shadow-lg hover:shadow-brikx",
 
-        // Destructieve actie
+        // Destructive - Rood met witte tekst
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
+          "bg-red-500 hover:bg-red-600 text-white",
 
-        // Outline: duidelijke tekstkleur + goede hover/active achtergrond
+        // Outline - Wit met border en donkere tekst
         outline:
-          "border border-input bg-background text-foreground " +
-          "hover:bg-accent hover:text-accent-foreground " +
-          "active:bg-accent active:text-accent-foreground",
+          "border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-brikx-teal text-gray-700",
 
-        // Secundair: subtieler, maar nooit wit-op-wit
+        // Secondary - Lichtgrijs met donkere tekst
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70",
+          "bg-gray-100 hover:bg-gray-200 text-gray-900",
 
-        // Ghost: transparant maar met duidelijke hover/active states
+        // Ghost - Transparant met hover effect
         ghost:
-          "bg-transparent text-foreground " +
-          "hover:bg-accent hover:text-accent-foreground " +
-          "active:bg-accent active:text-accent-foreground",
+          "bg-transparent hover:bg-gray-100 text-gray-700",
 
-        // Link-stijl: leesbaar en active iets donkerder
-        link: "bg-transparent text-primary underline-offset-4 hover:underline active:text-primary/90",
+        // Link - Zoals een link
+        link: 
+          "bg-transparent text-brikx-teal underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

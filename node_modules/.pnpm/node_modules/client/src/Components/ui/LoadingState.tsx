@@ -1,5 +1,4 @@
 // src/components/ui/LoadingState.tsx
-import React from "react";
 
 type Props = { message?: string; className?: string };
 

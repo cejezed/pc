@@ -34,6 +34,7 @@ export type TimeEntry = {
   projects?: { 
     name?: string | null; 
     client_name?: string | null;
+    default_rate_cents?: number | null; // ✅ TOEGEVOEGD
   } | null;
 };
 
@@ -50,6 +51,7 @@ export type Project = {
   id: string;
   name: string;
   client_name?: string | null;
+  default_rate_cents?: number | null; // ✅ TOEGEVOEGD
 };
 
 export type InvoiceKPIs = {

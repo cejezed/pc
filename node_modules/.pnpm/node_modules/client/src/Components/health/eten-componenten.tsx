@@ -29,7 +29,7 @@ import {
   EmptyState,
   DateHeader,
 } from "./basis-componenten";
-import type { Meal } from "./types";
+import type { Meal } from "./hooks";
 
 export function EtenTab() {
   const { meals, isLoading, addMeal, deleteMeal } = useMeals();
@@ -39,18 +39,18 @@ export function EtenTab() {
   const { last7Days, totalMeals, avgSatisfaction, totalCalories, groupedMeals, sortedDates } =
     useMemo(() => {
       const weekAgoISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-      const last = (meals ?? []).filter((m) => m.meal_date >= weekAgoISO);
+      const last = (meals ?? []).filter((m: Meal) => m.meal_date >= weekAgoISO);
       const total = last.length;
 
-      const withSat = last.filter((m) => m.satisfaction_rating != null);
+      const withSat = last.filter((m: Meal) => m.satisfaction_rating != null);
       const avgSat =
         withSat.length > 0
-          ? withSat.reduce((sum, m) => sum + (m.satisfaction_rating ?? 0), 0) / withSat.length
+          ? withSat.reduce((sum: number, m: Meal) => sum + (m.satisfaction_rating ?? 0), 0) / withSat.length
           : 0;
 
-      const kcal = last.reduce((sum, m) => sum + (m.calories ?? 0), 0);
+      const kcal = last.reduce((sum: number, m: Meal) => sum + (m.calories ?? 0), 0);
 
-      const grouped = (meals ?? []).reduce<Record<string, Meal[]>>((acc, meal) => {
+      const grouped = (meals ?? []).reduce<Record<string, Meal[]>>((acc, meal: Meal) => {
         const date = meal.meal_date;
         (acc[date] ||= []).push(meal);
         return acc;
@@ -99,7 +99,7 @@ export function EtenTab() {
         <CardContent className="py-3">
           <p className="text-sm text-blue-800">
             💡 <strong>Tip:</strong> Deze feature is bedoeld voor bewustwording, niet voor restrictie.
-            Alle velden zijn optioneel — voeg toe wat voor jou nuttig is!
+            Alle velden zijn optioneel – voeg toe wat voor jou nuttig is!
           </p>
         </CardContent>
       </Card>
@@ -128,8 +128,8 @@ export function EtenTab() {
               <DateHeader date={date} />
               <div className="grid gap-3">
                 {groupedMeals[date]
-                  .sort((a, b) => (a.meal_time || "").localeCompare(b.meal_time || ""))
-                  .map((meal) => (
+                  .sort((a: Meal, b: Meal) => (a.meal_time || "").localeCompare(b.meal_time || ""))
+                  .map((meal: Meal) => (
                     <MealCard
                       key={meal.id}
                       meal={meal}
@@ -227,7 +227,7 @@ function MealCard({ meal, onDelete }: { meal: Meal; onDelete: () => void }) {
         {/* Tags */}
         {meal.tags && meal.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {meal.tags.map((tag) => (
+            {meal.tags.map((tag: string) => (
               <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>
@@ -276,7 +276,7 @@ function AddMealModal({
               .filter(Boolean);
 
             onSubmit({
-              meal_type: mealType, // ⬅️ uit state, niet uit FormData
+              meal_type: mealType,
               description: String(fd.get("description")),
               meal_date: String(fd.get("meal_date")),
               meal_time: String(fd.get("meal_time")) || undefined,
@@ -293,13 +293,12 @@ function AddMealModal({
           }}
           className="space-y-4"
         >
-          {/* (optioneel) hidden input om de waarde ook in FormData te hebben */}
           <input type="hidden" name="meal_type" value={mealType} />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Type *</Label>
-              <Select value={mealType} onValueChange={(v) => setMealType(v as any)}>
+              <Select value={mealType} onValueChange={(v) => setMealType(v as "breakfast" | "lunch" | "dinner" | "snack")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -307,7 +306,7 @@ function AddMealModal({
                   <SelectItem value="breakfast">🌅 Ontbijt</SelectItem>
                   <SelectItem value="lunch">🌤️ Lunch</SelectItem>
                   <SelectItem value="dinner">🌙 Diner</SelectItem>
-                  <SelectItem value="snack">🍎 Snack</SelectItem>
+                  <SelectItem value="snack">🎁 Snack</SelectItem>
                 </SelectContent>
               </Select>
             </div>

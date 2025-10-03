@@ -9,10 +9,46 @@ export const useBudgetCategories = () => {
     queryFn: async (): Promise<BudgetCategory[]> => {
       // Mock implementation - replace with your actual API call
       return [
-        { id: "1", name: "Boodschappen", color: "#84CC16", icon: "🛒", type: "expense" },
-        { id: "2", name: "Transport", color: "#F59E0B", icon: "🚗", type: "expense" },
-        { id: "3", name: "Salaris", color: "#10B981", icon: "💰", type: "income" },
-        { id: "4", name: "Utilities", color: "#06B6D4", icon: "⚡", type: "expense" },
+        { 
+          id: "1", 
+          name: "Boodschappen", 
+          color: "#84CC16", 
+          icon: "🛒", 
+          type: "expense",
+          sort_order: 1,
+          active: true,
+          created_at: new Date().toISOString()
+        },
+        { 
+          id: "2", 
+          name: "Transport", 
+          color: "#F59E0B", 
+          icon: "🚗", 
+          type: "expense",
+          sort_order: 2,
+          active: true,
+          created_at: new Date().toISOString()
+        },
+        { 
+          id: "3", 
+          name: "Salaris", 
+          color: "#10B981", 
+          icon: "💰", 
+          type: "income",
+          sort_order: 3,
+          active: true,
+          created_at: new Date().toISOString()
+        },
+        { 
+          id: "4", 
+          name: "Utilities", 
+          color: "#06B6D4", 
+          icon: "⚡", 
+          type: "expense",
+          sort_order: 4,
+          active: true,
+          created_at: new Date().toISOString()
+        },
       ];
     },
     staleTime: 5 * 60 * 1000,
@@ -86,10 +122,14 @@ export const useAddCategory = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (category: Omit<BudgetCategory, "id">) => {
+    mutationFn: async (category: Omit<BudgetCategory, "id" | "created_at" | "updated_at">) => {
       // Mock implementation
       console.log("Adding category:", category);
-      return { id: Date.now().toString(), ...category };
+      return { 
+        id: Date.now().toString(), 
+        ...category,
+        created_at: new Date().toISOString()
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budget-categories"] });

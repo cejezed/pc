@@ -2,13 +2,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public data?: any
-  ) {
+  status: number;
+  data?: any;
+  
+  constructor(message: string, status: number, data?: any) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
   }
 }
 
@@ -44,7 +45,6 @@ export async function api<T = any>(
       );
     }
 
-    // Handle empty responses (204 No Content, etc.)
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return null as T;
     }
@@ -60,7 +60,6 @@ export async function api<T = any>(
       throw error;
     }
     
-    // Network errors, etc.
     throw new ApiError(
       error instanceof Error ? error.message : 'Unknown error',
       0,
@@ -69,7 +68,6 @@ export async function api<T = any>(
   }
 }
 
-// Convenience methods
 export const apiGet = <T>(endpoint: string) => api<T>(endpoint);
 
 export const apiPost = <T>(endpoint: string, data?: any) =>
@@ -93,7 +91,6 @@ export const apiPatch = <T>(endpoint: string, data?: any) =>
     body: data ? JSON.stringify(data) : undefined,
   });
 
-// Upload helper for files
 export async function uploadFile(
   endpoint: string,
   file: File,
@@ -105,6 +102,6 @@ export async function uploadFile(
   return api(endpoint, {
     method: 'POST',
     body: formData,
-    headers: {}, // Let browser set Content-Type for FormData
+    headers: {},
   });
 }

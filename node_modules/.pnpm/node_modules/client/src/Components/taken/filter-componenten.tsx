@@ -1,4 +1,3 @@
-import React from "react";
 import { Search, SlidersHorizontal, Grid, List } from "lucide-react";
 
 export function SearchBar({ 

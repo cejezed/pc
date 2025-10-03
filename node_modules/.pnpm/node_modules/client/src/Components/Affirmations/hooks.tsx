@@ -8,6 +8,8 @@ export const useAffirmations = () => {
   return useQuery({
     queryKey: ["affirmations"],
     queryFn: async (): Promise<Affirmation[]> => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("affirmations")
         .select("*")
@@ -26,6 +28,8 @@ export const useAffirmationStats = () => {
   return useQuery({
     queryKey: ["affirmation-stats"],
     queryFn: async (): Promise<AffirmationStats | null> => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       // Since we're not using auth, we'll calculate stats from logs directly
       const { data: logs, error } = await supabase
         .from("affirmation_logs")
@@ -66,7 +70,6 @@ export const useAffirmationStats = () => {
       // Simple streak calculation (consecutive days with at least one completion)
       let current_streak = 0;
       let longest_streak = 0;
-      let temp_streak = 0;
       
       // Group logs by date
       const dateGroups = new Map();
@@ -114,6 +117,8 @@ export const useTodayLogs = () => {
   return useQuery({
     queryKey: ["affirmation-logs-today"],
     queryFn: async (): Promise<AffirmationLog[]> => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const today = new Date().toISOString().split("T")[0];
       
       const { data, error } = await supabase
@@ -135,6 +140,8 @@ export const useCreateAffirmation = () => {
 
   return useMutation({
     mutationFn: async (affirmation: Omit<Affirmation, "id" | "created_at" | "updated_at" | "user_id">) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("affirmations")
         .insert([
@@ -161,6 +168,8 @@ export const useLogAffirmation = () => {
 
   return useMutation({
     mutationFn: async (log: Omit<AffirmationLog, "id" | "user_id" | "completed_at">) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("affirmation_logs")
         .insert([
@@ -189,6 +198,8 @@ export const useDeleteAffirmation = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { error } = await supabase
         .from("affirmations")
         .delete()
@@ -209,6 +220,8 @@ export const useUpdateAffirmation = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Affirmation> & { id: string }) => {
+      if (!supabase) throw new Error("Supabase not initialized");
+      
       const { data, error } = await supabase
         .from("affirmations")
         .update(updates)

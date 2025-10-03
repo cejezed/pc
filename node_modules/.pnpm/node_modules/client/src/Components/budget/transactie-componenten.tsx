@@ -1,7 +1,6 @@
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Modal, EUR, formatDate, CategoryBadge, todayISO } from "./basis-componenten";
-// ✅ FIXED: Import types from types file, hooks from hooks file
 import type { BudgetCategory, Transaction as BudgetTransaction } from "./types";
 import { useAddTransaction, useDeleteTransaction } from "./hooks";
 
@@ -39,7 +38,7 @@ export function TransactionFormModal({
       amount_cents: Math.round(parseFloat(form.amount) * 100),
       description: form.description,
       transaction_date: form.transaction_date,
-      type: "expense", // Default to expense, could be dynamic
+      type: "expense",
       notes: form.notes || undefined,
       recurring: form.is_recurring,
       recurring_interval: form.is_recurring ? form.recurring_interval : undefined,

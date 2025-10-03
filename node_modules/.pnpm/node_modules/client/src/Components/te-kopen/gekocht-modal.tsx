@@ -27,7 +27,6 @@ export function PurchaseModal({
     } else {
       setActualCostEuros("");
     }
-    // Pre-fill location met store als die er is
     setPurchasedLocation(item?.store || "");
   }, [item]);
 

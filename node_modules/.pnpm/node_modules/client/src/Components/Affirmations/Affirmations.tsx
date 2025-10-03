@@ -24,6 +24,15 @@ import {
 } from "./hooks";
 import { CATEGORY_ICONS, CATEGORY_COLORS, TEMPLATES } from "./types";
 
+// ✅ Missing type definition
+type AffirmationFormData = {
+  statement: string;
+  category: "financial" | "health" | "personal" | "business";
+  times_per_day: number;
+  reminder_times: string[];
+  linked_goal_id?: string;
+};
+
 export default function Affirmations() {
   // Data fetching
   const { data: affirmations = [], isLoading: affirmationsLoading } = useAffirmations();
@@ -140,7 +149,7 @@ export default function Affirmations() {
     if (ritualStep !== 3) {
       setVisualizationTime(30);
     }
- }, [showRitualModal, ritualStep, visualizationTime]);
+  }, [showRitualModal, ritualStep, visualizationTime]);
 
   // Main UI Rendering
   return (
@@ -347,7 +356,7 @@ export default function Affirmations() {
                   setForm({
                     ...form,
                     statement: template.text,
-                    category: template.category as any,
+                    category: template.category as "financial" | "health" | "personal" | "business",
                   });
                   setShowCreateModal(true);
                 }}
@@ -362,7 +371,7 @@ export default function Affirmations() {
         {/* Empty State */}
         {!affirmationsLoading && affirmations.length === 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
-            <div className="text-6xl mb-4">🔿</div>
+            <div className="text-6xl mb-4">📿</div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
               Nog geen affirmaties
             </h3>
@@ -379,13 +388,12 @@ export default function Affirmations() {
         )}
       </div>
 
-
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-brikx-dark">🔿 Nieuwe Affirmatie</h3>
+              <h3 className="text-xl font-bold text-brikx-dark">📿 Nieuwe Affirmatie</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-all"

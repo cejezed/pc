@@ -6,7 +6,7 @@ import { supabase } from "../../supabase"; // Was: "../../supabase" (dit klopt a
 
 // Import types and utilities
 import type { Phase, Project } from "./types";
-import type { phaseShortcodes } from "./types";
+import { phaseShortcodes } from "./types";
 import { EUR } from "./utils";
 
 type Props = {

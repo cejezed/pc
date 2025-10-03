@@ -37,7 +37,7 @@ export function TaskFormModal({
         status: editTask.status,
         priority: editTask.priority,
         due_date: editTask.due_date || "",
-        project: editTask.project || "",
+        project: typeof editTask.project === 'string' ? editTask.project : editTask.project?.id || "",
         tags: editTask.tags || [],
       });
     } else {
@@ -68,13 +68,13 @@ export function TaskFormModal({
   const handleSubmit = () => {
     if (!form.title.trim()) return;
 
-    const payload = {
+    const payload: Partial<Task> = {
       title: form.title.trim(),
       description: form.description.trim() || undefined,
       status: form.status,
       priority: form.priority,
       due_date: form.due_date || undefined,
-      project: form.project.trim() || undefined,
+      project: form.project.trim() ? { id: form.project.trim(), name: form.project.trim(), color: 'gray' } : undefined,
       tags: form.tags.length > 0 ? form.tags : undefined,
     };
 
