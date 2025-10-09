@@ -8,7 +8,6 @@ import {
   ymd, 
   addDays 
 } from "./hooks";
-import { api } from "@/lib/api";
 import { supabase } from "@/supabase";
 import type { InvoiceItem, TimeEntry } from "./types";
 
@@ -32,21 +31,22 @@ type CreateForm = {
 
 const today = ymd(new Date());
 
-export function CreateInvoiceModal({
+export function CreateInvoiceModalV2({  
   open,
   onClose,
-  onCreated
+  onCreated,
+  defaultMode,
 }: {
   open: boolean;
   onClose: () => void;
   onCreated?: (id: string) => void;
+  defaultMode?: Mode;
 }) {
   const { data: unbilled, isLoading: loadingUnbilled, refetch: refetchUnbilled } = useUnbilled();
   const { data: projects = [] } = useProjects();
   const createMutation = useCreateInvoice();
 
-  const [step, setStep] = useState<Step>(1);
-  const [form, setForm] = useState<CreateForm>({
+  const makeInitialForm = (mode: Mode): CreateForm => ({
     selectedEntryIds: [],
     byProject: {},
     invoice_number: "",
@@ -57,9 +57,19 @@ export function CreateInvoiceModal({
     notes: "",
     project_id: undefined,
     items: [],
-    mode: "normal",
+    mode,
     cutoff_date: today,
   });
+
+  const [step, setStep] = useState<Step>(1);
+  const [form, setForm] = useState<CreateForm>(makeInitialForm(defaultMode ?? "normal"));
+
+  useEffect(() => {
+    if (open) {
+      setStep(1);
+      setForm(makeInitialForm(defaultMode ?? "normal"));
+    }
+  }, [open, defaultMode]);
 
   useEffect(() => {
     if (!form.invoice_number) {
@@ -186,10 +196,6 @@ export function CreateInvoiceModal({
 
     const created = await createMutation.mutateAsync(payload);
 
-    if (sendImmediately && created?.id) {
-      await api(`/api/invoices/${created.id}/send`, { method: "POST" });
-    }
-
     alert(sendImmediately ? "Factuur aangemaakt en verzonden." : "Conceptfactuur opgeslagen.");
 
     if (onCreated && created?.id) onCreated(created.id);
@@ -208,22 +214,42 @@ export function CreateInvoiceModal({
     if (!confirm(confirmMsg)) return;
 
     try {
-      const { error } = await supabase
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('facturen')
+        .insert({
+          invoice_number: form.invoice_number || `HIST-${Date.now()}`,
+          project_id: form.project_id,
+          invoice_date: form.invoice_date,
+          due_date: form.invoice_date,
+          amount_cents: historicTotal,
+          status: 'paid',
+          notes: `Historische factuur - ${ids.length} uren geregistreerd`,
+          vat_percent: form.vat_percent,
+          payment_terms: '0',
+        })
+        .select()
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      const { error: timeError } = await supabase
         .from("time_entries")
         .update({ 
           invoiced_at: form.invoice_date, 
-          invoice_number: form.invoice_number || null 
+          invoice_number: form.invoice_number || invoice.invoice_number
         })
         .in("id", ids);
 
-      if (error) throw error;
+      if (timeError) throw timeError;
 
-      alert(`${ids.length} uren gemarkeerd als gefactureerd`);
+      alert(`Factuur ${invoice.invoice_number} geregistreerd met ${ids.length} uren`);
       await refetchUnbilled();
+      
+      if (onCreated && invoice?.id) onCreated(invoice.id);
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Er ging iets mis bij het markeren");
+      alert("Er ging iets mis bij het registreren");
     }
   };
 
@@ -307,7 +333,7 @@ export function CreateInvoiceModal({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Project *</label>
                     <select
@@ -324,14 +350,36 @@ export function CreateInvoiceModal({
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Factuurdatum *</label>
-                    <input
-                      type="date"
-                      value={form.invoice_date}
-                      onChange={(e) => setForm((f) => ({ ...f, invoice_date: e.target.value, cutoff_date: e.target.value }))}
-                      className="w-full border rounded-xl px-3 py-2"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Markeer uren tot en met datum *
+                      </label>
+                      <input
+                        type="date"
+                        value={form.cutoff_date}
+                        onChange={(e) => setForm((f) => ({ ...f, cutoff_date: e.target.value }))}
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Alle ongefactureerde uren tot deze datum worden gemarkeerd
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Factuurdatum (registratie)
+                      </label>
+                      <input
+                        type="date"
+                        value={form.invoice_date}
+                        onChange={(e) => setForm((f) => ({ ...f, invoice_date: e.target.value }))}
+                        className="w-full border rounded-xl px-3 py-2"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Optioneel: wanneer was de factuur verstuurd?
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -352,7 +400,7 @@ export function CreateInvoiceModal({
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">
-                          Ongefactureerde uren tot {new Date(form.invoice_date).toLocaleDateString('nl-NL')}:
+                          Ongefactureerde uren tot {new Date(form.cutoff_date).toLocaleDateString('nl-NL')}:
                         </span>
                         <strong>{historicEntries.length} entries</strong>
                       </div>
@@ -402,7 +450,7 @@ export function CreateInvoiceModal({
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                   <label className="block">
                     <span className="text-sm font-medium text-blue-900 mb-2 block flex items-center gap-2">
-                      📅 Factureer alle uren tot en met datum
+                      Factureer alle uren tot en met datum
                     </span>
                     <input
                       type="date"
@@ -421,7 +469,7 @@ export function CreateInvoiceModal({
                 {loadingUnbilled ? (
                   <div className="py-12 flex justify-center text-gray-500">
                     <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    Unbilled uren laden…
+                    Unbilled uren laden
                   </div>
                 ) : !filteredUnbilled?.length ? (
                   <div className="py-8 text-center text-gray-600">
@@ -444,10 +492,10 @@ export function CreateInvoiceModal({
                           <div className="flex items-center justify-between p-3">
                             <div>
                               <div className="font-medium">
-                                {b.project_name} <span className="text-gray-500">— {b.client_name}</span>
+                                {b.project_name} <span className="text-gray-500">{b.client_name}</span>
                               </div>
                               <div className="text-sm text-gray-600">
-                                {b.total_hours.toFixed(2)} uur • {centsToMoney(b.total_amount_cents)}
+                                {b.total_hours.toFixed(2)} uur {centsToMoney(b.total_amount_cents)}
                               </div>
                             </div>
                             <label className="inline-flex items-center gap-2 text-sm">
@@ -481,8 +529,8 @@ export function CreateInvoiceModal({
                                     }
                                   />
                                   <div className="flex-1">
-                                    <div className="font-medium">{e.occurred_on} • {hours.toFixed(2)} u</div>
-                                    <div className="text-gray-600">{e.notes || "—"} • {e.phase_code}</div>
+                                    <div className="font-medium">{e.occurred_on} {hours.toFixed(2)} u</div>
+                                    <div className="text-gray-600">{e.notes || "—"} {e.phase_code}</div>
                                   </div>
                                 </label>
                               );
@@ -602,41 +650,6 @@ export function CreateInvoiceModal({
                         />
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <input
-                          type="number"
-                          step="0.25"
-                          className="w-28 border rounded-lg px-2 py-1 text-right"
-                          value={it.quantity}
-                          onChange={(e) => {
-                            const quantity = Number(e.target.value);
-                            setForm((f) => {
-                              const items = [...f.items];
-                              const rate = items[idx].rate_cents;
-                              items[idx] = { ...items[idx], quantity, amount_cents: Math.round(rate * quantity) };
-                              return { ...f, items };
-                            });
-                          }}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <input
-                          type="number"
-                          step="1"
-                          className="w-28 border rounded-lg px-2 py-1 text-right"
-                          value={(it.rate_cents / 100).toFixed(2)}
-                          onChange={(e) => {
-                            const rate = Math.round(Number(e.target.value) * 100);
-                            setForm((f) => {
-                              const items = [...f.items];
-                              const qty = items[idx].quantity;
-                              items[idx] = { ...items[idx], rate_cents: rate, amount_cents: Math.round(rate * qty) };
-                              return { ...f, items };
-                            });
-                          }}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-right">{centsToMoney(it.amount_cents)}</td>
-                      <td className="px-3 py-2 text-right">
                         <button
                           className="p-2 rounded hover:bg-gray-100"
                           onClick={() => setForm((f) => ({ ...f, items: f.items.filter((_, i) => i !== idx) }))}
@@ -686,7 +699,6 @@ export function CreateInvoiceModal({
         )}
       </div>
 
-      {/* Footer - Navigatie */}
       <div className="border-t px-4 py-3 flex justify-between">
         {form.mode === "historic" ? (
           <>

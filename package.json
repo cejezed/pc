@@ -5,5 +5,7 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "react-router-dom": "^7.9.3"
   }
 }

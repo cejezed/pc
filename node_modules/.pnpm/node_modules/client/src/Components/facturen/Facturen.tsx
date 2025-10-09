@@ -8,7 +8,7 @@ import {
 } from "./hooks";
 import { KPICard, centsToMoney } from "./basis-componenten";
 import { InvoicesTable } from "./factuur-tabel-componenten";
-import { CreateInvoiceModal } from "./factuur-wizard-componenten";
+import { CreateInvoiceModalV2 } from "./factuur-wizard-componenten";
 import { InvoiceDetailDrawer } from "./factuur-detail-componenten";
 import type { Invoice } from "./types";
 
@@ -19,11 +19,13 @@ export default function FacturenPage() {
 
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createMode, setCreateMode] = useState<"normal" | "manual" | "historic">("normal");
+
   const [filterStatus, setFilterStatus] = useState<"all" | Invoice["status"]>("all");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
   const [search, setSearch] = useState("");
 
-  // KPI's
+  // KPI's berekenen
   const kpis = useMemo(() => {
     const now = new Date();
     const month = now.getMonth();
@@ -32,10 +34,7 @@ export default function FacturenPage() {
     const sentOrOverdue = invoices.filter((i) => 
       ["sent", "overdue"].includes(i.status)
     );
-    const teOntvangen = sentOrOverdue.reduce(
-      (acc, i) => acc + i.amount_cents, 
-      0
-    );
+    const teOntvangen = sentOrOverdue.reduce((acc, i) => acc + i.amount_cents, 0);
 
     const ontvangenDezeMaand = invoices
       .filter(
@@ -69,16 +68,20 @@ export default function FacturenPage() {
             Beheer facturen, stuur ze per e-mail, exporteer PDF's en registreer betalingen.
           </p>
         </div>
+
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-black text-white px-3 py-2 hover:opacity-90"
+          onClick={() => { 
+            setCreateMode("normal"); 
+            setShowCreateModal(true); 
+          }}
+          className="inline-flex items-center gap-2 rounded-xl bg-black text-white px-4 py-2 hover:opacity-90 transition-opacity"
         >
           <Plus className="h-4 w-4" /> Nieuwe factuur
         </button>
       </div>
 
-      {/* KPI's */}
-      <div className="grid sm:grid-cols-3 gap-3">
+      {/* KPI Cards */}
+      <div className="grid sm:grid-cols-3 gap-4">
         <KPICard
           label="Te ontvangen (sent + overdue)"
           value={centsToMoney(kpis.teOntvangen)}
@@ -94,13 +97,13 @@ export default function FacturenPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-end gap-2">
+      <div className="flex flex-wrap items-end gap-3">
         <label className="flex-1 min-w-[220px]">
-          <div className="text-sm text-gray-600 flex items-center gap-2">
+          <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
             <Search className="h-4 w-4" /> Zoeken
           </div>
           <input
-            className="mt-1 w-full border rounded-xl px-3 py-2"
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="Nummer/klant/project"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -108,11 +111,11 @@ export default function FacturenPage() {
         </label>
         
         <label>
-          <div className="text-sm text-gray-600 flex items-center gap-2">
+          <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
             <Filter className="h-4 w-4" /> Status
           </div>
           <select
-            className="mt-1 border rounded-xl px-3 py-2"
+            className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
           >
@@ -126,24 +129,24 @@ export default function FacturenPage() {
         </label>
         
         <label>
-          <div className="text-sm text-gray-600 flex items-center gap-2">
+          <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4" /> Van
           </div>
           <input
             type="date"
-            className="mt-1 border rounded-xl px-3 py-2"
+            className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             value={dateRange.from}
             onChange={(e) => setDateRange((r) => ({ ...r, from: e.target.value }))}
           />
         </label>
         
         <label>
-          <div className="text-sm text-gray-600 flex items-center gap-2">
+          <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4" /> Tot
           </div>
           <input
             type="date"
-            className="mt-1 border rounded-xl px-3 py-2"
+            className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             value={dateRange.to}
             onChange={(e) => setDateRange((r) => ({ ...r, to: e.target.value }))}
           />
@@ -151,8 +154,8 @@ export default function FacturenPage() {
         
         {!!overdueList.length && (
           <div className="ml-auto">
-            <span className="inline-flex items-center gap-2 rounded-xl bg-red-50 text-red-700 px-3 py-2 text-sm">
-              🔔 {overdueList.length} overdue
+            <span className="inline-flex items-center gap-2 rounded-xl bg-red-50 text-red-700 px-3 py-2 text-sm font-medium">
+              {overdueList.length} overdue
             </span>
           </div>
         )}
@@ -162,7 +165,7 @@ export default function FacturenPage() {
       {isLoading ? (
         <div className="py-16 text-center text-gray-500">
           <Loader2 className="h-5 w-5 animate-spin inline-block mr-2" />
-          Facturen laden…
+          Facturen laden...
         </div>
       ) : (
         <InvoicesTable
@@ -176,11 +179,16 @@ export default function FacturenPage() {
       )}
 
       {/* Modals */}
-      <CreateInvoiceModal
+      <CreateInvoiceModalV2
         open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        defaultMode={createMode}
+        onClose={() => {
+          setShowCreateModal(false);
+          setCreateMode("normal");
+        }}
         onCreated={(id) => {
           setShowCreateModal(false);
+          setCreateMode("normal");
           const inv = invoices.find((x) => x.id === id);
           if (inv) setSelectedInvoice(inv);
         }}

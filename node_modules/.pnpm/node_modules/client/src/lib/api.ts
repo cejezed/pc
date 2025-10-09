@@ -1,5 +1,4 @@
-// src/lib/api.ts
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { supabase } from './supabase';
 
 export class ApiError extends Error {
   status: number;
@@ -17,14 +16,29 @@ export async function api<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Get current session for auth
+  const { data: { session } } = await supabase.auth.getSession();
   
+  // Supabase REST API base URL
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1${endpoint}`;
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY!,
+    'Prefer': 'return=representation',
+  };
+
+  // Add auth header if logged in
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   const config: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers: {
+      ...headers,
+      ...(options.headers || {}),
+    },
   };
 
   try {

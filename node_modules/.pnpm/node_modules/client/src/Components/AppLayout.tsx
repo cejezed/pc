@@ -1,6 +1,7 @@
 // src/components/AppLayout.tsx - VOLLEDIG RESPONSIVE
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
+import { useAuth } from '@/lib/AuthContext';
 import {
   LayoutDashboard,
   BarChart3,
@@ -149,6 +150,26 @@ export default function AppLayout({
                   Navigatie
                 </div>
                 <NavList />
+                <div className="mt-4 pt-3 border-t border-white/10">
+  <div className="flex items-center justify-between px-1">
+    <div className="flex items-center gap-2 min-w-0">
+      <div 
+        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+        style={{ backgroundColor: '#2D9CDB' }}
+      >
+        {useAuth().user?.email?.[0].toUpperCase()}
+      </div>
+      <div className="text-xs min-w-0 flex-1">
+        <p className="font-medium truncate text-white">
+          {useAuth().user?.user_metadata?.full_name || 'User'}
+        </p>
+        <p className="text-white/60 truncate">
+          {useAuth().user?.email}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
               </div>
             </aside>
 
