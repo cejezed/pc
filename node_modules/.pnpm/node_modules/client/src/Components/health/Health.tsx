@@ -4,7 +4,7 @@ import { EnergieTab } from './energie-componenten';
 import { WorkoutTab } from './workout-componenten'; // ✅ Was: WorkoutsTab
 import { SlaapTab } from './slaap-componenten';
 import { PijnTab } from './pijn-componenten';
-import { StressTab } from './stress-componenten';
+import StressTab from './stress-componenten';
 import { Zap, Dumbbell, Moon, Heart, Brain } from 'lucide-react';
 
 type TabType = 'energie' | 'workout' | 'slaap' | 'pijn' | 'stress';

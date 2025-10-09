@@ -24,21 +24,21 @@ function getStressLabel(score: number): string {
   return "Zeer gestrest";
 }
 
-export default StressTab; StressTab() {
+export default function StressTab() {
   const { data: metrics = [], isLoading } = useQuery({
-    queryKey: ['daily-metrics-history'],
+    queryKey: ["daily-metrics-history"],
     queryFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
+      const dateStr = thirtyDaysAgo.toISOString().split("T")[0];
 
       const { data, error } = await supabase
-        .from('daily_metrics')
-        .select('*')
-        .gte('date', dateStr)
-        .order('date', { ascending: false });
+        .from("daily_metrics")
+        .select("*")
+        .gte("date", dateStr)
+        .order("date", { ascending: false });
 
       if (error) throw error;
       return data as DailyMetric[];
@@ -47,7 +47,16 @@ export default StressTab; StressTab() {
   });
 
   const stats = useMemo(() => {
-    if (!metrics.length) return null;
+    if (!metrics.length) {
+      return {
+        avgStress: 0,
+        relaxedDays: 0,
+        highStressDays: 0,
+        mostRelaxedDay: null as DailyMetric | null,
+        mostStressedDay: null as DailyMetric | null,
+        totalDays: 0,
+      };
+    }
 
     const last7Days = metrics.filter((m) => {
       const date = new Date(m.date);
@@ -56,19 +65,22 @@ export default StressTab; StressTab() {
       return date >= weekAgo;
     });
 
-    const avgStress = last7Days.length > 0
-      ? last7Days.reduce((sum, m) => sum + (m.stress_niveau || 0), 0) / last7Days.length
-      : 0;
+    const avgStress =
+      last7Days.length > 0
+        ? last7Days.reduce((sum, m) => sum + (m.stress_niveau || 0), 0) /
+          last7Days.length
+        : 0;
 
-    const relaxedDays = last7Days.filter(m => (m.stress_niveau || 0) >= 7).length;
-    const highStressDays = last7Days.filter(m => (m.stress_niveau || 0) <= 3).length;
+    const relaxedDays = last7Days.filter((m) => (m.stress_niveau || 0) >= 7).length;
+    const highStressDays = last7Days.filter((m) => (m.stress_niveau || 0) <= 3).length;
 
     const sortedByStress = [...metrics]
-      .filter(m => m.stress_niveau && m.stress_niveau > 0)
+      .filter((m) => m.stress_niveau && m.stress_niveau > 0)
       .sort((a, b) => (b.stress_niveau || 0) - (a.stress_niveau || 0));
-    
+
     const mostRelaxedDay = sortedByStress[0] || null;
-    const mostStressedDay = sortedByStress[sortedByStress.length - 1] || null;
+    const mostStressedDay =
+      sortedByStress.length ? sortedByStress[sortedByStress.length - 1] : null;
 
     return {
       avgStress,
@@ -97,28 +109,32 @@ export default StressTab; StressTab() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
           title="Gem. Stress (7d)"
-          value={stats?.avgStress.toFixed(1) || "0"}
+          value={stats.avgStress.toFixed(1)}
           unit="/ 10"
           icon={<Brain className="h-4 w-4 text-pink-500" />}
-          subtitle={getStressLabel(stats?.avgStress || 0)}
+          subtitle={getStressLabel(stats.avgStress)}
         />
         <StatCard
           title="Relaxte Dagen (7d)"
-          value={(stats?.relaxedDays || 0).toString()}
+          value={String(stats.relaxedDays)}
           unit="dagen"
           icon={<Brain className="h-4 w-4 text-green-500" />}
-          subtitle={(stats?.relaxedDays || 0) >= 5 ? "Uitstekend!" : "Meer ontspanning nodig"}
+          subtitle={
+            stats.relaxedDays >= 5 ? "Uitstekend!" : "Meer ontspanning nodig"
+          }
         />
         <StatCard
           title="Stressvolle Dagen (7d)"
-          value={(stats?.highStressDays || 0).toString()}
+          value={String(stats.highStressDays)}
           unit="dagen"
           icon={<Brain className="h-4 w-4 text-red-500" />}
-          subtitle={(stats?.highStressDays || 0) === 0 ? "Goed bezig!" : "Let op stress management"}
+          subtitle={
+            stats.highStressDays === 0 ? "Goed bezig!" : "Let op stress management"
+          }
         />
       </div>
 
-      {stats && stats.avgStress <= 4 && (
+      {stats.avgStress <= 4 && (
         <Card className="bg-red-50 border-red-200">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -127,13 +143,13 @@ export default StressTab; StressTab() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-red-800 mb-3">
-              Je gemiddelde stress is {stats.avgStress.toFixed(1)}/10 (waarbij 10 = zeer relaxed).
-              Overweeg deze stress management technieken:
+              Je gemiddelde stress is {stats.avgStress.toFixed(1)}/10 (waarbij 10
+              = zeer relaxed). Overweeg deze stressmanagement-technieken:
             </p>
             <ul className="text-sm text-red-800 space-y-1 ml-4">
               <li>• Meditatie of ademhalingsoefeningen</li>
               <li>• Regelmatige beweging/sport</li>
-              <li>• Voldoende slaap (7-9 uur)</li>
+              <li>• Voldoende slaap (7–9 uur)</li>
               <li>• Praat met iemand over je stress</li>
               <li>• Plan ontspanningsmomenten in je dag</li>
             </ul>
@@ -141,7 +157,7 @@ export default StressTab; StressTab() {
         </Card>
       )}
 
-      {stats && stats.avgStress >= 7 && (
+      {stats.avgStress >= 7 && (
         <Card className="bg-green-50 border-green-200">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -150,15 +166,15 @@ export default StressTab; StressTab() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-green-800">
-              Je gemiddelde stress is laag ({stats.avgStress.toFixed(1)}/10). 
-              Blijf je huidige aanpak voor stress management volhouden!
+              Je gemiddelde stress is laag ({stats.avgStress.toFixed(1)}/10).
+              Blijf je huidige aanpak voor stressmanagement volhouden!
             </p>
           </CardContent>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {stats?.mostRelaxedDay && (
+        {stats.mostRelaxedDay && (
           <Card className="bg-green-50 border-green-200">
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
@@ -167,20 +183,21 @@ export default StressTab; StressTab() {
             </CardHeader>
             <CardContent>
               <p className="text-sm font-medium">
-                {new Date(stats.mostRelaxedDay.date).toLocaleDateString('nl-NL', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
+                {new Date(stats.mostRelaxedDay.date).toLocaleDateString("nl-NL", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
                 })}
               </p>
               <p className="text-xs text-green-800 mt-2">
-                Stress: {stats.mostRelaxedDay.stress_niveau}/10 ({getStressLabel(stats.mostRelaxedDay.stress_niveau || 0)})
+                Stress: {stats.mostRelaxedDay.stress_niveau}/10 (
+                {getStressLabel(stats.mostRelaxedDay.stress_niveau || 0)})
               </p>
             </CardContent>
           </Card>
         )}
 
-        {stats?.mostStressedDay && (
+        {stats.mostStressedDay && (
           <Card className="bg-red-50 border-red-200">
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
@@ -189,14 +206,15 @@ export default StressTab; StressTab() {
             </CardHeader>
             <CardContent>
               <p className="text-sm font-medium">
-                {new Date(stats.mostStressedDay.date).toLocaleDateString('nl-NL', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long',
+                {new Date(stats.mostStressedDay.date).toLocaleDateString("nl-NL", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
                 })}
               </p>
               <p className="text-xs text-red-800 mt-2">
-                Stress: {stats.mostStressedDay.stress_niveau}/10 ({getStressLabel(stats.mostStressedDay.stress_niveau || 0)})
+                Stress: {stats.mostStressedDay.stress_niveau}/10 (
+                {getStressLabel(stats.mostStressedDay.stress_niveau || 0)})
               </p>
             </CardContent>
           </Card>
@@ -229,10 +247,10 @@ function StressDayCard({ metric }: { metric: DailyMetric }) {
   yesterday.setDate(yesterday.getDate() - 1);
   const isYesterday = date.toDateString() === yesterday.toDateString();
 
-  let dateLabel = date.toLocaleDateString('nl-NL', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
+  let dateLabel = date.toLocaleDateString("nl-NL", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
   });
 
   if (isToday) dateLabel = "Vandaag";
@@ -244,12 +262,14 @@ function StressDayCard({ metric }: { metric: DailyMetric }) {
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
       <div className="flex items-center gap-3">
         <p className="text-sm font-medium">{dateLabel}</p>
-        <Badge 
-          variant="secondary" 
+        <Badge
+          variant="secondary"
           className={`text-xs ${
-            stress >= 7 ? 'bg-green-100 text-green-700' : 
-            stress >= 4 ? 'bg-yellow-100 text-yellow-700' : 
-            'bg-red-100 text-red-700'
+            stress >= 7
+              ? "bg-green-100 text-green-700"
+              : stress >= 4
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700"
           }`}
         >
           {getStressEmoji(stress)} {stress}/10
@@ -259,5 +279,3 @@ function StressDayCard({ metric }: { metric: DailyMetric }) {
     </div>
   );
 }
-
-function
