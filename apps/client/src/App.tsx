@@ -5,7 +5,7 @@ import AppLayout from './Components/AppLayout';
 import Dashboard from './Components/Dashboard/Dashboard';
 import Analytics from './Components/analytics/Analytics';
 import Uren from './Components/uren/Uren';
-import Invoices from './Components/facturen/facturen';
+import Invoices from './Components/facturen/Facturen';
 import Budget from './Components/budget/Budget';
 import Ideas from './Components/ideas/Ideas';
 import Taken from './Components/taken/Taken';
@@ -63,7 +63,7 @@ function App() {
       {currentPage === "home" && <Dashboard />}
       {currentPage === "analytics" && <Analytics />}
       {currentPage === "uren" && <Uren />}
-      {currentPage === "facturen" && <Invoices />}
+      {currentPage === "facturen" && <Facturen />}
       {currentPage === "budget" && <Budget />}
       {currentPage === "ideas" && <Ideas />}
       {currentPage === "taken" && <Taken />}
