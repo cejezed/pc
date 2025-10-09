@@ -1,4 +1,4 @@
-// src/components/ideas/hooks.tsx - Voor bestaande database schema
+// src/components/ideas/hooks.tsx - MET AUTH
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Idea, IdeaStats } from "./types";
@@ -39,7 +39,7 @@ export const useIdeas = (filters?: {
   });
 };
 
-// Add new idea - NO AUTH VERSION
+// Add new idea - ✅ MET AUTH
 export const useAddIdea = () => {
   const queryClient = useQueryClient();
 
@@ -47,12 +47,16 @@ export const useAddIdea = () => {
     mutationFn: async (idea: Omit<Idea, "id" | "created_at" | "updated_at">) => {
       if (!supabase) throw new Error("Supabase not initialized");
 
+      // ✅ Haal user op
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { data, error } = await supabase
         .from("ideas")
         .insert([
           {
             ...idea,
-            owner_id: null, // NO AUTH: set to null
+            user_id: user.id, // ✅ Voeg user_id toe!
           },
         ])
         .select()

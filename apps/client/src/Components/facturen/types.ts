@@ -9,6 +9,10 @@ export type Invoice = {
   notes?: string;
   time_entry_ids?: string[];
   payment_date?: string;
+  vat_percent: number;
+  payment_terms: string;
+  sent_at?: string;
+  created_at?: string;
   project?: {
     name: string;
     client_name: string;
@@ -18,6 +22,7 @@ export type Invoice = {
 
 export type InvoiceItem = {
   id?: string;
+  factuur_id?: string;
   description: string;
   quantity: number;
   rate_cents: number;
@@ -31,10 +36,13 @@ export type TimeEntry = {
   occurred_on: string;
   minutes?: number | null;
   notes?: string | null;
+  invoiced_at?: string | null;
+  invoice_number?: string | null;
   projects?: { 
+    id?: string;
     name?: string | null; 
     client_name?: string | null;
-    default_rate_cents?: number | null; // ✅ TOEGEVOEGD
+    default_rate_cents?: number | null;
   } | null;
 };
 
@@ -51,7 +59,9 @@ export type Project = {
   id: string;
   name: string;
   client_name?: string | null;
-  default_rate_cents?: number | null; // ✅ TOEGEVOEGD
+  default_rate_cents?: number | null;
+  city?: string | null;
+  billing_type?: "hourly" | "fixed";
 };
 
 export type InvoiceKPIs = {

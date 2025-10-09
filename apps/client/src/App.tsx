@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useAuth } from './lib/AuthContext';
+import Auth from './pages/Auth';
 import AppLayout from './Components/AppLayout';
 import Dashboard from './Components/Dashboard/Dashboard';
 import Analytics from './Components/analytics/Analytics';
 import Uren from './Components/uren/Uren';
-import Invoices from './Components/invoices/Invoices';
+import Invoices from './Components/facturen/facturen';
 import Budget from './Components/budget/Budget';
 import Ideas from './Components/ideas/Ideas';
 import Taken from './Components/taken/Taken';
@@ -15,12 +17,41 @@ import Affirmations from './Components/Affirmations/Affirmations';
 type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen";
 
 function App() {
+  const { user, loading, signOut } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>("home");
 
+
+  // Loading state
+  if (loading) {
+    console.log('→ Showing LOADING screen');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2540] to-[#1D3A5C]">
+        <div className="text-center">
+          <div className="animate-spin text-4xl mb-4">⏳</div>
+          <p className="text-white text-lg">Laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in - show Auth page
+  if (!user) {
+    console.log('→ Showing AUTH page (no user)');
+    return <Auth />;
+  }
+
+  console.log('→ Showing DASHBOARD (user logged in)');
+
+  // Logged in - show app
   const handleLogout = async () => {
-    // TODO: Implementeer Supabase logout
-    console.log("Logging out...");
-    alert("Logout functionaliteit komt hier");
+    if (confirm('Weet je zeker dat je wilt uitloggen?')) {
+      try {
+        await signOut();
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Fout bij uitloggen');
+      }
+    }
   };
 
   return (
