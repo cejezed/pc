@@ -4,11 +4,27 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Badge } from "@/Components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Brain, Calendar, TrendingDown } from "lucide-react";
+import { Brain, Calendar } from "lucide-react";
 import { StatCard, LoadingState, EmptyState } from "./basis-componenten";
 import type { DailyMetric } from "../Dashboard/types";
 
-export function StressTab() {
+export function getStressEmoji(score: number): string {
+  if (score >= 8) return "😌";
+  if (score >= 6) return "🙂";
+  if (score >= 4) return "😐";
+  if (score >= 2) return "😰";
+  return "😫";
+}
+
+function getStressLabel(score: number): string {
+  if (score >= 8) return "Zeer relaxed";
+  if (score >= 6) return "Relaxed";
+  if (score >= 4) return "Gemiddeld";
+  if (score >= 2) return "Gestrest";
+  return "Zeer gestrest";
+}
+
+export default StressTab; StressTab() {
   const { data: metrics = [], isLoading } = useQuery({
     queryKey: ['daily-metrics-history'],
     queryFn: async () => {
@@ -51,8 +67,8 @@ export function StressTab() {
       .filter(m => m.stress_niveau && m.stress_niveau > 0)
       .sort((a, b) => (b.stress_niveau || 0) - (a.stress_niveau || 0));
     
-    const mostRelaxedDay = sortedByStress[0];
-    const mostStressedDay = sortedByStress[sortedByStress.length - 1];
+    const mostRelaxedDay = sortedByStress[0] || null;
+    const mostStressedDay = sortedByStress[sortedByStress.length - 1] || null;
 
     return {
       avgStress,
@@ -88,21 +104,20 @@ export function StressTab() {
         />
         <StatCard
           title="Relaxte Dagen (7d)"
-          value={stats?.relaxedDays.toString() || "0"}
+          value={(stats?.relaxedDays || 0).toString()}
           unit="dagen"
           icon={<Brain className="h-4 w-4 text-green-500" />}
-          subtitle={stats?.relaxedDays >= 5 ? "Uitstekend!" : "Meer ontspanning nodig"}
+          subtitle={(stats?.relaxedDays || 0) >= 5 ? "Uitstekend!" : "Meer ontspanning nodig"}
         />
         <StatCard
           title="Stressvolle Dagen (7d)"
-          value={stats?.highStressDays.toString() || "0"}
+          value={(stats?.highStressDays || 0).toString()}
           unit="dagen"
           icon={<Brain className="h-4 w-4 text-red-500" />}
-          subtitle={stats?.highStressDays === 0 ? "Goed bezig!" : "Let op stress management"}
+          subtitle={(stats?.highStressDays || 0) === 0 ? "Goed bezig!" : "Let op stress management"}
         />
       </div>
 
-      {/* Insight Cards */}
       {stats && stats.avgStress <= 4 && (
         <Card className="bg-red-50 border-red-200">
           <CardHeader>
@@ -142,7 +157,6 @@ export function StressTab() {
         </Card>
       )}
 
-      {/* Best/Worst Days */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.mostRelaxedDay && (
           <Card className="bg-green-50 border-green-200">
@@ -189,7 +203,6 @@ export function StressTab() {
         )}
       </div>
 
-      {/* Recent Days */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -247,20 +260,4 @@ function StressDayCard({ metric }: { metric: DailyMetric }) {
   );
 }
 
-function getStressEmoji(score: number): string {
-  if (score >= 8) return "😌";
-  if (score >= 6) return "🙂";
-  if (score >= 4) return "😐";
-  if (score >= 2) return "😰";
-  return "😫";
-}
-
-function getStressLabel(score: number): string {
-  if (score >= 8) return "Zeer relaxed";
-  if (score >= 6) return "Relaxed";
-  if (score >= 4) return "Gemiddeld";
-  if (score >= 2) return "Gestrest";
-  return "Zeer gestrest";
-}
-
-export default StressTab;
+function

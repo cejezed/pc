@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Badge } from "@/Components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Heart, Calendar, TrendingDown } from "lucide-react";
+import { Heart, Calendar } from "lucide-react";
 import { StatCard, LoadingState, EmptyState } from "./basis-componenten";
 import type { DailyMetric } from "../Dashboard/types";
 
@@ -51,8 +51,8 @@ export function PijnTab() {
       .filter(m => m.schouder_pijn && m.schouder_pijn > 0)
       .sort((a, b) => (a.schouder_pijn || 0) - (b.schouder_pijn || 0));
     
-    const worstDay = sortedByPain[0];
-    const bestDay = sortedByPain[sortedByPain.length - 1];
+    const worstDay = sortedByPain[0] || null;
+    const bestDay = sortedByPain[sortedByPain.length - 1] || null;
 
     return {
       avgPijn,
@@ -88,21 +88,20 @@ export function PijnTab() {
         />
         <StatCard
           title="Pijnvrije Dagen (7d)"
-          value={stats?.pijnFreeDays.toString() || "0"}
+          value={(stats?.pijnFreeDays || 0).toString()}
           unit="dagen"
           icon={<Heart className="h-4 w-4 text-green-500" />}
-          subtitle={stats?.pijnFreeDays === 7 ? "Perfect!" : "Blijf werken eraan"}
+          subtitle={(stats?.pijnFreeDays || 0) === 7 ? "Perfect!" : "Blijf werken eraan"}
         />
         <StatCard
           title="Hoge Pijn Dagen (7d)"
-          value={stats?.highPainDays.toString() || "0"}
+          value={(stats?.highPainDays || 0).toString()}
           unit="dagen"
           icon={<Heart className="h-4 w-4 text-orange-500" />}
-          subtitle={stats?.highPainDays === 0 ? "Uitstekend!" : "Let op rust"}
+          subtitle={(stats?.highPainDays || 0) === 0 ? "Uitstekend!" : "Let op rust"}
         />
       </div>
 
-      {/* Insight Card */}
       {stats && stats.avgPijn < 5 && (
         <Card className="bg-red-50 border-red-200">
           <CardHeader>
@@ -134,7 +133,6 @@ export function PijnTab() {
         </Card>
       )}
 
-      {/* Best/Worst Days */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.bestDay && (
           <Card className="bg-green-50 border-green-200">
@@ -181,7 +179,6 @@ export function PijnTab() {
         )}
       </div>
 
-      {/* Recent Days */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

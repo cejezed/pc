@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Badge } from "@/Components/ui/badge";
 import { supabase } from "@/lib/supabase";
-import { Moon, Calendar, TrendingUp } from "lucide-react";
+import { Moon, Calendar } from "lucide-react";
 import { StatCard, LoadingState, EmptyState } from "./basis-componenten";
 import type { DailyMetric } from "../Dashboard/types";
 
@@ -85,21 +85,20 @@ export function SlaapTab() {
         />
         <StatCard
           title="Lang Wakker (7d)"
-          value={stats?.langWakkerCount.toString() || "0"}
+          value={(stats?.langWakkerCount || 0).toString()}
           unit="nachten"
           icon={<Moon className="h-4 w-4 text-purple-500" />}
-          subtitle={stats?.langWakkerCount === 0 ? "Goed bezig!" : "Probeer te verbeteren"}
+          subtitle={(stats?.langWakkerCount || 0) === 0 ? "Goed bezig!" : "Probeer te verbeteren"}
         />
         <StatCard
           title="Kort Wakker (7d)"
-          value={stats?.kortWakkerCount.toString() || "0"}
+          value={(stats?.kortWakkerCount || 0).toString()}
           unit="nachten"
           icon={<Moon className="h-4 w-4 text-indigo-500" />}
-          subtitle={stats?.kortWakkerCount === 0 ? "Perfect!" : "Lichte verstoring"}
+          subtitle={(stats?.kortWakkerCount || 0) === 0 ? "Perfect!" : "Lichte verstoring"}
         />
       </div>
 
-      {/* Best/Worst Nights */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.bestNight && (
           <Card className="bg-blue-50 border-blue-200">
@@ -142,7 +141,6 @@ export function SlaapTab() {
         )}
       </div>
 
-      {/* Recent Days */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
