@@ -1,52 +1,32 @@
-// src/Components/Dashboard/Dashboard.tsx - NO AUTH VERSION
+// src/Components/Dashboard/Dashboard.tsx - MET AUTH & UITGEBREIDE HEALTH
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Sparkles, CheckSquare, Lightbulb, Zap, Moon, Dumbbell, Trash2 } from 'lucide-react';
+import { Plus, Sparkles, CheckSquare, Lightbulb, Zap, Moon, Dumbbell, Trash2, Activity, Brain, Heart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-
-type DailyMetric = {
-  id: string;
-  user_id: string | null;
-  date: string;
-  energie_score: number;
-  slaap_score: number;
-  workout_done: boolean;
-  created_at: string;
-};
-
-type Task = {
-  id: string;
-  title: string;
-  notes?: string;
-  status: string;
-  priority: number;
-  due_date?: string;
-  completed_at?: string;
-  created_at: string;
-};
-
-type Idea = {
-  id: string;
-  title: string;
-  note?: string;
-  status: string;
-  created_at: string;
-};
+import type { DailyMetric, Task, Idea } from './types';
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
 
-  const [dailyMetrics, setDailyMetrics] = useState({
+  const [dailyMetrics, setDailyMetrics] = useState<Partial<DailyMetric>>({
     energie_score: 0,
     slaap_score: 0,
     workout_done: false,
+    lang_wakker: false,
+    kort_wakker: false,
+    ochtend_workout: false,
+    golf_oefenen: false,
+    golfen: false,
+    mtb: false,
+    schouder_pijn: 0,
+    stress_niveau: 0,
   });
 
   const [newTask, setNewTask] = useState('');
   const [newIdea, setNewIdea] = useState('');
 
-  // Fetch today's metrics - NO AUTH
+  // Fetch today's metrics
   const { data: todayMetrics } = useQuery({
     queryKey: ['daily-metrics', today],
     queryFn: async () => {
@@ -63,7 +43,7 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch tasks - NO AUTH
+  // Fetch tasks
   const { data: tasks = [] } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
@@ -79,7 +59,7 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch ideas - NO AUTH
+  // Fetch ideas
   const { data: ideas = [] } = useQuery({
     queryKey: ['ideas'],
     queryFn: async () => {
@@ -95,7 +75,7 @@ export default function Dashboard() {
     },
   });
 
-  // Fetch pending affirmation - NO AUTH
+  // Fetch pending affirmation
   const { data: pendingAffirmation } = useQuery({
     queryKey: ['pending-affirmation'],
     queryFn: async () => {
@@ -121,17 +101,29 @@ export default function Dashboard() {
     },
   });
 
-  // Save daily metrics - NO AUTH
+  // ✅ Save daily metrics - MET AUTH
   const saveDailyMetrics = useMutation({
     mutationFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
       
+      // ✅ Haal user op
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const payload = {
-        user_id: null,
+        user_id: user.id, // ✅ Voeg user_id toe!
         date: today,
-        energie_score: dailyMetrics.energie_score,
-        slaap_score: dailyMetrics.slaap_score,
-        workout_done: dailyMetrics.workout_done,
+        energie_score: dailyMetrics.energie_score || 0,
+        slaap_score: dailyMetrics.slaap_score || 0,
+        workout_done: dailyMetrics.workout_done || false,
+        lang_wakker: dailyMetrics.lang_wakker || false,
+        kort_wakker: dailyMetrics.kort_wakker || false,
+        ochtend_workout: dailyMetrics.ochtend_workout || false,
+        golf_oefenen: dailyMetrics.golf_oefenen || false,
+        golfen: dailyMetrics.golfen || false,
+        mtb: dailyMetrics.mtb || false,
+        schouder_pijn: dailyMetrics.schouder_pijn || 0,
+        stress_niveau: dailyMetrics.stress_niveau || 0,
       };
 
       if (todayMetrics) {
@@ -152,19 +144,21 @@ export default function Dashboard() {
     },
   });
 
-  // Add task - NO AUTH
+  // ✅ Add task - MET AUTH
   const addTask = useMutation({
     mutationFn: async (title: string) => {
       if (!supabase) throw new Error("Supabase not initialized");
       
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('tasks')
         .insert([{ 
-          user_id: null, 
+          user_id: user.id,
           title, 
           status: 'todo',
           priority: 2,
-          notes: null
         }]);
 
       if (error) throw error;
@@ -175,7 +169,7 @@ export default function Dashboard() {
     },
   });
 
-  // Toggle task - NO AUTH
+  // Toggle task
   const toggleTask = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       if (!supabase) throw new Error("Supabase not initialized");
@@ -198,7 +192,7 @@ export default function Dashboard() {
     },
   });
 
-  // Delete task - NO AUTH
+  // Delete task
   const deleteTask = useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error("Supabase not initialized");
@@ -215,18 +209,21 @@ export default function Dashboard() {
     },
   });
 
-  // Add idea - NO AUTH
+  // ✅ Add idea - MET AUTH
   const addIdea = useMutation({
     mutationFn: async (title: string) => {
       if (!supabase) throw new Error("Supabase not initialized");
       
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase
         .from('ideas')
         .insert([{ 
-          owner_id: null, 
+          user_id: user.id,
           title, 
           status: 'open',
-          note: null
+          priority: 2,
         }]);
 
       if (error) throw error;
@@ -237,7 +234,7 @@ export default function Dashboard() {
     },
   });
 
-  // Delete idea - NO AUTH
+  // Delete idea
   const deleteIdea = useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error("Supabase not initialized");
@@ -258,9 +255,17 @@ export default function Dashboard() {
   React.useEffect(() => {
     if (todayMetrics) {
       setDailyMetrics({
-        energie_score: todayMetrics.energie_score,
-        slaap_score: todayMetrics.slaap_score,
-        workout_done: todayMetrics.workout_done,
+        energie_score: todayMetrics.energie_score || 0,
+        slaap_score: todayMetrics.slaap_score || 0,
+        workout_done: todayMetrics.workout_done || false,
+        lang_wakker: todayMetrics.lang_wakker || false,
+        kort_wakker: todayMetrics.kort_wakker || false,
+        ochtend_workout: todayMetrics.ochtend_workout || false,
+        golf_oefenen: todayMetrics.golf_oefenen || false,
+        golfen: todayMetrics.golfen || false,
+        mtb: todayMetrics.mtb || false,
+        schouder_pijn: todayMetrics.schouder_pijn || 0,
+        stress_niveau: todayMetrics.stress_niveau || 0,
       });
     }
   }, [todayMetrics]);
@@ -309,6 +314,31 @@ export default function Dashboard() {
     </div>
   );
 
+  const CheckboxItem = ({
+    label,
+    icon: Icon,
+    iconColor,
+    checked,
+    onChange,
+  }: {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    iconColor: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+  }) => (
+    <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-lg hover:border-brikx-teal transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-5 h-5 text-brikx-teal rounded focus:ring-2 focus:ring-brikx-teal"
+      />
+      <Icon className={`w-5 h-5 ${iconColor}`} />
+      <span className="flex-1 font-medium text-gray-900">{label}</span>
+    </label>
+  );
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div>
@@ -346,6 +376,7 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column - Tasks & Ideas */}
         <div className="space-y-6">
           {/* Tasks */}
           <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
@@ -396,7 +427,7 @@ export default function Dashboard() {
                 onChange={(e) => setNewTask(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
                 placeholder="Nieuwe taak..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
               />
               <button
                 onClick={() => newTask.trim() && addTask.mutate(newTask)}
@@ -413,7 +444,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-brikx-dark flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-yellow-500" />
-                Ideeen
+                Ideeën
               </h3>
               <span className="text-sm text-gray-500">{ideas.length}</span>
             </div>
@@ -435,7 +466,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {ideas.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">Geen ideeen. Voeg er een toe!</p>
+                <p className="text-sm text-gray-500 text-center py-4">Geen ideeën. Voeg er een toe!</p>
               )}
             </div>
 
@@ -446,7 +477,7 @@ export default function Dashboard() {
                 onChange={(e) => setNewIdea(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
                 placeholder="Nieuw idee..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500"
               />
               <button
                 onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
@@ -459,18 +490,19 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Daily Check-in */}
+        {/* Right Column - Daily Check-in */}
         <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-brikx-dark mb-6">
             Dagelijkse Check-in
           </h3>
 
           <div className="space-y-6">
+            {/* Energie & Slaap Scores */}
             <ScoreSelector
               label="Energie niveau"
               icon={Zap}
               iconColor="text-orange-500"
-              value={dailyMetrics.energie_score}
+              value={dailyMetrics.energie_score || 0}
               onChange={(score) => setDailyMetrics({ ...dailyMetrics, energie_score: score })}
               lowLabel="Uitgeput"
               highLabel="Energiek"
@@ -480,41 +512,132 @@ export default function Dashboard() {
               label="Slaap kwaliteit"
               icon={Moon}
               iconColor="text-blue-500"
-              value={dailyMetrics.slaap_score}
+              value={dailyMetrics.slaap_score || 0}
               onChange={(score) => setDailyMetrics({ ...dailyMetrics, slaap_score: score })}
-              lowLabel="Slecht geslapen"
+              lowLabel="Slecht"
               highLabel="Uitgerust"
             />
 
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer p-4 border-2 border-gray-200 rounded-lg hover:border-brikx-teal transition-colors">
-                <input
-                  type="checkbox"
-                  checked={dailyMetrics.workout_done}
-                  onChange={(e) => setDailyMetrics({ ...dailyMetrics, workout_done: e.target.checked })}
-                  className="w-5 h-5 text-brikx-teal rounded focus:ring-2 focus:ring-brikx-teal"
-                />
-                <Dumbbell className="w-5 h-5 text-purple-500" />
-                <span className="flex-1 font-medium text-gray-900">
-                  Workout gedaan vandaag
-                </span>
-              </label>
+            {/* Pijn & Stress Scores */}
+            <ScoreSelector
+              label="Schouderpijn"
+              icon={Heart}
+              iconColor="text-red-500"
+              value={dailyMetrics.schouder_pijn || 0}
+              onChange={(score) => setDailyMetrics({ ...dailyMetrics, schouder_pijn: score })}
+              lowLabel="Veel pijn"
+              highLabel="Geen pijn"
+            />
+
+            <ScoreSelector
+              label="Stress niveau"
+              icon={Brain}
+              iconColor="text-pink-500"
+              value={dailyMetrics.stress_niveau || 0}
+              onChange={(score) => setDailyMetrics({ ...dailyMetrics, stress_niveau: score })}
+              lowLabel="Zeer gestrest"
+              highLabel="Zeer relaxed"
+            />
+
+            {/* Slaap Details */}
+            <div className="space-y-2">
+              <CheckboxItem
+                label="Lang wakker geweest"
+                icon={Moon}
+                iconColor="text-purple-500"
+                checked={dailyMetrics.lang_wakker || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, lang_wakker: checked })}
+              />
+              <CheckboxItem
+                label="Kort wakker geweest"
+                icon={Moon}
+                iconColor="text-indigo-500"
+                checked={dailyMetrics.kort_wakker || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
+              />
             </div>
 
+           
+            {/* Activiteiten */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 mb-2">Activiteiten vandaag</p>
+              <CheckboxItem
+                label="Ochtend workout"
+                icon={Dumbbell}
+                iconColor="text-purple-500"
+                checked={dailyMetrics.ochtend_workout || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ochtend_workout: checked })}
+              />
+              <CheckboxItem
+                label="Golfen geoefend"
+                icon={Activity}
+                iconColor="text-green-500"
+                checked={dailyMetrics.golf_oefenen || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golf_oefenen: checked })}
+              />
+              <CheckboxItem
+                label="Golfen"
+                icon={Activity}
+                iconColor="text-emerald-500"
+                checked={dailyMetrics.golfen || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golfen: checked })}
+              />
+              <CheckboxItem
+                label="MTB gereden"
+                icon={Activity}
+                iconColor="text-orange-500"
+                checked={dailyMetrics.mtb || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, mtb: checked })}
+              />
+              <CheckboxItem
+                label="Workout gedaan"
+                icon={Dumbbell}
+                iconColor="text-red-500"
+                checked={dailyMetrics.workout_done || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, workout_done: checked })}
+              />
+            </div>
+
+           
+            {/* Save Button */}
             <button
               onClick={() => saveDailyMetrics.mutate()}
-              disabled={dailyMetrics.energie_score === 0 || dailyMetrics.slaap_score === 0 || saveDailyMetrics.isPending}
+              disabled={
+                (dailyMetrics.energie_score || 0) === 0 || 
+                (dailyMetrics.slaap_score || 0) === 0 || 
+                saveDailyMetrics.isPending
+              }
               className="w-full bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-3 rounded-brikx font-semibold transition-all shadow-brikx disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {saveDailyMetrics.isPending ? 'Opslaan...' : 'Check-in Opslaan'}
             </button>
 
+            {/* Success Message */}
             {todayMetrics && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-800">
-                  <strong>Vandaag opgeslagen:</strong> {todayMetrics.energie_score}/10 energie, {todayMetrics.slaap_score}/10 slaap
-                  {todayMetrics.workout_done && ', workout ✓'}
+                <p className="text-sm text-green-800 font-medium mb-2">
+                  ✅ Vandaag opgeslagen
                 </p>
+                <div className="text-xs text-green-700 space-y-1">
+                  <p>🔋 Energie: {todayMetrics.energie_score}/10</p>
+                  <p>😴 Slaap: {todayMetrics.slaap_score}/10</p>
+                  {todayMetrics.schouder_pijn > 0 && (
+                    <p>💪 Schouderpijn: {todayMetrics.schouder_pijn}/10</p>
+                  )}
+                  {todayMetrics.stress_niveau > 0 && (
+                    <p>🧠 Stress: {todayMetrics.stress_niveau}/10</p>
+                  )}
+                  <p className="mt-2 font-medium">Activiteiten:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {todayMetrics.ochtend_workout && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Ochtend workout</span>}
+                    {todayMetrics.golf_oefenen && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">Golf oefenen</span>}
+                    {todayMetrics.golfen && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs">Golfen</span>}
+                    {todayMetrics.mtb && <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">MTB</span>}
+                    {todayMetrics.workout_done && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs">Workout</span>}
+                    {todayMetrics.lang_wakker && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Lang wakker</span>}
+                    {todayMetrics.kort_wakker && <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">Kort wakker</span>}
+                  </div>
+                </div>
               </div>
             )}
           </div>
