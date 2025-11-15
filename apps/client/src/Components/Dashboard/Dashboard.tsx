@@ -391,7 +391,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {tasks.filter(t => t.status !== 'done').slice(0, 8).map((task) => (
+              {tasks.filter(t => t.status !== 'done').map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
@@ -450,7 +450,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {ideas.slice(0, 6).map((idea) => (
+              {ideas.map((idea) => (
                 <div
                   key={idea.id}
                   className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
