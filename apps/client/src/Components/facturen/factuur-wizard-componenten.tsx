@@ -692,6 +692,49 @@ export function CreateInvoiceModalV2({
                         />
                       </td>
                       <td className="px-3 py-2 text-right">
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="w-20 border rounded px-2 py-1 text-right"
+                          value={it.quantity}
+                          onChange={(e) => {
+                            const qty = Number(e.target.value);
+                            setForm((f) => {
+                              const items = [...f.items];
+                              items[idx] = {
+                                ...items[idx],
+                                quantity: qty,
+                                amount_cents: Math.round(qty * items[idx].rate_cents)
+                              };
+                              return { ...f, items };
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <input
+                          type="number"
+                          step="1"
+                          className="w-24 border rounded px-2 py-1 text-right"
+                          value={it.rate_cents / 100}
+                          onChange={(e) => {
+                            const rate = Number(e.target.value) * 100;
+                            setForm((f) => {
+                              const items = [...f.items];
+                              items[idx] = {
+                                ...items[idx],
+                                rate_cents: rate,
+                                amount_cents: Math.round(items[idx].quantity * rate)
+                              };
+                              return { ...f, items };
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right font-medium">
+                        {centsToMoney(it.amount_cents)}
+                      </td>
+                      <td className="px-3 py-2 text-right">
                         <button
                           className="p-2 rounded hover:bg-gray-100"
                           onClick={() => setForm((f) => ({ ...f, items: f.items.filter((_, i) => i !== idx) }))}
