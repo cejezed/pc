@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Trash2, ArrowUpDown, CheckCircle2 } from "lucide-react";
-import { useDeleteTimeEntry } from "./hooks";
+import { Trash2, ArrowUpDown, CheckCircle2, XCircle } from "lucide-react";
+import { useDeleteTimeEntry, useUnmarkTimeEntry } from "./hooks";
 import { EUR } from "./utils";
 import type { TimeEntry } from "./types";
 
@@ -13,6 +13,7 @@ type SortDirection = "asc" | "desc";
 
 export default function AlleUren({ timeEntries }: Props) {
   const deleteEntry = useDeleteTimeEntry();
+  const unmarkEntry = useUnmarkTimeEntry();
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [filterInvoiced, setFilterInvoiced] = useState<"all" | "billed" | "unbilled">("all"); // ✅ NIEUW
@@ -232,9 +233,17 @@ export default function AlleUren({ timeEntries }: Props) {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       ) : (
-                        <span className="text-gray-300" title="Gefactureerde uren kunnen niet verwijderd worden">
-                          <Trash2 className="w-4 h-4" />
-                        </span>
+                        <button
+                          onClick={() => {
+                            if (confirm("Weet je zeker dat je deze uren wilt ontmarkeren als gefactureerd?")) {
+                              unmarkEntry.mutate(entry.id);
+                            }
+                          }}
+                          className="text-gray-400 hover:text-orange-600 transition-colors"
+                          title="Ontmarkeren als gefactureerd"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
                       )}
                     </td>
                   </tr>

@@ -152,3 +152,22 @@ export function useDeleteTimeEntry() {
     },
   });
 }
+
+export function useUnmarkTimeEntry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("time_entries")
+        .update({
+          invoiced_at: null,
+          invoice_number: null
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["time-entries"] });
+    },
+  });
+}
