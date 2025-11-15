@@ -91,7 +91,7 @@ export function InvoicesTable({
 
     return (
       <button
-        className="inline-flex items-center gap-1"
+        className="inline-flex items-center gap-1 text-gray-900 hover:text-black font-medium focus:outline-none"
         onClick={() =>
           setSort((s) =>
             s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
