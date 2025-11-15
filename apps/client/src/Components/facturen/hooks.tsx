@@ -117,7 +117,7 @@ export const useCreateInvoice = () => {
     mutationFn: async (payload: any) => {
       // Calculate total amount
       const totalAmount = payload.items.reduce(
-        (sum: number, item: any) => sum + (item.amount_cents || 0), 
+        (sum: number, item: any) => sum + (item.amount_cents || 0),
         0
       );
 
@@ -153,7 +153,7 @@ export const useCreateInvoice = () => {
               amount_cents: item.amount_cents,
             }))
           );
-        
+
         if (itemsError) throw itemsError;
       }
 
@@ -161,13 +161,75 @@ export const useCreateInvoice = () => {
       if (payload.time_entry_ids && payload.time_entry_ids.length > 0) {
         const { error: timeError } = await supabase
           .from('time_entries')
-          .update({ 
+          .update({
             invoiced_at: payload.invoice_date,
             invoice_number: payload.invoice_number,
           })
           .in('id', payload.time_entry_ids);
-        
+
         if (timeError) throw timeError;
+      }
+
+      return invoice;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["invoices", "unbilled-hours"] });
+    },
+  });
+};
+
+export const useUpdateInvoice = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
+      // Calculate total amount
+      const totalAmount = payload.items?.reduce(
+        (sum: number, item: any) => sum + (item.amount_cents || 0),
+        0
+      ) || 0;
+
+      // Update invoice
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('facturen')
+        .update({
+          invoice_number: payload.invoice_number,
+          project_id: payload.project_id,
+          invoice_date: payload.invoice_date,
+          due_date: payload.due_date,
+          amount_cents: totalAmount,
+          status: payload.status,
+          notes: payload.notes,
+          vat_percent: payload.vat_percent,
+          payment_terms: payload.payment_terms,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      // Delete existing items
+      await supabase
+        .from('factuur_items')
+        .delete()
+        .eq('factuur_id', id);
+
+      // Insert updated items
+      if (payload.items && payload.items.length > 0) {
+        const { error: itemsError } = await supabase
+          .from('factuur_items')
+          .insert(
+            payload.items.map((item: any) => ({
+              factuur_id: id,
+              description: item.description,
+              quantity: item.quantity,
+              rate_cents: item.rate_cents,
+              amount_cents: item.amount_cents,
+            }))
+          );
+
+        if (itemsError) throw itemsError;
       }
 
       return invoice;

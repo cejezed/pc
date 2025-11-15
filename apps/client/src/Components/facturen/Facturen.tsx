@@ -8,7 +8,7 @@ import {
 } from "./hooks";
 import { KPICard, centsToMoney } from "./basis-componenten";
 import { InvoicesTable } from "./factuur-tabel-componenten";
-import { CreateInvoiceModalV2 } from "./factuur-wizard-componenten";
+import { CreateInvoiceModalV2, EditInvoiceModal } from "./factuur-wizard-componenten";
 import { InvoiceDetailDrawer } from "./factuur-detail-componenten";
 import type { Invoice } from "./types";
 
@@ -20,6 +20,7 @@ export default function FacturenPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createMode, setCreateMode] = useState<"normal" | "manual" | "historic">("normal");
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
 
   const [filterStatus, setFilterStatus] = useState<"all" | Invoice["status"]>("all");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
@@ -197,6 +198,20 @@ export default function FacturenPage() {
       <InvoiceDetailDrawer
         invoice={selectedInvoice}
         onClose={() => setSelectedInvoice(null)}
+        onEdit={(inv) => {
+          setEditingInvoice(inv);
+          setSelectedInvoice(null);
+        }}
+      />
+
+      <EditInvoiceModal
+        invoice={editingInvoice}
+        onClose={() => setEditingInvoice(null)}
+        onUpdated={(id) => {
+          setEditingInvoice(null);
+          const inv = invoices.find((x) => x.id === id);
+          if (inv) setSelectedInvoice(inv);
+        }}
       />
     </div>
   );

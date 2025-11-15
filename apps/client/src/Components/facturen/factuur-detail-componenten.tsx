@@ -7,6 +7,7 @@ import {
   XCircle,
   Send,
   FileText,
+  Edit,
 } from "lucide-react";
 import {
   StatusBadge,
@@ -27,9 +28,11 @@ import type { Invoice } from "./types";
 export function InvoiceDetailDrawer({
   invoice,
   onClose,
+  onEdit,
 }: {
   invoice: Invoice | null;
   onClose: () => void;
+  onEdit?: (invoice: Invoice) => void;
 }) {
   const [working, setWorking] = useState(false);
 
@@ -180,6 +183,15 @@ export function InvoiceDetailDrawer({
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
+            {invoice.status === "draft" && onEdit && (
+              <button
+                onClick={() => onEdit(invoice)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-black text-white hover:opacity-90"
+              >
+                <Edit className="h-4 w-4" /> Bewerken
+              </button>
+            )}
+
             {invoice.status === "draft" && (
               <a
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-gray-50"

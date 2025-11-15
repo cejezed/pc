@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Plus, Loader2, Trash2, AlertCircle } from "lucide-react";
 import { Modal, centsToMoney } from "./basis-componenten";
-import { 
-  useCreateInvoice, 
+import {
+  useCreateInvoice,
+  useUpdateInvoice,
   useUnbilled,
   useProjects,
-  ymd, 
-  addDays 
+  ymd,
+  addDays
 } from "./hooks";
 import { supabase } from "@/supabase";
-import type { InvoiceItem, TimeEntry } from "./types";
+import type { InvoiceItem, TimeEntry, Invoice } from "./types";
 
 type Step = 1 | 2 | 3;
 type Mode = "normal" | "manual" | "historic";
@@ -133,6 +134,23 @@ export function CreateInvoiceModalV2({
     }
   };
 
+  // Helper function to get correct rate for an entry
+  const getEntryRate = (entry: TimeEntry): number => {
+    // Try phase-specific rate first
+    const phaseRates = (entry.projects as any)?.phase_rates_cents || {};
+    const phaseRate = phaseRates[entry.phase_code];
+    if (phaseRate !== undefined && phaseRate !== null) {
+      return phaseRate;
+    }
+    // Fall back to project default rate
+    const defaultRate = entry.projects?.default_rate_cents;
+    if (defaultRate !== undefined && defaultRate !== null) {
+      return defaultRate;
+    }
+    // Ultimate fallback
+    return 7500;
+  };
+
   useEffect(() => {
     if (step === 3 && form.items.length === 0 && form.mode === "normal" && filteredUnbilled) {
       const chosen: TimeEntry[] = [];
@@ -145,23 +163,27 @@ export function CreateInvoiceModalV2({
       const items: InvoiceItem[] = chosen.map((e) => {
         const hours = (e.minutes || 0) / 60;
         const projectName = e.projects?.name ?? "Project";
+        const rateCents = getEntryRate(e);
         return {
           description: `${projectName} — ${e.occurred_on}${e.notes ? ` — ${e.notes}` : ""}`,
           quantity: Number(hours.toFixed(2)),
-          rate_cents: 7500,
-          amount_cents: Math.round(7500 * hours),
+          rate_cents: rateCents,
+          amount_cents: Math.round(rateCents * hours),
         };
       });
       setForm((f) => ({ ...f, items }));
     }
-    
+
     if (step === 3 && form.items.length === 0 && form.mode === "manual") {
+      // For manual invoices, use project's default rate if available
+      const project = projects.find(p => p.id === form.project_id);
+      const defaultRate = project?.default_rate_cents || 7500;
       setForm((f) => ({
         ...f,
-        items: [{ description: "", quantity: 1, rate_cents: 7500, amount_cents: 7500 }],
+        items: [{ description: "", quantity: 1, rate_cents: defaultRate, amount_cents: defaultRate }],
       }));
     }
-  }, [step, form.selectedEntryIds, form.items.length, form.mode, filteredUnbilled]);
+  }, [step, form.selectedEntryIds, form.items.length, form.mode, filteredUnbilled, form.project_id, projects]);
 
   const subtotalCents = useMemo(
     () => form.items.reduce((acc, it) => acc + (it.amount_cents || 0), 0),
@@ -210,7 +232,7 @@ export function CreateInvoiceModalV2({
 
     const ids = historicEntries.map(e => e.id);
     const confirmMsg = `${ids.length} uren markeren als gefactureerd (${centsToMoney(historicTotal)})?`;
-    
+
     if (!confirm(confirmMsg)) return;
 
     try {
@@ -232,10 +254,30 @@ export function CreateInvoiceModalV2({
 
       if (invoiceError) throw invoiceError;
 
+      // Create invoice items for historic invoice
+      const items = historicEntries.map((e) => {
+        const hours = (e.minutes || 0) / 60;
+        const projectName = e.projects?.name ?? "Project";
+        const rateCents = getEntryRate(e);
+        return {
+          factuur_id: invoice.id,
+          description: `${projectName} — ${e.occurred_on}${e.notes ? ` — ${e.notes}` : ""}`,
+          quantity: Number(hours.toFixed(2)),
+          rate_cents: rateCents,
+          amount_cents: Math.round(rateCents * hours),
+        };
+      });
+
+      const { error: itemsError } = await supabase
+        .from('factuur_items')
+        .insert(items);
+
+      if (itemsError) throw itemsError;
+
       const { error: timeError } = await supabase
         .from("time_entries")
-        .update({ 
-          invoiced_at: form.invoice_date, 
+        .update({
+          invoiced_at: form.invoice_date,
           invoice_number: form.invoice_number || invoice.invoice_number
         })
         .in("id", ids);
@@ -244,7 +286,7 @@ export function CreateInvoiceModalV2({
 
       alert(`Factuur ${invoice.invoice_number} geregistreerd met ${ids.length} uren`);
       await refetchUnbilled();
-      
+
       if (onCreated && invoice?.id) onCreated(invoice.id);
       onClose();
     } catch (err) {
@@ -664,12 +706,14 @@ export function CreateInvoiceModalV2({
                     <td colSpan={5} className="px-3 py-2">
                       <button
                         className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-50"
-                        onClick={() =>
+                        onClick={() => {
+                          const project = projects.find(p => p.id === form.project_id);
+                          const defaultRate = project?.default_rate_cents || 7500;
                           setForm((f) => ({
                             ...f,
-                            items: [...f.items, { description: "", quantity: 1, rate_cents: 7500, amount_cents: 7500 }],
-                          }))
-                        }
+                            items: [...f.items, { description: "", quantity: 1, rate_cents: defaultRate, amount_cents: defaultRate }],
+                          }));
+                        }}
                       >
                         <Plus className="h-4 w-4" /> Regel toevoegen
                       </button>
@@ -767,6 +811,301 @@ export function CreateInvoiceModalV2({
             </div>
           </>
         )}
+      </div>
+    </Modal>
+  );
+}
+
+export function EditInvoiceModal({
+  invoice,
+  onClose,
+  onUpdated,
+}: {
+  invoice: Invoice | null;
+  onClose: () => void;
+  onUpdated?: (id: string) => void;
+}) {
+  const updateMutation = useUpdateInvoice();
+  const { data: projects = [] } = useProjects();
+  
+  const [form, setForm] = useState<{
+    invoice_number: string;
+    invoice_date: string;
+    due_date: string;
+    payment_terms: "14" | "30" | "60";
+    vat_percent: number;
+    notes?: string;
+    project_id?: string;
+    items: InvoiceItem[];
+    status: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (invoice) {
+      setForm({
+        invoice_number: invoice.invoice_number,
+        invoice_date: invoice.invoice_date,
+        due_date: invoice.due_date,
+        payment_terms: invoice.payment_terms as "14" | "30" | "60",
+        vat_percent: invoice.vat_percent,
+        notes: invoice.notes,
+        project_id: invoice.project_id,
+        items: invoice.items || [],
+        status: invoice.status,
+      });
+    }
+  }, [invoice]);
+
+  const subtotalCents = useMemo(
+    () => form?.items.reduce((acc, it) => acc + (it.amount_cents || 0), 0) || 0,
+    [form?.items]
+  );
+
+  const vatCents = useMemo(
+    () => Math.round(subtotalCents * ((form?.vat_percent || 0) / 100)),
+    [subtotalCents, form?.vat_percent]
+  );
+
+  const totalCents = subtotalCents + vatCents;
+
+  const onSave = async () => {
+    if (!form || !invoice) return;
+
+    try {
+      await updateMutation.mutateAsync({
+        id: invoice.id,
+        payload: form,
+      });
+
+      alert("Factuur bijgewerkt");
+
+      if (onUpdated) onUpdated(invoice.id);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Er ging iets mis bij het bijwerken");
+    }
+  };
+
+  if (!invoice || !form) return null;
+
+  return (
+    <Modal open={!!invoice} onClose={onClose} title={`Factuur ${invoice.invoice_number} bewerken`} maxWidth="4xl">
+      <div className="p-4 overflow-auto max-h-[70vh] space-y-6">
+        {/* Invoice Details */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <label className="block">
+              <span className="text-sm text-gray-600">Factuurnummer</span>
+              <input
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={form.invoice_number}
+                onChange={(e) => setForm((f) => f ? ({ ...f, invoice_number: e.target.value }) : null)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">Factuurdatum</span>
+              <input
+                type="date"
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={form.invoice_date}
+                onChange={(e) => {
+                  const inv = e.target.value;
+                  const due = ymd(addDays(new Date(inv + "T00:00:00"), Number(form.payment_terms)));
+                  setForm((f) => f ? ({ ...f, invoice_date: inv, due_date: due }) : null);
+                }}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">Vervaldatum</span>
+              <input
+                type="date"
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={form.due_date}
+                onChange={(e) => setForm((f) => f ? ({ ...f, due_date: e.target.value }) : null)}
+              />
+            </label>
+          </div>
+          <div className="space-y-3">
+            <label className="block">
+              <span className="text-sm text-gray-600">Betaalvoorwaarden</span>
+              <select
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={form.payment_terms}
+                onChange={(e) => {
+                  const terms = e.target.value as typeof form.payment_terms;
+                  const due = ymd(addDays(new Date(form.invoice_date + "T00:00:00"), Number(terms)));
+                  setForm((f) => f ? ({ ...f, payment_terms: terms, due_date: due }) : null);
+                }}
+              >
+                <option value="14">14 dagen</option>
+                <option value="30">30 dagen</option>
+                <option value="60">60 dagen</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">BTW %</span>
+              <input
+                type="number"
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                value={form.vat_percent}
+                onChange={(e) => setForm((f) => f ? ({ ...f, vat_percent: Number(e.target.value) }) : null)}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">Notities</span>
+              <textarea
+                className="mt-1 w-full border rounded-lg px-3 py-2"
+                rows={4}
+                value={form.notes}
+                onChange={(e) => setForm((f) => f ? ({ ...f, notes: e.target.value }) : null)}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Invoice Items */}
+        <div className="space-y-4">
+          <h3 className="font-medium">Factuurregels</h3>
+          <div className="overflow-auto border rounded-xl">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left px-3 py-2">Omschrijving</th>
+                  <th className="text-right px-3 py-2">Aantal (uur)</th>
+                  <th className="text-right px-3 py-2">Tarief</th>
+                  <th className="text-right px-3 py-2">Bedrag</th>
+                  <th className="w-10 px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {form.items.map((it, idx) => (
+                  <tr key={idx} className="align-top">
+                    <td className="px-3 py-2">
+                      <textarea
+                        className="w-full border rounded-lg px-2 py-1"
+                        rows={2}
+                        value={it.description}
+                        onChange={(e) =>
+                          setForm((f) => {
+                            if (!f) return null;
+                            const items = [...f.items];
+                            items[idx] = { ...items[idx], description: e.target.value };
+                            return { ...f, items };
+                          })
+                        }
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="w-20 border rounded px-2 py-1 text-right"
+                        value={it.quantity}
+                        onChange={(e) => {
+                          const qty = Number(e.target.value);
+                          setForm((f) => {
+                            if (!f) return null;
+                            const items = [...f.items];
+                            items[idx] = {
+                              ...items[idx],
+                              quantity: qty,
+                              amount_cents: Math.round(qty * items[idx].rate_cents)
+                            };
+                            return { ...f, items };
+                          });
+                        }}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <input
+                        type="number"
+                        step="100"
+                        className="w-24 border rounded px-2 py-1 text-right"
+                        value={it.rate_cents / 100}
+                        onChange={(e) => {
+                          const rate = Number(e.target.value) * 100;
+                          setForm((f) => {
+                            if (!f) return null;
+                            const items = [...f.items];
+                            items[idx] = {
+                              ...items[idx],
+                              rate_cents: rate,
+                              amount_cents: Math.round(items[idx].quantity * rate)
+                            };
+                            return { ...f, items };
+                          });
+                        }}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right font-medium">
+                      {centsToMoney(it.amount_cents)}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <button
+                        className="p-2 rounded hover:bg-gray-100"
+                        onClick={() => setForm((f) => f ? ({ ...f, items: f.items.filter((_, i) => i !== idx) }) : null)}
+                        title="Regel verwijderen"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                <tr>
+                  <td colSpan={5} className="px-3 py-2">
+                    <button
+                      className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-50"
+                      onClick={() => {
+                        const project = projects.find(p => p.id === form.project_id);
+                        const defaultRate = project?.default_rate_cents || 7500;
+                        setForm((f) => f ? ({
+                          ...f,
+                          items: [...f.items, { description: "", quantity: 1, rate_cents: defaultRate, amount_cents: defaultRate }],
+                        }) : null);
+                      }}
+                    >
+                      <Plus className="h-4 w-4" /> Regel toevoegen
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3} className="px-3 py-2 text-right font-medium">Subtotaal</td>
+                  <td className="px-3 py-2 text-right">{centsToMoney(subtotalCents)}</td>
+                  <td />
+                </tr>
+                <tr>
+                  <td colSpan={3} className="px-3 py-2 text-right font-medium">BTW {form.vat_percent}%</td>
+                  <td className="px-3 py-2 text-right">{centsToMoney(vatCents)}</td>
+                  <td />
+                </tr>
+                <tr className="font-semibold">
+                  <td colSpan={3} className="px-3 py-2 text-right">Totaal</td>
+                  <td className="px-3 py-2 text-right">{centsToMoney(totalCents)}</td>
+                  <td />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t px-4 py-3 flex justify-between">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+        >
+          Annuleren
+        </button>
+        <button
+          onClick={onSave}
+          disabled={updateMutation.isPending}
+          className="px-4 py-2 bg-black text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+        >
+          {updateMutation.isPending ? "Opslaan..." : "Wijzigingen opslaan"}
+        </button>
       </div>
     </Modal>
   );
