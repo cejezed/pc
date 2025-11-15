@@ -1,8 +1,14 @@
+# Node.js
+/node_modules
+/.pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Nooit committen
+# Build output
+/dist
+/build
+
+# Omgeving
 .env
-.env.*
-!.env.example
-
-# Dependencies
-node_modules/
+.env.local
