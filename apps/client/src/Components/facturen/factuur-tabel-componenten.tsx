@@ -135,7 +135,7 @@ export function InvoicesTable({
               <td className="px-4 py-2">
                 <button
                   onClick={() => onRowClick(i)}
-                  className="text-black hover:underline"
+                  className="text-left text-gray-900 hover:underline font-medium focus:outline-none"
                 >
                   {i.invoice_number}
                 </button>
