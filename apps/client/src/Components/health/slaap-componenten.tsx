@@ -100,11 +100,11 @@ export function SlaapTab() {
           subtitle={(stats?.kortWakkerCount || 0) === 0 ? "Perfect!" : "Lichte verstoring"}
         />
         <StatCard
-          title="Naps (7d)"
+          title="Powernaps (7d)"
           value={(stats?.napCount || 0).toString()}
           unit="dagen"
           icon={<Moon className="h-4 w-4 text-blue-400" />}
-          subtitle={(stats?.napCount || 0) > 0 ? "Extra rust genomen" : "Geen naps"}
+          subtitle={(stats?.napCount || 0) > 0 ? "Extra rust genomen" : "Geen powernaps"}
         />
       </div>
 
@@ -206,7 +206,7 @@ function SlaapDayCard({ metric }: { metric: DailyMetric }) {
         )}
         {metric.nap && (
           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-            😴 Nap
+            😴 Powernap
           </span>
         )}
       </div>

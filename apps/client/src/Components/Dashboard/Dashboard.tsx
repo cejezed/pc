@@ -568,7 +568,7 @@ export default function Dashboard() {
                 onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
               />
               <CheckboxItem
-                label="Nap gedaan"
+                label="Powernap"
                 icon={Moon}
                 iconColor="text-blue-400"
                 checked={dailyMetrics.nap || false}
@@ -681,7 +681,7 @@ export default function Dashboard() {
                     {todayMetrics.workout_done && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs">Workout</span>}
                     {todayMetrics.lang_wakker && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Lang wakker</span>}
                     {todayMetrics.kort_wakker && <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">Kort wakker</span>}
-                    {todayMetrics.nap && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Nap</span>}
+                    {todayMetrics.nap && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Powernap</span>}
                     {todayMetrics.ogen_schoonmaken && <span className="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-xs">Ogen schoonmaken</span>}
                     {todayMetrics.oogdruppels && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Oogdruppels</span>}
                     {todayMetrics.allergie_medicatie && <span className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">Allergie medicatie</span>}
