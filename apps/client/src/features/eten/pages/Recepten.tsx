@@ -1,8 +1,9 @@
 // src/features/eten/pages/Recepten.tsx
 import React, { useState } from 'react';
-import { Plus, Search, Heart, Clock, Link as LinkIcon, BookOpen, Loader2 } from 'lucide-react';
+import { Plus, Search, Heart, Clock, Link as LinkIcon, BookOpen, Loader2, Camera } from 'lucide-react';
 import { useRecipes, useUpdateRecipe, useImportRecipe, useCreateRecipe } from '../hooks';
 import { RecipeCard } from '../components/RecipeCard';
+import ScanRecipeDialog from '../components/ScanRecipeDialog';
 import { COMMON_TAGS } from '../utils';
 import type { RecipeFilters } from '../types';
 
@@ -14,6 +15,7 @@ export default function ReceptenPage() {
   });
 
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showScanDialog, setShowScanDialog] = useState(false);
   const [importUrl, setImportUrl] = useState('');
 
   const { data: recipes = [], isLoading } = useRecipes(filters);
@@ -65,6 +67,13 @@ export default function ReceptenPage() {
           >
             <LinkIcon className="w-4 h-4" />
             Importeer URL
+          </button>
+          <button
+            onClick={() => setShowScanDialog(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Camera className="w-4 h-4" />
+            Scan Kaart
           </button>
           <button
             onClick={() => {/* TODO: Open create modal */}}
@@ -241,6 +250,15 @@ export default function ReceptenPage() {
           </div>
         </div>
       )}
+
+      {/* Scan Recipe Dialog */}
+      <ScanRecipeDialog
+        isOpen={showScanDialog}
+        onClose={() => setShowScanDialog(false)}
+        onSuccess={() => {
+          // Recipe list will auto-refresh via query invalidation
+        }}
+      />
     </div>
   );
 }

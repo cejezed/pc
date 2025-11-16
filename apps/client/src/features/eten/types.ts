@@ -1,7 +1,7 @@
 // src/features/eten/types.ts
 // Type definitions for Mijn Keuken module
 
-export type SourceType = 'manual' | 'url' | 'book';
+export type SourceType = 'manual' | 'url' | 'book' | 'scan';
 export type MealType = 'ontbijt' | 'lunch' | 'avond' | 'snack';
 export type IngredientCategory = 'produce' | 'meat' | 'dairy' | 'pantry' | 'spices' | 'frozen' | 'other';
 export type DietType = 'geen' | 'vega' | 'vegan' | 'glutenvrij' | 'lactosevrij';
@@ -233,4 +233,45 @@ export interface DayNutritionSummary {
   totalCarbs: number;
   totalFat: number;
   warnings: RecipeWarning[];
+}
+
+// =============================================
+// Recipe Scan Types
+// =============================================
+
+export interface ScannedIngredient {
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  category: IngredientCategory | null;
+  is_optional: boolean;
+}
+
+export interface ScannedRecipeDraft {
+  title: string;
+  default_servings: number;
+  prep_time_min: number | null;
+  tags: string[];
+  ingredients: ScannedIngredient[];
+  instructions: string[]; // Each step as a separate line
+  notes: string;
+  image_url: string; // Public URL after upload to Supabase Storage
+}
+
+export interface ScanRecipeResponse {
+  recipeDraft: ScannedRecipeDraft;
+}
+
+export interface CreateRecipeFromScanInput {
+  recipe: {
+    title: string;
+    default_servings: number;
+    prep_time_min: number | null;
+    tags: string[];
+    instructions: string[];
+    notes: string;
+    image_url: string;
+    source_type: 'scan';
+  };
+  ingredients: ScannedIngredient[];
 }
