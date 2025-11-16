@@ -13,8 +13,9 @@ import Health from './Components/health/Health';
 import Abonnementen from './Components/abonnementen/Abonnementen';
 import TeKopen from './Components/te-kopen/TeKopen';
 import Affirmations from './Components/Affirmations/Affirmations';
+import MijnKeuken from './features/eten';
 
-type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen";
+type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten";
 
 function App() {
   const { user, loading, signOut } = useAuth();
@@ -63,12 +64,13 @@ function App() {
       {currentPage === "home" && <Dashboard />}
       {currentPage === "analytics" && <Analytics />}
       {currentPage === "uren" && <Uren />}
-   {currentPage === "facturen" && <Facturen />}
+      {currentPage === "facturen" && <Facturen />}
       {currentPage === "budget" && <Budget />}
       {currentPage === "ideas" && <Ideas />}
       {currentPage === "taken" && <Taken />}
       {currentPage === "affirmaties" && <Affirmations />}
       {currentPage === "health" && <Health />}
+      {currentPage === "eten" && <MijnKeuken />}
       {currentPage === "abonnementen" && <Abonnementen />}
       {currentPage === "tekopen" && <TeKopen />}
     </AppLayout>
