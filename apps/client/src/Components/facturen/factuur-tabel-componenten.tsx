@@ -141,7 +141,7 @@ export function InvoicesTable({
                 </button>
               </td>
               <td className="px-4 py-2">
-                <div className="font-medium">{i.project?.client_name || "—"}</div>
+                <div className="font-medium text-gray-900">{i.project?.client_name || "—"}</div>
                 <div className="text-gray-600">{i.project?.name || "—"}</div>
               </td>
               <td className="px-4 py-2">{fmtDate(i.invoice_date)}</td>
