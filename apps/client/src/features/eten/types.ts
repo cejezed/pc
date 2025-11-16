@@ -142,6 +142,7 @@ export interface CreateIngredientInput {
 
 export interface UpdateRecipeInput extends Partial<CreateRecipeInput> {
   id: string;
+  is_favourite?: boolean;
 }
 
 export interface ImportRecipeInput {
