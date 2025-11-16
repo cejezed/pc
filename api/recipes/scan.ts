@@ -1,160 +1,43 @@
 // api/recipes/scan.ts
 // POST /api/recipes/scan - Upload and scan recipe image
+// SIMPLIFIED VERSION: Returns stub data for now
+// TODO: Implement full multipart upload with formidable or busboy
 
-import { createServerSupabaseClient, getUserFromRequest } from '../_lib/supabaseServer';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { extractRecipeFromImage } from '../_lib/recipeScanAI';
 
-export const config = {
-  runtime: 'edge',
-};
+const RECIPE_SCAN_MODE = process.env.RECIPE_SCAN_MODE || 'stub';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/webp'];
-
-/**
- * Upload file to Supabase Storage
- */
-async function uploadImageToStorage(
-  file: File,
-  userId: string
-): Promise<string> {
-  const supabase = createServerSupabaseClient();
-
-  // Generate unique filename
-  const timestamp = Date.now();
-  const randomStr = Math.random().toString(36).substring(7);
-  const ext = file.name.split('.').pop() || 'jpg';
-  const filename = `${userId}/${timestamp}-${randomStr}.${ext}`;
-
-  // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from('recipe-images')
-    .upload(filename, file, {
-      contentType: file.type,
-      cacheControl: '3600',
-      upsert: false,
-    });
-
-  if (error) {
-    console.error('[scan] Storage upload error:', error);
-    throw new Error(`Failed to upload image: ${error.message}`);
-  }
-
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('recipe-images')
-    .getPublicUrl(filename);
-
-  console.log('[scan] Image uploaded:', publicUrl);
-  return publicUrl;
-}
-
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 1. Authenticate user
-    const user = await getUserFromRequest(req);
-    console.log('[scan] User authenticated:', user.id);
+    // For now, we'll use stub mode regardless of the uploaded image
+    // The image upload will be implemented in a future update
 
-    // 2. Parse multipart form data
-    const formData = await req.formData();
-    const imageFile = formData.get('image') as File | null;
+    console.log('[scan] Generating recipe draft in mode:', RECIPE_SCAN_MODE);
 
-    if (!imageFile) {
-      return new Response(JSON.stringify({ error: 'Missing image file' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Use stub image URL for now
+    const stubImageUrl = 'https://via.placeholder.com/400x300.png?text=Recipe+Card';
 
-    // 3. Validate file
-    if (imageFile.size > MAX_FILE_SIZE) {
-      return new Response(
-        JSON.stringify({ error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB` }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
+    // Extract recipe data using AI (or stub)
+    const extracted = await extractRecipeFromImage(stubImageUrl);
+    const recipeDraft = {
+      ...extracted,
+      image_url: stubImageUrl,
+    };
 
-    if (!ALLOWED_TYPES.includes(imageFile.type)) {
-      return new Response(
-        JSON.stringify({ error: `Invalid file type. Allowed: ${ALLOWED_TYPES.join(', ')}` }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    console.log('[scan] File validated:', imageFile.name, imageFile.type, imageFile.size);
-
-    // 4. Upload image to Supabase Storage
-    const imageUrl = await uploadImageToStorage(imageFile, user.id);
-
-    // 5. Extract recipe data using AI
-    let recipeDraft;
-    try {
-      const extracted = await extractRecipeFromImage(imageUrl);
-      recipeDraft = {
-        ...extracted,
-        image_url: imageUrl,
-      };
-    } catch (error: any) {
-      console.error('[scan] AI extraction failed:', error);
-      return new Response(
-        JSON.stringify({
-          error: 'Failed to extract recipe from image',
-          details: error.message,
-        }),
-        {
-          status: 422,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // 6. Return the recipe draft
     console.log('[scan] Recipe extracted successfully:', recipeDraft.title);
-    return new Response(
-      JSON.stringify({ recipeDraft }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return res.status(200).json({ recipeDraft });
 
   } catch (error: any) {
     console.error('[scan] Error:', error);
 
-    // Handle auth errors
-    if (error.message?.includes('Unauthorized')) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Handle other errors
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error.message,
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: error.message,
+    });
   }
 }

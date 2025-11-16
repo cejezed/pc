@@ -5,7 +5,6 @@
   "framework": "vite",
   "functions": { "api/**/*.{ts,js}": { "runtime": "nodejs20.x" } },
   "routes": [
-    { "src": "^/api/.*", "dest": "/api/index.ts" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "apps/client/index.html" }
   ]
