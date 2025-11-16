@@ -183,7 +183,7 @@ export function InvoiceDetailDrawer({
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
-            {invoice.status === "draft" && onEdit && (
+            {onEdit && invoice.status !== "cancelled" && (
               <button
                 onClick={() => onEdit(invoice)}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-black text-white hover:opacity-90"

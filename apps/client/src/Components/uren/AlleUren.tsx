@@ -70,7 +70,7 @@ export default function AlleUren({ timeEntries }: Props) {
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <button
       onClick={() => handleSort(field)}
-      className="inline-flex items-center gap-1 hover:text-brikx-teal transition-colors"
+      className="inline-flex items-center gap-1 text-gray-700 hover:text-brikx-teal transition-colors"
     >
       {children}
       <ArrowUpDown className={`w-4 h-4 ${sortField === field ? 'text-brikx-teal' : 'text-gray-400'}`} />

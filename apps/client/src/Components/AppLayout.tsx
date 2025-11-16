@@ -17,6 +17,7 @@ import {
   X,
   Sparkles,
   FileText,
+  ChefHat,
 } from "lucide-react";
 
 type Page =
@@ -28,6 +29,7 @@ type Page =
   | "taken"
   | "ideas"
   | "health"
+  | "eten"
   | "abonnementen"
   | "tekopen"
   | "affirmaties";
@@ -48,6 +50,7 @@ const NAV: Array<{ key: Page; label: string; icon: React.ReactNode }> = [
   { key: "ideas", label: "Ideeën", icon: <Lightbulb size={18} /> },
   { key: "affirmaties", label: "Affirmaties", icon: <Sparkles size={18} /> },
   { key: "health", label: "Health", icon: <Heart size={18} /> },
+  { key: "eten", label: "Mijn Keuken", icon: <ChefHat size={18} /> },
   { key: "abonnementen", label: "Abonnementen", icon: <CreditCard size={18} /> },
   { key: "tekopen", label: "Te kopen", icon: <ShoppingCart size={18} /> },
 ];
