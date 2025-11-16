@@ -46,6 +46,7 @@ export function SlaapTab() {
 
     const langWakkerCount = last7Days.filter(m => m.lang_wakker).length;
     const kortWakkerCount = last7Days.filter(m => m.kort_wakker).length;
+    const napCount = last7Days.filter(m => m.nap).length;
 
     const sortedBySlaap = [...metrics].sort((a, b) => b.slaap_score - a.slaap_score);
     const bestNight = sortedBySlaap[0];
@@ -55,6 +56,7 @@ export function SlaapTab() {
       avgSlaap,
       langWakkerCount,
       kortWakkerCount,
+      napCount,
       bestNight,
       worstNight,
       totalDays: metrics.length,
@@ -75,7 +77,7 @@ export function SlaapTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Gem. Slaap (7d)"
           value={stats?.avgSlaap.toFixed(1) || "0"}
@@ -96,6 +98,13 @@ export function SlaapTab() {
           unit="nachten"
           icon={<Moon className="h-4 w-4 text-indigo-500" />}
           subtitle={(stats?.kortWakkerCount || 0) === 0 ? "Perfect!" : "Lichte verstoring"}
+        />
+        <StatCard
+          title="Naps (7d)"
+          value={(stats?.napCount || 0).toString()}
+          unit="dagen"
+          icon={<Moon className="h-4 w-4 text-blue-400" />}
+          subtitle={(stats?.napCount || 0) > 0 ? "Extra rust genomen" : "Geen naps"}
         />
       </div>
 
@@ -193,6 +202,11 @@ function SlaapDayCard({ metric }: { metric: DailyMetric }) {
         {metric.kort_wakker && (
           <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
             💤 Kort wakker
+          </span>
+        )}
+        {metric.nap && (
+          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+            😴 Nap
           </span>
         )}
       </div>
