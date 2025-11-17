@@ -13,8 +13,23 @@ interface ManualItem {
 
 export default function BoodschappenPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekDates()[0]);
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const [manualItems, setManualItems] = useState<ManualItem[]>([]);
+
+  // Load from localStorage
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('boodschappen-checked');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  const [manualItems, setManualItems] = useState<ManualItem[]>(() => {
+    const saved = localStorage.getItem('boodschappen-manual');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [frequentItems, setFrequentItems] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('boodschappen-frequent');
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const [newItemName, setNewItemName] = useState('');
   const [newItemCategory, setNewItemCategory] = useState<IngredientCategory>('other');
 
@@ -26,6 +41,19 @@ export default function BoodschappenPage() {
     weekStart,
     weekEnd,
   });
+
+  // Persist to localStorage
+  React.useEffect(() => {
+    localStorage.setItem('boodschappen-checked', JSON.stringify(Array.from(checkedItems)));
+  }, [checkedItems]);
+
+  React.useEffect(() => {
+    localStorage.setItem('boodschappen-manual', JSON.stringify(manualItems));
+  }, [manualItems]);
+
+  React.useEffect(() => {
+    localStorage.setItem('boodschappen-frequent', JSON.stringify(frequentItems));
+  }, [frequentItems]);
 
   const handlePrevWeek = () => {
     const newStart = new Date(currentWeekStart);
@@ -57,19 +85,47 @@ export default function BoodschappenPage() {
     ));
   };
 
-  const addManualItem = () => {
-    if (newItemName.trim()) {
+  const addManualItem = (itemName?: string, itemCategory?: IngredientCategory) => {
+    const name = itemName || newItemName.trim();
+    const category = itemCategory || newItemCategory;
+
+    if (name) {
+      // Check if item already exists (unchecked)
+      const existingItem = manualItems.find(
+        item => item.name.toLowerCase() === name.toLowerCase() && !item.checked
+      );
+
+      if (existingItem) {
+        // Item already in list, just clear input
+        setNewItemName('');
+        return;
+      }
+
       setManualItems(prev => [...prev, {
-        name: newItemName.trim(),
-        category: newItemCategory,
+        name,
+        category,
         checked: false,
       }]);
+
+      // Track frequency
+      setFrequentItems(prev => ({
+        ...prev,
+        [name.toLowerCase()]: (prev[name.toLowerCase()] || 0) + 1,
+      }));
+
       setNewItemName('');
     }
   };
 
   const removeManualItem = (index: number) => {
     setManualItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearAllChecked = () => {
+    if (confirm('Alle afgevinkte items verwijderen?')) {
+      setManualItems(prev => prev.filter(item => !item.checked));
+      setCheckedItems(new Set());
+    }
   };
 
   const handlePrint = () => {
@@ -110,6 +166,14 @@ export default function BoodschappenPage() {
   }
 
   const categories = Object.keys(allItemsByCategory);
+
+  // Get top frequent items
+  const topFrequentItems = useMemo(() => {
+    return Object.entries(frequentItems)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 12)
+      .map(([name]) => name);
+  }, [frequentItems]);
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -224,9 +288,15 @@ export default function BoodschappenPage() {
           <p className="text-2xl font-semibold text-gray-900 mb-2">
             Alle boodschappen gehaald!
           </p>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Je lijst is compleet. Veel kookplezier!
           </p>
+          <button
+            onClick={clearAllChecked}
+            className="px-6 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm font-semibold"
+          >
+            Lijst opschonen
+          </button>
         </div>
       ) : (
         <div className="space-y-8">
@@ -323,6 +393,31 @@ export default function BoodschappenPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Frequently Used Items */}
+      {topFrequentItems.length > 0 && (
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-4 sm:p-6 print:hidden">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">⭐</span>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900">Vaak gebruikt</h3>
+            <span className="text-xs sm:text-sm text-gray-600 ml-auto">Klik om snel toe te voegen</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {topFrequentItems.map((itemName) => (
+              <button
+                key={itemName}
+                onClick={() => addManualItem(itemName, 'other')}
+                className="px-3 py-2 bg-white border-2 border-purple-300 rounded-lg hover:bg-purple-100 hover:border-purple-400 transition-all text-sm font-medium text-gray-800 capitalize shadow-sm hover:shadow-md"
+              >
+                + {itemName}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-600 mt-3">
+            💡 Deze items worden bijgehouden op basis van wat je vaak toevoegt
+          </p>
         </div>
       )}
     </div>
