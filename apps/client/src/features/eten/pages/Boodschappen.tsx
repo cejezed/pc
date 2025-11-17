@@ -196,50 +196,52 @@ export default function BoodschappenPage() {
       </div>
 
       {/* Week Navigation */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 sm:p-4 print:hidden">
+      <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 p-4 sm:p-5 print:hidden backdrop-blur-sm">
         <button
           onClick={handlePrevWeek}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2.5 hover:bg-gradient-to-r hover:from-brikx-teal/10 hover:to-blue-50 rounded-xl transition-all hover:scale-105"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
         </button>
 
         <div className="text-center">
-          <p className="font-semibold text-lg">
+          <p className="font-bold text-lg bg-gradient-to-r from-brikx-teal to-blue-600 bg-clip-text text-transparent">
             {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
           </p>
         </div>
 
         <button
           onClick={handleNextWeek}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2.5 hover:bg-gradient-to-r hover:from-brikx-teal/10 hover:to-blue-50 rounded-xl transition-all hover:scale-105"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-5 h-5 text-gray-700" />
         </button>
       </div>
 
       {/* Add Manual Item - More Prominent */}
-      <div className="bg-gradient-to-br from-brikx-teal/10 to-blue-50 rounded-lg border-2 border-brikx-teal/30 p-4 sm:p-6 print:hidden shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Plus className="w-5 h-5 text-brikx-teal" />
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">Voeg item toe aan je lijst</h3>
+      <div className="bg-gradient-to-br from-brikx-teal/5 via-blue-50/80 to-purple-50/60 rounded-2xl border border-brikx-teal/20 p-5 sm:p-7 print:hidden shadow-xl shadow-brikx-teal/10 backdrop-blur-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-brikx-teal to-blue-500 rounded-xl shadow-lg">
+            <Plus className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Voeg item toe aan je lijst</h3>
         </div>
-        <p className="text-xs sm:text-sm text-gray-600 mb-4">
+        <p className="text-xs sm:text-sm text-gray-600 mb-5 leading-relaxed">
           Voeg handmatig items toe of plan maaltijden in de weekplanner om ingrediënten automatisch toe te voegen
         </p>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
             placeholder="Wat moet je halen? Bijv. Melk, Brood, Eieren..."
-            className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal text-sm sm:text-base"
+            className="flex-1 px-5 py-3.5 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base shadow-sm hover:shadow-md transition-shadow"
           />
           <select
             value={newItemCategory}
             onChange={(e) => setNewItemCategory(e.target.value as IngredientCategory)}
-            className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal text-sm sm:text-base"
+            className="px-5 py-3.5 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base shadow-sm hover:shadow-md transition-shadow"
           >
             <option value="produce">🥬 Groente & Fruit</option>
             <option value="meat">🥩 Vlees & Vis</option>
@@ -252,7 +254,7 @@ export default function BoodschappenPage() {
           <button
             onClick={() => addManualItem()}
             disabled={!newItemName.trim()}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+            className="flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-brikx-teal to-blue-500 text-white rounded-xl hover:from-brikx-teal/90 hover:to-blue-600 transition-all text-sm sm:text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:scale-105 disabled:hover:scale-100"
           >
             <Plus className="w-5 h-5" />
             <span>Toevoegen</span>
@@ -262,17 +264,18 @@ export default function BoodschappenPage() {
 
       {/* Shopping List - Tile Layout */}
       {categories.length === 0 && manualItems.filter(m => !m.checked).length === 0 ? (
-        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <div className="text-6xl mb-4">🛒</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300 p-12 sm:p-16 text-center shadow-inner">
+          <div className="text-7xl mb-6 animate-pulse">🛒</div>
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-3">
             Je boodschappenlijst is leeg
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-5 max-w-md mx-auto leading-relaxed">
             Voeg items toe met het formulier hierboven, of ga naar de weekplanner om maaltijden in te plannen.
           </p>
-          <p className="text-sm text-gray-500">
-            💡 Tip: Items uit geplande recepten worden automatisch toegevoegd!
-          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full text-sm text-blue-700 border border-blue-200">
+            <span className="text-lg">💡</span>
+            <span className="font-medium">Items uit geplande recepten worden automatisch toegevoegd!</span>
+          </div>
         </div>
       ) : categories.filter(category => {
         const items = allItemsByCategory[category] || [];
@@ -283,17 +286,19 @@ export default function BoodschappenPage() {
         });
         return uncheckedItems.length > 0;
       }).length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <p className="text-2xl font-semibold text-gray-900 mb-2">
+        <div className="bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-teal-50/50 rounded-2xl border border-green-200 p-12 sm:p-16 text-center shadow-xl shadow-green-200/40">
+          <div className="inline-block p-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-6 shadow-lg animate-bounce">
+            <div className="text-6xl">🎉</div>
+          </div>
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-3">
             Alle boodschappen gehaald!
-          </p>
-          <p className="text-gray-600 mb-4">
+          </h3>
+          <p className="text-gray-700 mb-6 text-lg max-w-md mx-auto leading-relaxed">
             Je lijst is compleet. Veel kookplezier!
           </p>
           <button
             onClick={clearAllChecked}
-            className="px-6 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm font-semibold"
+            className="px-8 py-3.5 bg-gradient-to-r from-brikx-teal to-emerald-500 text-white rounded-xl hover:from-brikx-teal/90 hover:to-emerald-600 transition-all text-sm sm:text-base font-bold shadow-lg hover:shadow-xl hover:scale-105"
           >
             Lijst opschonen
           </button>
@@ -340,7 +345,7 @@ export default function BoodschappenPage() {
                             toggleItem(itemKey);
                           }
                         }}
-                        className="relative group cursor-pointer rounded-xl p-4 transition-all bg-white border-2 border-gray-200 hover:border-brikx-teal hover:shadow-md"
+                        className="relative group cursor-pointer rounded-2xl p-5 transition-all bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 hover:border-brikx-teal hover:shadow-xl hover:shadow-brikx-teal/10 hover:-translate-y-1 active:scale-95"
                       >
                         {/* Delete button for manual items */}
                         {isManual && (
@@ -378,17 +383,28 @@ export default function BoodschappenPage() {
           })}
 
           {/* Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 print:hidden">
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">💡</div>
+          <div className="bg-gradient-to-br from-blue-50/80 to-cyan-50/60 border border-blue-200/50 rounded-2xl p-5 sm:p-6 print:hidden shadow-lg shadow-blue-200/30">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg flex-shrink-0">
+                <div className="text-2xl">💡</div>
+              </div>
               <div className="flex-1">
-                <p className="text-sm text-blue-900 font-medium mb-1">
+                <p className="text-base sm:text-lg text-blue-900 font-bold mb-3">
                   Handige tips:
                 </p>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Klik op tegels om items af te vinken in de supermarkt</li>
-                  <li>• Afgevinkte items verdwijnen automatisch van je lijst</li>
-                  <li>• Items uit recepten worden automatisch toegevoegd als je maaltijden plant</li>
+                <ul className="text-sm text-blue-800 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 flex-shrink-0">▸</span>
+                    <span>Klik op tegels om items af te vinken in de supermarkt</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 flex-shrink-0">▸</span>
+                    <span>Afgevinkte items verdwijnen automatisch van je lijst</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 flex-shrink-0">▸</span>
+                    <span>Items uit recepten worden automatisch toegevoegd als je maaltijden plant</span>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -398,26 +414,31 @@ export default function BoodschappenPage() {
 
       {/* Frequently Used Items */}
       {topFrequentItems.length > 0 && (
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-4 sm:p-6 print:hidden">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl">⭐</span>
-            <h3 className="text-base sm:text-lg font-bold text-gray-900">Vaak gebruikt</h3>
-            <span className="text-xs sm:text-sm text-gray-600 ml-auto">Klik om snel toe te voegen</span>
+        <div className="bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-orange-50/50 rounded-2xl border border-purple-200/50 p-5 sm:p-7 print:hidden shadow-xl shadow-purple-200/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+              <span className="text-2xl">⭐</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-900 to-pink-700 bg-clip-text text-transparent">Vaak gebruikt</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Klik om snel toe te voegen</p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {topFrequentItems.map((itemName) => (
               <button
                 key={itemName}
                 onClick={() => addManualItem(itemName, 'other')}
-                className="px-3 py-2 bg-white border-2 border-purple-300 rounded-lg hover:bg-purple-100 hover:border-purple-400 transition-all text-sm font-medium text-gray-800 capitalize shadow-sm hover:shadow-md"
+                className="px-4 py-3 bg-white/90 backdrop-blur-sm border border-purple-200 rounded-xl hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 hover:border-purple-400 transition-all text-sm font-semibold text-gray-800 capitalize shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
               >
-                + {itemName}
+                <span className="text-purple-600">+</span> {itemName}
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-600 mt-3">
-            💡 Deze items worden bijgehouden op basis van wat je vaak toevoegt
-          </p>
+          <div className="mt-5 flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-xs text-purple-700 border border-purple-200/50 w-fit">
+            <span className="text-base">💡</span>
+            <span className="font-medium">Deze items worden bijgehouden op basis van wat je vaak toevoegt</span>
+          </div>
         </div>
       )}
     </div>
