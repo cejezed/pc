@@ -1,7 +1,7 @@
 // src/Components/Dashboard/Dashboard.tsx - MET AUTH & UITGEBREIDE HEALTH
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Sparkles, CheckSquare, Lightbulb, Zap, Moon, Dumbbell, Trash2, Activity, Brain, Heart } from 'lucide-react';
+import { Plus, Sparkles, CheckSquare, Lightbulb, Zap, Moon, Dumbbell, Trash2, Activity, Brain, Heart, Eye, Pill } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { DailyMetric, Task, Idea } from './types';
 
@@ -15,10 +15,14 @@ export default function Dashboard() {
     workout_done: false,
     lang_wakker: false,
     kort_wakker: false,
+    nap: false,
     ochtend_workout: false,
     golf_oefenen: false,
     golfen: false,
     mtb: false,
+    ogen_schoonmaken: false,
+    oogdruppels: false,
+    allergie_medicatie: false,
     schouder_pijn: 0,
     stress_niveau: 0,
   });
@@ -118,10 +122,14 @@ export default function Dashboard() {
         workout_done: dailyMetrics.workout_done || false,
         lang_wakker: dailyMetrics.lang_wakker || false,
         kort_wakker: dailyMetrics.kort_wakker || false,
+        nap: dailyMetrics.nap || false,
         ochtend_workout: dailyMetrics.ochtend_workout || false,
         golf_oefenen: dailyMetrics.golf_oefenen || false,
         golfen: dailyMetrics.golfen || false,
         mtb: dailyMetrics.mtb || false,
+        ogen_schoonmaken: dailyMetrics.ogen_schoonmaken || false,
+        oogdruppels: dailyMetrics.oogdruppels || false,
+        allergie_medicatie: dailyMetrics.allergie_medicatie || false,
         schouder_pijn: dailyMetrics.schouder_pijn || 0,
         stress_niveau: dailyMetrics.stress_niveau || 0,
       };
@@ -260,10 +268,14 @@ export default function Dashboard() {
         workout_done: todayMetrics.workout_done || false,
         lang_wakker: todayMetrics.lang_wakker || false,
         kort_wakker: todayMetrics.kort_wakker || false,
+        nap: todayMetrics.nap || false,
         ochtend_workout: todayMetrics.ochtend_workout || false,
         golf_oefenen: todayMetrics.golf_oefenen || false,
         golfen: todayMetrics.golfen || false,
         mtb: todayMetrics.mtb || false,
+        ogen_schoonmaken: todayMetrics.ogen_schoonmaken || false,
+        oogdruppels: todayMetrics.oogdruppels || false,
+        allergie_medicatie: todayMetrics.allergie_medicatie || false,
         schouder_pijn: todayMetrics.schouder_pijn || 0,
         stress_niveau: todayMetrics.stress_niveau || 0,
       });
@@ -391,7 +403,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {tasks.filter(t => t.status !== 'done').slice(0, 8).map((task) => (
+              {tasks.filter(t => t.status !== 'done').map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
@@ -450,7 +462,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {ideas.slice(0, 6).map((idea) => (
+              {ideas.map((idea) => (
                 <div
                   key={idea.id}
                   className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
@@ -555,6 +567,13 @@ export default function Dashboard() {
                 checked={dailyMetrics.kort_wakker || false}
                 onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
               />
+              <CheckboxItem
+                label="Powernap"
+                icon={Moon}
+                iconColor="text-blue-400"
+                checked={dailyMetrics.nap || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, nap: checked })}
+              />
             </div>
 
            
@@ -598,7 +617,33 @@ export default function Dashboard() {
               />
             </div>
 
-           
+            {/* Gezondheid */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 mb-2">Gezondheid</p>
+              <CheckboxItem
+                label="Ogen schoonmaken"
+                icon={Eye}
+                iconColor="text-cyan-500"
+                checked={dailyMetrics.ogen_schoonmaken || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ogen_schoonmaken: checked })}
+              />
+              <CheckboxItem
+                label="Oogdruppels"
+                icon={Eye}
+                iconColor="text-blue-600"
+                checked={dailyMetrics.oogdruppels || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, oogdruppels: checked })}
+              />
+              <CheckboxItem
+                label="Allergie medicatie"
+                icon={Pill}
+                iconColor="text-pink-500"
+                checked={dailyMetrics.allergie_medicatie || false}
+                onChange={(checked) => setDailyMetrics({ ...dailyMetrics, allergie_medicatie: checked })}
+              />
+            </div>
+
+
             {/* Save Button */}
             <button
               onClick={() => saveDailyMetrics.mutate()}
@@ -636,6 +681,10 @@ export default function Dashboard() {
                     {todayMetrics.workout_done && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs">Workout</span>}
                     {todayMetrics.lang_wakker && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Lang wakker</span>}
                     {todayMetrics.kort_wakker && <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">Kort wakker</span>}
+                    {todayMetrics.nap && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Powernap</span>}
+                    {todayMetrics.ogen_schoonmaken && <span className="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-xs">Ogen schoonmaken</span>}
+                    {todayMetrics.oogdruppels && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Oogdruppels</span>}
+                    {todayMetrics.allergie_medicatie && <span className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">Allergie medicatie</span>}
                   </div>
                 </div>
               </div>

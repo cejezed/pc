@@ -12,13 +12,19 @@ export type DailyMetric = {
   // Nieuwe slaap velden
   lang_wakker: boolean;
   kort_wakker: boolean;
-  
+  nap: boolean;
+
   // Nieuwe activiteit velden
   ochtend_workout: boolean;
   golf_oefenen: boolean;
   golfen: boolean;
   mtb: boolean;
-  
+
+  // Gezondheid velden
+  ogen_schoonmaken: boolean;
+  oogdruppels: boolean;
+  allergie_medicatie: boolean;
+
   // Nieuwe score velden
   schouder_pijn: number;
   stress_niveau: number;

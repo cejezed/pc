@@ -1,8 +1,10 @@
 {
-  "name": "client",
+  "name": "pc-workspace",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vite"
+    "dev": "pnpm --filter client dev",
+    "build": "pnpm --filter client build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
