@@ -250,7 +250,7 @@ export default function BoodschappenPage() {
             <option value="other">📦 Overig</option>
           </select>
           <button
-            onClick={addManualItem}
+            onClick={() => addManualItem()}
             disabled={!newItemName.trim()}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
