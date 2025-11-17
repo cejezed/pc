@@ -112,25 +112,25 @@ export default function BoodschappenPage() {
   const categories = Object.keys(allItemsByCategory);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Boodschappenlijst</h1>
-          <p className="text-gray-600">Klik op items om ze af te vinken</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Boodschappenlijst</h1>
+          <p className="text-sm sm:text-base text-gray-600">Klik op items om ze af te vinken</p>
         </div>
 
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors print:hidden"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors print:hidden text-sm"
         >
           <Printer className="w-4 h-4" />
-          Print
+          <span className="hidden sm:inline">Print</span>
         </button>
       </div>
 
       {/* Week Navigation */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4 print:hidden">
+      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 sm:p-4 print:hidden">
         <button
           onClick={handlePrevWeek}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -153,21 +153,21 @@ export default function BoodschappenPage() {
       </div>
 
       {/* Add Manual Item */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 print:hidden">
-        <h3 className="font-semibold text-gray-900 mb-3">Handmatig toevoegen</h3>
-        <div className="flex gap-2">
+      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 print:hidden">
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-3">Handmatig toevoegen</h3>
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
             placeholder="Bijv. Melk, Brood, Eieren..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal text-sm sm:text-base"
           />
           <select
             value={newItemCategory}
             onChange={(e) => setNewItemCategory(e.target.value as IngredientCategory)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal text-sm sm:text-base"
           >
             <option value="produce">Groente & Fruit</option>
             <option value="meat">Vlees & Vis</option>
@@ -179,10 +179,10 @@ export default function BoodschappenPage() {
           </select>
           <button
             onClick={addManualItem}
-            className="flex items-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm sm:text-base"
           >
             <Plus className="w-4 h-4" />
-            Toevoegen
+            <span>Toevoegen</span>
           </button>
         </div>
       </div>
@@ -231,12 +231,12 @@ export default function BoodschappenPage() {
             return (
               <div key={category}>
                 {/* Category Header */}
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                   {getCategoryLabel(category as any)}
                 </h2>
 
                 {/* Items Grid - Bring! Style */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
                   {uncheckedItems.map((item, index) => {
                     const itemKey = `${item.name}-${item.unit}-${category}`;
                     const isChecked = false; // Always false since we filtered checked items

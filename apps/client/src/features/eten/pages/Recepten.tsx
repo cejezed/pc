@@ -52,43 +52,46 @@ export default function ReceptenPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Recepten</h1>
-          <p className="text-gray-600">Jouw persoonlijke receptenbibliotheek</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Recepten</h1>
+          <p className="text-sm sm:text-base text-gray-600">Jouw persoonlijke receptenbibliotheek</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
             <LinkIcon className="w-4 h-4" />
-            Importeer URL
+            <span className="hidden sm:inline">Importeer URL</span>
+            <span className="sm:hidden">URL</span>
           </button>
           <button
             onClick={() => setShowScanDialog(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
             <Camera className="w-4 h-4" />
-            Scan Kaart
+            <span className="hidden sm:inline">Scan Kaart</span>
+            <span className="sm:hidden">Scan</span>
           </button>
           <button
             onClick={() => {/* TODO: Open create modal */}}
-            className="flex items-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm"
           >
             <Plus className="w-4 h-4" />
-            Nieuw recept
+            <span className="hidden sm:inline">Nieuw recept</span>
+            <span className="sm:hidden">Nieuw</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-3 sm:space-y-4">
         {/* Search & Favourites */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -96,20 +99,20 @@ export default function ReceptenPage() {
               placeholder="Zoek recepten..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base"
             />
           </div>
 
           <button
             onClick={() => setFilters({ ...filters, favouritesOnly: !filters.favouritesOnly })}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${
               filters.favouritesOnly
                 ? 'bg-red-50 border-red-200 text-red-700'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
           >
             <Heart className={`w-4 h-4 ${filters.favouritesOnly ? 'fill-current' : ''}`} />
-            Favorieten
+            <span className="hidden sm:inline">Favorieten</span>
           </button>
         </div>
 
@@ -123,7 +126,7 @@ export default function ReceptenPage() {
                 <button
                   key={tag}
                   onClick={() => handleToggleTag(tag)}
-                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${
                     isActive
                       ? 'bg-brikx-teal text-white border-brikx-teal'
                       : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal'
@@ -137,10 +140,10 @@ export default function ReceptenPage() {
         </div>
 
         {/* Max cook time */}
-        <div className="flex items-center gap-4">
-          <Clock className="w-4 h-4 text-gray-600" />
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            Max. bereidingstijd:
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Clock className="w-4 h-4 text-gray-600 hidden sm:block" />
+          <label className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-700">
+            <span>Max. bereidingstijd:</span>
             <select
               value={filters.maxPrepTime || ''}
               onChange={(e) =>
@@ -149,7 +152,7 @@ export default function ReceptenPage() {
                   maxPrepTime: e.target.value ? parseInt(e.target.value) : undefined,
                 })
               }
-              className="px-3 py-1 border border-gray-300 rounded-lg"
+              className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
             >
               <option value="">Alle</option>
               <option value="15">15 min</option>
