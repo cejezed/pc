@@ -188,7 +188,7 @@ export default function BoodschappenPage() {
       </div>
 
       {/* Shopping List - Tile Layout */}
-      {categories.length === 0 ? (
+      {categories.length === 0 && manualItems.filter(m => !m.checked).length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <p className="text-gray-600">
             Geen maaltijden gepland voor deze week.
@@ -197,10 +197,36 @@ export default function BoodschappenPage() {
             Ga naar de weekplanner om maaltijden in te plannen, of voeg handmatig items toe.
           </p>
         </div>
+      ) : categories.filter(category => {
+        const items = allItemsByCategory[category] || [];
+        const uncheckedItems = items.filter((item) => {
+          const itemKey = `${item.name}-${item.unit}-${category}`;
+          const isChecked = checkedItems.has(itemKey) || item.checked;
+          return !isChecked;
+        });
+        return uncheckedItems.length > 0;
+      }).length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+          <div className="text-6xl mb-4">🎉</div>
+          <p className="text-2xl font-semibold text-gray-900 mb-2">
+            Alle boodschappen gehaald!
+          </p>
+          <p className="text-gray-600">
+            Je lijst is compleet. Veel kookplezier!
+          </p>
+        </div>
       ) : (
         <div className="space-y-8">
           {categories.map((category) => {
             const items = allItemsByCategory[category] || [];
+            const uncheckedItems = items.filter((item) => {
+              const itemKey = `${item.name}-${item.unit}-${category}`;
+              const isChecked = checkedItems.has(itemKey) || item.checked;
+              return !isChecked;
+            });
+
+            // Skip category if no unchecked items
+            if (uncheckedItems.length === 0) return null;
 
             return (
               <div key={category}>
@@ -211,9 +237,9 @@ export default function BoodschappenPage() {
 
                 {/* Items Grid - Bring! Style */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {items.map((item, index) => {
+                  {uncheckedItems.map((item, index) => {
                     const itemKey = `${item.name}-${item.unit}-${category}`;
-                    const isChecked = checkedItems.has(itemKey) || item.checked;
+                    const isChecked = false; // Always false since we filtered checked items
                     const isManual = !item.recipe_ids || item.recipe_ids.length === 0;
 
                     return (
@@ -231,21 +257,10 @@ export default function BoodschappenPage() {
                             toggleItem(itemKey);
                           }
                         }}
-                        className={`relative group cursor-pointer rounded-xl p-4 transition-all ${
-                          isChecked
-                            ? 'bg-green-100 border-2 border-green-400 opacity-60'
-                            : 'bg-white border-2 border-gray-200 hover:border-brikx-teal hover:shadow-md'
-                        }`}
+                        className="relative group cursor-pointer rounded-xl p-4 transition-all bg-white border-2 border-gray-200 hover:border-brikx-teal hover:shadow-md"
                       >
-                        {/* Check indicator */}
-                        {isChecked && (
-                          <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        )}
-
                         {/* Delete button for manual items */}
-                        {isManual && !isChecked && (
+                        {isManual && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -263,7 +278,7 @@ export default function BoodschappenPage() {
                         )}
 
                         {/* Item name */}
-                        <div className={`text-center ${isChecked ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                        <div className="text-center text-gray-900">
                           <p className="font-medium text-sm mb-1">{item.name}</p>
                           {item.quantity > 0 && (
                             <p className="text-xs text-gray-600">
