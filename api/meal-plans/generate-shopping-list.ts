@@ -2,14 +2,11 @@
 // POST /api/meal-plans/generate-shopping-list
 // Generates aggregated shopping list from meal plans in a date range
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const config = {
-  runtime: 'edge',
-};
 
 interface AggregatedIngredient {
   name: string;
@@ -81,23 +78,17 @@ function normalizeIngredientName(name: string): string {
   return name.toLowerCase().trim();
 }
 
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Get user from auth header
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(
@@ -105,20 +96,14 @@ export default async function handler(req: Request) {
   );
 
   if (authError || !user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    const { weekStart, weekEnd } = await req.json();
+    const { weekStart, weekEnd } = req.body;
 
     if (!weekStart || !weekEnd) {
-      return new Response(JSON.stringify({ error: 'weekStart and weekEnd are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'weekStart and weekEnd are required' });
     }
 
     // Fetch all meal plans in the date range
@@ -132,12 +117,9 @@ export default async function handler(req: Request) {
     if (mealPlansError) throw mealPlansError;
 
     if (!mealPlans || mealPlans.length === 0) {
-      return new Response(JSON.stringify({
+      return res.status(200).json({
         items: [],
         grouped: {},
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -149,12 +131,9 @@ export default async function handler(req: Request) {
     )];
 
     if (recipeIds.length === 0) {
-      return new Response(JSON.stringify({
+      return res.status(200).json({
         items: [],
         grouped: {},
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -229,18 +208,12 @@ export default async function handler(req: Request) {
       }
     }
 
-    return new Response(JSON.stringify({
+    return res.status(200).json({
       items,
       grouped: sortedGrouped,
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     console.error('Shopping list generation error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: error.message });
   }
 }
