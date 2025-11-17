@@ -116,8 +116,10 @@ export default function BoodschappenPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Boodschappenlijst</h1>
-          <p className="text-sm sm:text-base text-gray-600">Klik op items om ze af te vinken</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">🛒 Boodschappenlijst</h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Voeg handmatig items toe of laat ze automatisch genereren uit je weekplanning
+          </p>
         </div>
 
         <button
@@ -125,7 +127,7 @@ export default function BoodschappenPage() {
           className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors print:hidden text-sm"
         >
           <Printer className="w-4 h-4" />
-          <span className="hidden sm:inline">Print</span>
+          <span className="hidden sm:inline">Print lijst</span>
         </button>
       </div>
 
@@ -152,36 +154,43 @@ export default function BoodschappenPage() {
         </button>
       </div>
 
-      {/* Add Manual Item */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 print:hidden">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-3">Handmatig toevoegen</h3>
+      {/* Add Manual Item - More Prominent */}
+      <div className="bg-gradient-to-br from-brikx-teal/10 to-blue-50 rounded-lg border-2 border-brikx-teal/30 p-4 sm:p-6 print:hidden shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Plus className="w-5 h-5 text-brikx-teal" />
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">Voeg item toe aan je lijst</h3>
+        </div>
+        <p className="text-xs sm:text-sm text-gray-600 mb-4">
+          Voeg handmatig items toe of plan maaltijden in de weekplanner om ingrediënten automatisch toe te voegen
+        </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
-            placeholder="Bijv. Melk, Brood, Eieren..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal text-sm sm:text-base"
+            placeholder="Wat moet je halen? Bijv. Melk, Brood, Eieren..."
+            className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal text-sm sm:text-base"
           />
           <select
             value={newItemCategory}
             onChange={(e) => setNewItemCategory(e.target.value as IngredientCategory)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal text-sm sm:text-base"
+            className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal text-sm sm:text-base"
           >
-            <option value="produce">Groente & Fruit</option>
-            <option value="meat">Vlees & Vis</option>
-            <option value="dairy">Zuivel</option>
-            <option value="pantry">Voorraad</option>
-            <option value="spices">Kruiden</option>
-            <option value="frozen">Diepvries</option>
-            <option value="other">Overig</option>
+            <option value="produce">🥬 Groente & Fruit</option>
+            <option value="meat">🥩 Vlees & Vis</option>
+            <option value="dairy">🥛 Zuivel</option>
+            <option value="pantry">🥫 Voorraad</option>
+            <option value="spices">🌿 Kruiden</option>
+            <option value="frozen">🧊 Diepvries</option>
+            <option value="other">📦 Overig</option>
           </select>
           <button
             onClick={addManualItem}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm sm:text-base"
+            disabled={!newItemName.trim()}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal/90 transition-colors text-sm sm:text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             <span>Toevoegen</span>
           </button>
         </div>
@@ -189,12 +198,16 @@ export default function BoodschappenPage() {
 
       {/* Shopping List - Tile Layout */}
       {categories.length === 0 && manualItems.filter(m => !m.checked).length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <p className="text-gray-600">
-            Geen maaltijden gepland voor deze week.
+        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+          <div className="text-6xl mb-4">🛒</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Je boodschappenlijst is leeg
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Voeg items toe met het formulier hierboven, of ga naar de weekplanner om maaltijden in te plannen.
           </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Ga naar de weekplanner om maaltijden in te plannen, of voeg handmatig items toe.
+          <p className="text-sm text-gray-500">
+            💡 Tip: Items uit geplande recepten worden automatisch toegevoegd!
           </p>
         </div>
       ) : categories.filter(category => {
@@ -296,9 +309,19 @@ export default function BoodschappenPage() {
 
           {/* Summary */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 print:hidden">
-            <p className="text-sm text-blue-900">
-              <strong>Tip:</strong> Klik op de tegels om items af te vinken terwijl je door de supermarkt loopt!
-            </p>
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">💡</div>
+              <div className="flex-1">
+                <p className="text-sm text-blue-900 font-medium mb-1">
+                  Handige tips:
+                </p>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Klik op tegels om items af te vinken in de supermarkt</li>
+                  <li>• Afgevinkte items verdwijnen automatisch van je lijst</li>
+                  <li>• Items uit recepten worden automatisch toegevoegd als je maaltijden plant</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       )}
