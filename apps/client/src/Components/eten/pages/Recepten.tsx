@@ -42,8 +42,11 @@ export default function ReceptenPage() {
   // Nieuw: modal + state voor handmatige scaninput
   const [showScanInputModal, setShowScanInputModal] = useState(false);
   const [scanInput, setScanInput] = useState('');
-  const [scanImageUrl, setScanImageUrl] = useState('');
   const [scanInputError, setScanInputError] = useState<string | null>(null);
+
+  // Nieuw: afbeelding-upload voor handmatige scaninput
+  const [scanImageFile, setScanImageFile] = useState<File | null>(null);
+  const [scanImagePreview, setScanImagePreview] = useState<string | null>(null);
 
   const { data: recipes = [], isLoading } = useRecipes(filters);
   const updateRecipe = useUpdateRecipe();
@@ -79,7 +82,17 @@ export default function ReceptenPage() {
     }
   };
 
-  // Nieuw: importeren van handmatige scaninput (JSON)
+  // helper om een File -> data URL te lezen
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = () => reject(new Error('Afbeelding kon niet gelezen worden'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Nieuw: importeren van handmatige scaninput (JSON) + optionele afbeelding
   const handleImportScanInput = async () => {
     if (!scanInput.trim()) return;
 
@@ -91,7 +104,7 @@ export default function ReceptenPage() {
       let draft: ScannedRecipeDraft;
       let ingredients: ScannedIngredient[];
 
-      // Variant 1: volledig CreateRecipeFromScanInput
+      // Variant 1: volledige CreateRecipeFromScanInput
       if (parsed.recipe && parsed.ingredients) {
         const fromScan = parsed as CreateRecipeFromScanInput;
 
@@ -110,7 +123,7 @@ export default function ReceptenPage() {
           instructions: instructionsArray,
           notes: fromScan.recipe.notes,
           image_url: fromScan.recipe.image_url,
-          ingredients: fromScan.ingredients,
+          ingredients: parsed.ingredients,
         };
 
         ingredients = fromScan.ingredients;
@@ -120,8 +133,11 @@ export default function ReceptenPage() {
         ingredients = draft.ingredients;
       }
 
-      const imageUrl =
-        scanImageUrl.trim() || draft.image_url || '';
+      // Afbeelding: als er een bestand is gekozen, gebruik data-URL, anders de URL uit de draft
+      let imageUrl = draft.image_url;
+      if (scanImageFile) {
+        imageUrl = await readFileAsDataUrl(scanImageFile);
+      }
 
       await createRecipe.mutateAsync({
         title: draft.title,
@@ -144,16 +160,52 @@ export default function ReceptenPage() {
 
       setShowScanInputModal(false);
       setScanInput('');
-      setScanImageUrl('');
       setScanInputError(null);
+      setScanImageFile(null);
+      setScanImagePreview(null);
       alert('Recept succesvol aangemaakt!');
     } catch (error: any) {
       console.error(error);
       setScanInputError(
         error?.message ||
-          'Import mislukt: controleer of de JSON-structuur klopt.'
+          'Import mislukt: controleer of de JSON-structuur klopt (geen "const ..." eromheen).'
       );
     }
+  };
+
+  const handleResetScanInputModal = () => {
+    setShowScanInputModal(false);
+    setScanInput('');
+    setScanInputError(null);
+    setScanImageFile(null);
+    setScanImagePreview(null);
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setScanImageFile(null);
+      setScanImagePreview(null);
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Selecteer een geldig afbeeldingsbestand');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Afbeelding is te groot (max 10MB)');
+      return;
+    }
+
+    setScanImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setScanImagePreview(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -391,19 +443,14 @@ export default function ReceptenPage() {
         </div>
       )}
 
-      {/* Nieuw: Scaninput Modal (JSON + afbeelding-URL) */}
+      {/* Nieuw: Scaninput Modal (JSON + afbeelding-upload) */}
       {showScanInputModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full p-6 space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-semibold">Importeer scaninput</h2>
               <button
-                onClick={() => {
-                  setShowScanInputModal(false);
-                  setScanInput('');
-                  setScanImageUrl('');
-                  setScanInputError(null);
-                }}
+                onClick={handleResetScanInputModal}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X className="w-5 h-5" />
@@ -411,10 +458,16 @@ export default function ReceptenPage() {
             </div>
 
             <p className="text-sm text-gray-600">
-              Plak hier de JSON van een{' '}
-              <code className="font-mono">CreateRecipeFromScanInput</code> of{' '}
-              <code className="font-mono">ScannedRecipeDraft</code>. Optioneel
-              kun je hieronder een afbeelding-URL invullen als omslag.
+              Plak hier geldige{' '}
+              <span className="font-mono text-xs bg-gray-100 px-1 py-0.5 rounded">
+                JSON
+              </span>{' '}
+              van een{' '}
+              <code className="font-mono text-xs">CreateRecipeFromScanInput</code>{' '}
+              of{' '}
+              <code className="font-mono text-xs">ScannedRecipeDraft</code>.
+              Gebruik <strong>geen</strong> TypeScript-snippet met{' '}
+              <code className="font-mono text-xs">const ... =</code>.
             </p>
 
             <textarea
@@ -426,19 +479,28 @@ export default function ReceptenPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                Afbeelding-URL (optioneel)
+                Omslagafbeelding (optioneel)
               </label>
               <input
-                type="url"
-                value={scanImageUrl}
-                onChange={(e) => setScanImageUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm"
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="block w-full text-sm text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brikx-teal file:text-white hover:file:bg-brikx-teal-dark"
               />
               <p className="text-xs text-gray-500">
-                Deze URL wordt gebruikt als omslagafbeelding voor het recept.
-                Laat leeg om de waarde uit de JSON te gebruiken.
+                Als je hier een afbeelding kiest, wordt deze als data-URL
+                opgeslagen in het recept en gebruikt als omslag.
               </p>
+
+              {scanImagePreview && (
+                <div className="mt-2 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={scanImagePreview}
+                    alt="Preview"
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
+              )}
             </div>
 
             {scanInputError && (
@@ -449,12 +511,7 @@ export default function ReceptenPage() {
 
             <div className="flex justify-end gap-2 pt-2">
               <button
-                onClick={() => {
-                  setShowScanInputModal(false);
-                  setScanInput('');
-                  setScanImageUrl('');
-                  setScanInputError(null);
-                }}
+                onClick={handleResetScanInputModal}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 disabled={createRecipe.isPending}
               >
@@ -482,12 +539,12 @@ export default function ReceptenPage() {
         </div>
       )}
 
-      {/* Scan Recipe Dialog (afbeelding upload + OCR/LLM) */}
+      {/* Scan Recipe Dialog (foto van kaart → scan) */}
       <ScanRecipeDialog
         isOpen={showScanDialog}
         onClose={() => setShowScanDialog(false)}
         onSuccess={() => {
-          // Recipe list will auto-refresh via query invalidation
+          // Recipe list refresht via query invalidation
         }}
       />
     </div>

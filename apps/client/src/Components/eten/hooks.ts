@@ -330,30 +330,98 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
     queryFn: async () => {
       if (!input) throw new Error('Input is required');
 
-      const token = await getAuthToken();
+      // Fetch meal plans with recipes for the date range
+      const { data: mealPlans, error: mealPlansError } = await supabase
+        .from('meal_plans')
+        .select('*, recipe:recipes(id, title, default_servings)')
+        .gte('date', input.weekStart)
+        .lte('date', input.weekEnd);
 
-      const response = await fetch('/api/meal-plans/generate-shopping-list', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      if (mealPlansError) throw mealPlansError;
+      if (!mealPlans || mealPlans.length === 0) {
+        return { items: [], grouped: {} };
+      }
 
-      if (!response.ok) {
-        // Check if response is JSON before parsing
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to generate shopping list');
-        } else {
-          // HTML error page (like 404)
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
+      // Get unique recipe IDs
+      const recipeIds = [...new Set(
+        mealPlans
+          .filter(mp => mp.recipe_id)
+          .map(mp => mp.recipe_id)
+      )];
+
+      if (recipeIds.length === 0) {
+        return { items: [], grouped: {} };
+      }
+
+      // Fetch ingredients for these recipes
+      const { data: ingredients, error: ingredientsError } = await supabase
+        .from('recipe_ingredients')
+        .select('*')
+        .in('recipe_id', recipeIds);
+
+      if (ingredientsError) throw ingredientsError;
+
+      // Aggregate ingredients
+      const aggregated = new Map();
+
+      for (const mealPlan of mealPlans) {
+        if (!mealPlan.recipe || !mealPlan.recipe_id) continue;
+
+        const recipe = mealPlan.recipe as any;
+        const scaleFactor = mealPlan.servings / (recipe.default_servings || 1);
+
+        const recipeIngredients = ingredients?.filter(ing => ing.recipe_id === mealPlan.recipe_id) || [];
+
+        for (const ingredient of recipeIngredients) {
+          if (ingredient.is_optional) continue;
+
+          const normalizedName = ingredient.name.toLowerCase().trim();
+          const key = `${normalizedName}_${ingredient.unit || 'stuk'}_${ingredient.category}`;
+
+          const scaledQuantity = (ingredient.quantity || 0) * scaleFactor;
+
+          if (aggregated.has(key)) {
+            const existing = aggregated.get(key);
+            existing.quantity += scaledQuantity;
+            if (!existing.recipe_ids.includes(mealPlan.recipe_id)) {
+              existing.recipe_ids.push(mealPlan.recipe_id);
+              existing.recipe_titles.push(recipe.title);
+            }
+          } else {
+            aggregated.set(key, {
+              name: ingredient.name,
+              quantity: scaledQuantity,
+              unit: ingredient.unit || 'stuk',
+              category: ingredient.category,
+              recipe_ids: [mealPlan.recipe_id],
+              recipe_titles: [recipe.title],
+              checked: false,
+            });
+          }
         }
       }
 
-      return response.json() as Promise<GenerateShoppingListResponse>;
+      // Convert to array and group by category
+      const items = Array.from(aggregated.values());
+      const grouped: any = {};
+
+      for (const item of items) {
+        if (!grouped[item.category]) {
+          grouped[item.category] = [];
+        }
+        grouped[item.category].push(item);
+      }
+
+      // Sort categories
+      const categoryOrder = ['produce', 'meat', 'dairy', 'pantry', 'spices', 'frozen', 'other'];
+      const sortedGrouped: any = {};
+      for (const category of categoryOrder) {
+        if (grouped[category]) {
+          sortedGrouped[category] = grouped[category];
+        }
+      }
+
+      return { items, grouped: sortedGrouped } as GenerateShoppingListResponse;
     },
     enabled: !!input,
   });
