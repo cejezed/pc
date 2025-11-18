@@ -7,5 +7,15 @@
     "api/**/*.ts": {
       "runtime": "nodejs20.x"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/meal-plans/generate-shopping-list",
+      "destination": "/api/meal-plans/generate-shopping-list.ts"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
 }
