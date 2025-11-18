@@ -1,7 +1,7 @@
 {
-  "installCommand": "npm install --prefix apps/client",
-  "buildCommand": "npm run build --prefix apps/client",
-  "outputDirectory": "apps/client/dist",
+  "buildCommand": "npm --workspace=client run build",
+  "installCommand": "npm install",
+  "outputDirectory": "dist",
   "framework": null,
   "functions": {
     "api/**/*.ts": {
