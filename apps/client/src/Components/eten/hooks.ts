@@ -1,4 +1,4 @@
-// src/features/eten/hooks.ts
+// src/Components/eten/hooks.ts
 // React Query hooks for Mijn Keuken
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -342,8 +342,15 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate shopping list');
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to generate shopping list');
+        } else {
+          // HTML error page (like 404)
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
       }
 
       return response.json() as Promise<GenerateShoppingListResponse>;

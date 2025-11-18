@@ -2,15 +2,21 @@
   "name": "pc-workspace",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "pnpm --filter client dev",
-    "build": "pnpm --filter client build"
+    "dev": "npm run dev --workspace=apps/client",
+    "build": "npm run build --workspace=apps/client"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
+    "@vercel/node": "^3.0.0",
     "react-router-dom": "^7.9.3"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
     "vite": "^7.2.2"
   }
 }

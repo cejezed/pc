@@ -1,4 +1,4 @@
-// src/features/eten/pages/Instellingen.tsx
+// src/Components/eten/pages/Instellingen.tsx
 import React, { useState, useEffect } from 'react';
 import { Save, Plus, X } from 'lucide-react';
 import { useDietSettings, useSaveDietSettings } from '../hooks';
@@ -61,15 +61,15 @@ export default function InstellingenPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Instellingen</h1>
-        <p className="text-gray-600">Pas je dieet voorkeuren aan</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Instellingen</h1>
+        <p className="text-sm sm:text-base text-gray-600">Pas je dieet voorkeuren aan</p>
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Default Servings */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -112,20 +112,21 @@ export default function InstellingenPage() {
             Recepten met deze ingrediënten krijgen een waarschuwing
           </p>
 
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               type="text"
               value={newAllergy}
               onChange={(e) => setNewAllergy(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addAllergy()}
               placeholder="Bijv. pinda's, gluten, lactose..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base"
             />
             <button
               onClick={addAllergy}
-              className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm sm:text-base"
             >
               <Plus className="w-4 h-4" />
+              <span>Toevoegen</span>
             </button>
           </div>
 
@@ -156,20 +157,21 @@ export default function InstellingenPage() {
             Ingrediënten die je gewoon niet lust (geen allergie)
           </p>
 
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               type="text"
               value={newExcluded}
               onChange={(e) => setNewExcluded(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addExcluded()}
               placeholder="Bijv. koriander, olijven..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base"
             />
             <button
               onClick={addExcluded}
-              className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm sm:text-base"
             >
               <Plus className="w-4 h-4" />
+              <span>Toevoegen</span>
             </button>
           </div>
 

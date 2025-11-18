@@ -1,4 +1,4 @@
-// src/features/eten/index.tsx
+// src/Components/eten/index.tsx
 // Main entry point for Mijn Keuken module
 
 import React, { useState } from 'react';

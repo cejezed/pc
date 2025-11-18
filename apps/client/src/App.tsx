@@ -13,9 +13,10 @@ import Health from './Components/health/Health';
 import Abonnementen from './Components/abonnementen/Abonnementen';
 import TeKopen from './Components/te-kopen/TeKopen';
 import Affirmations from './Components/Affirmations/Affirmations';
-import MijnKeuken from './features/eten';
+import MijnKeuken from './Components/eten';
+import Boodschappen from './Components/eten/pages/Boodschappen';
 
-type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten";
+type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen";
 
 function App() {
   const { user, loading, signOut } = useAuth();
@@ -71,6 +72,7 @@ function App() {
       {currentPage === "affirmaties" && <Affirmations />}
       {currentPage === "health" && <Health />}
       {currentPage === "eten" && <MijnKeuken />}
+      {currentPage === "boodschappen" && <Boodschappen />}
       {currentPage === "abonnementen" && <Abonnementen />}
       {currentPage === "tekopen" && <TeKopen />}
     </AppLayout>

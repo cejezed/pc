@@ -1,4 +1,4 @@
-// src/features/eten/pages/Weekplanner.tsx
+// src/Components/eten/pages/Weekplanner.tsx
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useMealPlans, useCreateMealPlan, useDeleteMealPlan, useRecipes } from '../hooks';
@@ -71,25 +71,26 @@ export default function WeekplannerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Weekplanner</h1>
-          <p className="text-gray-600">Plan je maaltijden voor de week</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Weekplanner</h1>
+          <p className="text-sm sm:text-base text-gray-600">Plan je maaltijden voor de week</p>
         </div>
 
         <button
           onClick={() => {/* TODO: Generate shopping list */}}
-          className="flex items-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm sm:text-base"
         >
           <ShoppingCart className="w-4 h-4" />
-          Boodschappenlijst maken
+          <span className="hidden sm:inline">Boodschappenlijst maken</span>
+          <span className="sm:hidden">Boodschappen</span>
         </button>
       </div>
 
       {/* Week Navigation */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
+      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
         <button
           onClick={handlePrevWeek}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -98,10 +99,10 @@ export default function WeekplannerPage() {
         </button>
 
         <div className="text-center">
-          <p className="font-semibold text-lg">
+          <p className="font-semibold text-base sm:text-lg">
             {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
           </p>
-          <p className="text-sm text-gray-600">Week {getWeekNumber(weekDates[0])}</p>
+          <p className="text-xs sm:text-sm text-gray-600">Week {getWeekNumber(weekDates[0])}</p>
         </div>
 
         <button
@@ -113,24 +114,24 @@ export default function WeekplannerPage() {
       </div>
 
       {/* Week Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-auto">
-        <table className="w-full">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto -mx-4 sm:mx-0">
+        <table className="w-full min-w-max">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-32">
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-700 w-20 sm:w-32">
                 Maaltijd
               </th>
               {weekDates.map((date) => (
                 <th
                   key={formatDate(date)}
-                  className={`px-4 py-3 text-center text-sm font-semibold min-w-[180px] ${
+                  className={`px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold min-w-[140px] sm:min-w-[180px] ${
                     isToday(date)
                       ? 'bg-brikx-teal text-white'
                       : 'text-gray-700'
                   }`}
                 >
-                  <div>{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
-                  <div className="text-xs font-normal">
+                  <div className="text-xs sm:text-sm">{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
+                  <div className="text-[10px] sm:text-xs font-normal">
                     {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'short' })}
                   </div>
                 </th>
@@ -140,10 +141,10 @@ export default function WeekplannerPage() {
           <tbody className="divide-y divide-gray-200">
             {MEAL_TYPES.map((mealType) => (
               <tr key={mealType}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-700">
-                  <div className="flex items-center gap-2">
-                    <span>{getMealTypeEmoji(mealType)}</span>
-                    <span>{getMealTypeLabel(mealType)}</span>
+                <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-700">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-base sm:text-lg">{getMealTypeEmoji(mealType)}</span>
+                    <span className="hidden sm:inline">{getMealTypeLabel(mealType)}</span>
                   </div>
                 </td>
                 {weekDates.map((date) => {
@@ -214,8 +215,8 @@ export default function WeekplannerPage() {
       {/* Add Meal Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-auto p-6">
-            <h2 className="text-xl font-semibold mb-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-auto p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
               Voeg recept toe - {getMealTypeLabel(showAddModal.mealType)}
             </h2>
 
@@ -224,18 +225,18 @@ export default function WeekplannerPage() {
                 <button
                   key={recipe.id}
                   onClick={() => handleAddMeal(recipe.id)}
-                  className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3"
+                  className="w-full p-2 sm:p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 sm:gap-3"
                 >
                   {recipe.image_url && (
                     <img
                       src={recipe.image_url}
                       alt={recipe.title}
-                      className="w-16 h-16 object-cover rounded"
+                      className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
                     />
                   )}
-                  <div>
-                    <p className="font-medium">{recipe.title}</p>
-                    <p className="text-sm text-gray-600">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">{recipe.title}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">
                       {recipe.default_servings} personen
                       {recipe.prep_time_min && ` • ${recipe.prep_time_min} min`}
                     </p>
@@ -246,7 +247,7 @@ export default function WeekplannerPage() {
 
             <button
               onClick={() => setShowAddModal(null)}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
             >
               Annuleren
             </button>
