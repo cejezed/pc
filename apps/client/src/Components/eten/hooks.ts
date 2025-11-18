@@ -30,32 +30,75 @@ async function getAuthToken(): Promise<string> {
 }
 
 // ==============================================
+// Helper: Safely parse error responses (JSON or text/HTML)
+// ==============================================
+
+export async function parseErrorResponse(
+  response: Response,
+  fallbackMessage: string
+): Promise<string> {
+  const contentType = response.headers.get('content-type') || '';
+
+  // 1) Probeer JSON
+  if (contentType.includes('application/json')) {
+    try {
+      const body = await response.json();
+      if (body && typeof (body as any).error === 'string') {
+        return (body as any).error;
+      }
+      if (body && typeof (body as any).message === 'string') {
+        return (body as any).message;
+      }
+    } catch {
+      // negeer JSON parse fouten en probeer tekst
+    }
+  }
+
+  // 2) Probeer plain text / HTML (zoals “The page cannot be found”)
+  try {
+    const text = await response.text();
+    if (text) {
+      return text.slice(0, 200);
+    }
+  } catch {
+    // negeer tekst lees fouten
+  }
+
+  // 3) Vallen terug op een generieke boodschap
+  return fallbackMessage;
+}
+
+// ==============================================
 // Recipes Hooks
 // ==============================================
 
 export function useRecipes(filters?: RecipeFilters) {
   return useQuery({
     queryKey: ['recipes', filters],
-    queryFn: async () => {
+    queryFn: async (): Promise<Recipe[]> => {
       const token = await getAuthToken();
 
       const params = new URLSearchParams();
       if (filters?.search) params.append('search', filters.search);
-      if (filters?.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','));
+      if (filters?.tags && filters.tags.length > 0) {
+        params.append('tags', filters.tags.join(','));
+      }
       if (filters?.favouritesOnly) params.append('favourites', 'true');
-      if (filters?.maxPrepTime) params.append('maxPrepTime', filters.maxPrepTime.toString());
+      if (filters?.maxPrepTime) {
+        params.append('maxPrepTime', filters.maxPrepTime.toString());
+      }
 
       const url = `/api/recipes${params.toString() ? `?${params.toString()}` : ''}`;
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch recipes');
+        const message = await parseErrorResponse(response, 'Failed to fetch recipes');
+        throw new Error(message);
       }
 
       return response.json() as Promise<Recipe[]>;
@@ -65,25 +108,26 @@ export function useRecipes(filters?: RecipeFilters) {
 
 export function useRecipe(id: string | undefined) {
   return useQuery({
-    queryKey: ['recipes', id],
-    queryFn: async () => {
-      if (!id) throw new Error('Recipe ID is required');
+    queryKey: ['recipe', id],
+    enabled: !!id,
+    queryFn: async (): Promise<RecipeWithIngredients> => {
+      if (!id) throw new Error('Recipe id is required');
+
       const token = await getAuthToken();
 
       const response = await fetch(`/api/recipes/${id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch recipe');
+        const message = await parseErrorResponse(response, 'Failed to fetch recipe');
+        throw new Error(message);
       }
 
       return response.json() as Promise<RecipeWithIngredients>;
     },
-    enabled: !!id,
   });
 }
 
@@ -91,21 +135,21 @@ export function useCreateRecipe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateRecipeInput) => {
+    mutationFn: async (input: CreateRecipeInput): Promise<RecipeWithIngredients> => {
       const token = await getAuthToken();
 
       const response = await fetch('/api/recipes', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create recipe');
+        const message = await parseErrorResponse(response, 'Failed to create recipe');
+        throw new Error(message);
       }
 
       return response.json() as Promise<RecipeWithIngredients>;
@@ -120,28 +164,30 @@ export function useUpdateRecipe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateRecipeInput) => {
+    mutationFn: async (input: UpdateRecipeInput): Promise<RecipeWithIngredients> => {
       const token = await getAuthToken();
 
       const response = await fetch(`/api/recipes/${input.id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update recipe');
+        const message = await parseErrorResponse(response, 'Failed to update recipe');
+        throw new Error(message);
       }
 
       return response.json() as Promise<RecipeWithIngredients>;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
-      queryClient.invalidateQueries({ queryKey: ['recipes', variables.id] });
+      if (data?.id) {
+        queryClient.invalidateQueries({ queryKey: ['recipe', data.id] });
+      }
     },
   });
 }
@@ -150,25 +196,31 @@ export function useDeleteRecipe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string): Promise<void> => {
       const token = await getAuthToken();
 
       const response = await fetch(`/api/recipes/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete recipe');
+        const message = await parseErrorResponse(response, 'Failed to delete recipe');
+        throw new Error(message);
       }
 
-      return response.json();
+      // sommige DELETE-routes geven geen body terug
+      try {
+        await response.text();
+      } catch {
+        // negeren
+      }
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
+      queryClient.invalidateQueries({ queryKey: ['recipe', id] });
     },
   });
 }
@@ -177,21 +229,21 @@ export function useImportRecipe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: ImportRecipeInput) => {
+    mutationFn: async (input: ImportRecipeInput): Promise<RecipeWithIngredients> => {
       const token = await getAuthToken();
 
       const response = await fetch('/api/recipes/import', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to import recipe');
+        const message = await parseErrorResponse(response, 'Failed to import recipe');
+        throw new Error(message);
       }
 
       return response.json() as Promise<RecipeWithIngredients>;
@@ -209,7 +261,7 @@ export function useImportRecipe() {
 export function useMealPlans(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ['meal-plans', startDate, endDate],
-    queryFn: async () => {
+    queryFn: async (): Promise<MealPlanWithRecipe[]> => {
       const token = await getAuthToken();
 
       const params = new URLSearchParams();
@@ -220,18 +272,17 @@ export function useMealPlans(startDate?: string, endDate?: string) {
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch meal plans');
+        const message = await parseErrorResponse(response, 'Failed to fetch meal plans');
+        throw new Error(message);
       }
 
       return response.json() as Promise<MealPlanWithRecipe[]>;
     },
-    enabled: !!startDate && !!endDate,
   });
 }
 
@@ -239,27 +290,28 @@ export function useCreateMealPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateMealPlanInput) => {
+    mutationFn: async (input: CreateMealPlanInput): Promise<MealPlanWithRecipe> => {
       const token = await getAuthToken();
 
       const response = await fetch('/api/meal-plans', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create meal plan');
+        const message = await parseErrorResponse(response, 'Failed to create meal plan');
+        throw new Error(message);
       }
 
       return response.json() as Promise<MealPlanWithRecipe>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] });
     },
   });
 }
@@ -268,27 +320,28 @@ export function useUpdateMealPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateMealPlanInput) => {
+    mutationFn: async (input: UpdateMealPlanInput): Promise<MealPlanWithRecipe> => {
       const token = await getAuthToken();
 
       const response = await fetch(`/api/meal-plans/${input.id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update meal plan');
+        const message = await parseErrorResponse(response, 'Failed to update meal plan');
+        throw new Error(message);
       }
 
       return response.json() as Promise<MealPlanWithRecipe>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] });
     },
   });
 }
@@ -297,40 +350,46 @@ export function useDeleteMealPlan() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string): Promise<void> => {
       const token = await getAuthToken();
 
       const response = await fetch(`/api/meal-plans/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete meal plan');
+        const message = await parseErrorResponse(response, 'Failed to delete meal plan');
+        throw new Error(message);
       }
 
-      return response.json();
+      try {
+        await response.text();
+      } catch {
+        // negeren
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
+      queryClient.invalidateQueries({ queryKey: ['shopping-list'] });
     },
   });
 }
 
 // ==============================================
-// Shopping List Hooks
+// Shopping List Hook
 // ==============================================
 
 export function useGenerateShoppingList(input: GenerateShoppingListInput | null) {
   return useQuery({
     queryKey: ['shopping-list', input?.weekStart, input?.weekEnd],
-    queryFn: async () => {
+    enabled: !!input,
+    queryFn: async (): Promise<GenerateShoppingListResponse> => {
       if (!input) throw new Error('Input is required');
 
-      // 1. Haal alle maaltijdplannen met receptdetails op voor de geselecteerde week
+      // 1. Alle maaltijdplannen met receptdetails voor de week
       const { data: mealPlans, error: mealPlansError } = await supabase
         .from('meal_plans')
         .select('*, recipe:recipes(id, title, default_servings)')
@@ -342,18 +401,20 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         return { items: [], grouped: {} };
       }
 
-      // 2. Verzamel unieke recept ID's
-      const recipeIds = [...new Set(
-        mealPlans
-          .filter(mp => mp.recipe_id)
-          .map(mp => mp.recipe_id)
-      )];
+      // 2. Unieke recept-ID's
+      const recipeIds = [
+        ...new Set(
+          mealPlans
+            .filter((mp: any) => mp.recipe_id)
+            .map((mp: any) => mp.recipe_id as string)
+        ),
+      ];
 
       if (recipeIds.length === 0) {
         return { items: [], grouped: {} };
       }
 
-      // 3. Haal de ingrediënten op voor alle gevonden recepten
+      // 3. Alle ingrediënten per recept
       const { data: ingredients, error: ingredientsError } = await supabase
         .from('recipe_ingredients')
         .select('*')
@@ -361,30 +422,42 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
 
       if (ingredientsError) throw ingredientsError;
 
-      // 4. Aggregeer en schaal de ingrediënten (Client-Side Logica)
-      const aggregated = new Map();
+      // 4. Aggregeren + schalen
+      type AggregatedItem = {
+        name: string;
+        quantity: number;
+        unit: string;
+        category: string;
+        recipe_ids: string[];
+        recipe_titles: string[];
+        checked: boolean;
+      };
 
-      for (const mealPlan of mealPlans) {
+      const aggregated = new Map<string, AggregatedItem>();
+
+      for (const mealPlan of mealPlans as any[]) {
         if (!mealPlan.recipe || !mealPlan.recipe_id) continue;
 
         const recipe = mealPlan.recipe as any;
-        // Bepaal de schaalfactor (aantal porties in het plan / standaard porties van het recept)
-        const scaleFactor = mealPlan.servings / (recipe.default_servings || 1);
+        const baseServings = recipe.default_servings || 1;
+        const scaleFactor =
+          baseServings > 0 ? mealPlan.servings / baseServings : mealPlan.servings;
 
-        const recipeIngredients = ingredients?.filter(ing => ing.recipe_id === mealPlan.recipe_id) || [];
+        const recipeIngredients =
+          ingredients?.filter((ing: any) => ing.recipe_id === mealPlan.recipe_id) || [];
 
         for (const ingredient of recipeIngredients) {
           if (ingredient.is_optional) continue;
-          
-          // Gebruik naam, eenheid en categorie voor een unieke sleutel om dubbele items op te tellen
-          const normalizedName = ingredient.name.toLowerCase().trim();
-          const key = `${normalizedName}_${ingredient.unit || 'stuk'}_${ingredient.category}`;
 
-          // Pas de hoeveelheid aan met de schaalfactor
+          const normalizedName = (ingredient.name as string).toLowerCase().trim();
+          const unit = ingredient.unit || 'stuk';
+          const category = ingredient.category || 'other';
+
+          const key = `${normalizedName}_${unit}_${category}`;
           const scaledQuantity = (ingredient.quantity || 0) * scaleFactor;
 
           if (aggregated.has(key)) {
-            const existing = aggregated.get(key);
+            const existing = aggregated.get(key)!;
             existing.quantity += scaledQuantity;
             if (!existing.recipe_ids.includes(mealPlan.recipe_id)) {
               existing.recipe_ids.push(mealPlan.recipe_id);
@@ -394,8 +467,8 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
             aggregated.set(key, {
               name: ingredient.name,
               quantity: scaledQuantity,
-              unit: ingredient.unit || 'stuk',
-              category: ingredient.category,
+              unit,
+              category,
               recipe_ids: [mealPlan.recipe_id],
               recipe_titles: [recipe.title],
               checked: false,
@@ -404,10 +477,9 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         }
       }
 
-      // 5. Converteer naar array en groepeer op categorie
       const items = Array.from(aggregated.values());
-      const grouped: any = {};
 
+      const grouped: Record<string, AggregatedItem[]> = {};
       for (const item of items) {
         if (!grouped[item.category]) {
           grouped[item.category] = [];
@@ -415,9 +487,8 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         grouped[item.category].push(item);
       }
 
-      // 6. Sorteer categorieën
       const categoryOrder = ['produce', 'meat', 'dairy', 'pantry', 'spices', 'frozen', 'other'];
-      const sortedGrouped: any = {};
+      const sortedGrouped: Record<string, AggregatedItem[]> = {};
       for (const category of categoryOrder) {
         if (grouped[category]) {
           sortedGrouped[category] = grouped[category];
@@ -426,7 +497,6 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
 
       return { items, grouped: sortedGrouped } as GenerateShoppingListResponse;
     },
-    enabled: !!input,
   });
 }
 
@@ -437,8 +507,10 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
 export function useDietSettings() {
   return useQuery({
     queryKey: ['diet-settings'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    queryFn: async (): Promise<UserDietSettings | null> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -458,8 +530,12 @@ export function useSaveDietSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (settings: Partial<UserDietSettings>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async (
+      settings: Partial<UserDietSettings>
+    ): Promise<UserDietSettings> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
