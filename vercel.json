@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm --workspace=client run build",
   "installCommand": "npm install",
-  "outputDirectory": "apps/client/dist",
+  "outputDirectory": "dist",
   "framework": null,
   "functions": {
     "api/**/*.ts": {
