@@ -16,6 +16,8 @@ export default function Dashboard() {
     lang_wakker: false,
     kort_wakker: false,
     nap: false,
+    bedtijd: undefined,
+    wakker_tijd: undefined,
     ochtend_workout: false,
     golf_oefenen: false,
     golfen: false,
@@ -123,6 +125,8 @@ export default function Dashboard() {
         lang_wakker: dailyMetrics.lang_wakker || false,
         kort_wakker: dailyMetrics.kort_wakker || false,
         nap: dailyMetrics.nap || false,
+        bedtijd: dailyMetrics.bedtijd || null,
+        wakker_tijd: dailyMetrics.wakker_tijd || null,
         ochtend_workout: dailyMetrics.ochtend_workout || false,
         golf_oefenen: dailyMetrics.golf_oefenen || false,
         golfen: dailyMetrics.golfen || false,
@@ -269,6 +273,8 @@ export default function Dashboard() {
         lang_wakker: todayMetrics.lang_wakker || false,
         kort_wakker: todayMetrics.kort_wakker || false,
         nap: todayMetrics.nap || false,
+        bedtijd: todayMetrics.bedtijd || undefined,
+        wakker_tijd: todayMetrics.wakker_tijd || undefined,
         ochtend_workout: todayMetrics.ochtend_workout || false,
         golf_oefenen: todayMetrics.golf_oefenen || false,
         golfen: todayMetrics.golfen || false,
@@ -349,6 +355,36 @@ export default function Dashboard() {
       <Icon className={`w-5 h-5 ${iconColor}`} />
       <span className="flex-1 font-medium text-gray-900">{label}</span>
     </label>
+  );
+
+  const TimeInput = ({
+    label,
+    icon: Icon,
+    iconColor,
+    value,
+    onChange,
+    placeholder,
+  }: {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    iconColor: string;
+    value?: string;
+    onChange: (time: string) => void;
+    placeholder: string;
+  }) => (
+    <div>
+      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+        {label}
+      </label>
+      <input
+        type="time"
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal transition-all"
+      />
+    </div>
   );
 
   return (
@@ -530,6 +566,26 @@ export default function Dashboard() {
               highLabel="Uitgerust"
             />
 
+            {/* Slaap Tijden */}
+            <div className="grid grid-cols-2 gap-4">
+              <TimeInput
+                label="Bedtijd"
+                icon={Moon}
+                iconColor="text-indigo-500"
+                value={dailyMetrics.bedtijd}
+                onChange={(time) => setDailyMetrics({ ...dailyMetrics, bedtijd: time })}
+                placeholder="22:00"
+              />
+              <TimeInput
+                label="Wakker tijd"
+                icon={Moon}
+                iconColor="text-amber-500"
+                value={dailyMetrics.wakker_tijd}
+                onChange={(time) => setDailyMetrics({ ...dailyMetrics, wakker_tijd: time })}
+                placeholder="07:00"
+              />
+            </div>
+
             {/* Pijn & Stress Scores */}
             <ScoreSelector
               label="Schouderpijn"
@@ -666,6 +722,9 @@ export default function Dashboard() {
                 <div className="text-xs text-green-700 space-y-1">
                   <p>🔋 Energie: {todayMetrics.energie_score}/10</p>
                   <p>😴 Slaap: {todayMetrics.slaap_score}/10</p>
+                  {todayMetrics.bedtijd && todayMetrics.wakker_tijd && (
+                    <p>🌙 Slaap: {todayMetrics.bedtijd} - {todayMetrics.wakker_tijd}</p>
+                  )}
                   {todayMetrics.schouder_pijn > 0 && (
                     <p>💪 Schouderpijn: {todayMetrics.schouder_pijn}/10</p>
                   )}

@@ -13,6 +13,8 @@ export type DailyMetric = {
   lang_wakker: boolean;
   kort_wakker: boolean;
   nap: boolean;
+  bedtijd?: string;  // Tijd van naar bed gaan (HH:MM)
+  wakker_tijd?: string;  // Tijd van wakker worden (HH:MM)
 
   // Nieuwe activiteit velden
   ochtend_workout: boolean;

@@ -37,7 +37,7 @@ export default function BoodschappenPage() {
   const weekStart = formatDate(weekDates[0]);
   const weekEnd = formatDate(weekDates[6]);
 
-  const { data: shoppingList, isLoading } = useGenerateShoppingList({
+  const { data: shoppingList, isLoading, error } = useGenerateShoppingList({
     weekStart,
     weekEnd,
   });
@@ -165,6 +165,12 @@ export default function BoodschappenPage() {
     );
   }
 
+  // Show error, but allow manual items to work
+  if (error) {
+    console.error('Shopping list API error:', error);
+    // Continue anyway - manual items will still work
+  }
+
   const categories = Object.keys(allItemsByCategory);
 
   // Get top frequent items
@@ -194,6 +200,23 @@ export default function BoodschappenPage() {
           <span className="hidden sm:inline">Print lijst</span>
         </button>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg print:hidden">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-1">
+                Kan recepten niet laden uit weekplanner
+              </h3>
+              <p className="text-xs text-yellow-700">
+                De API is momenteel niet bereikbaar. Je kunt nog steeds handmatig items toevoegen aan je boodschappenlijst.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Week Navigation */}
       <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 p-4 sm:p-5 print:hidden backdrop-blur-sm">

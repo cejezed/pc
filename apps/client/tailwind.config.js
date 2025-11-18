@@ -18,12 +18,23 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
-      borderRadius: { 
-        'brikx': '12px' 
+      borderRadius: {
+        'brikx': '12px',
+        'brikx-lg': '16px',
+        'brikx-xl': '20px',
+        'brikx-2xl': '24px',
       },
       boxShadow: {
         'brikx': '0 4px 12px rgba(45, 156, 219, 0.3)',
         'brikx-lg': '0 8px 24px rgba(45, 156, 219, 0.4)',
+        'brikx-xl': '0 20px 25px -5px rgba(45, 156, 219, 0.15)',
+        'modern': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'modern-lg': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        'modern-xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        'inner-modern': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+      },
+      backdropBlur: {
+        'brikx': '8px',
       },
     },
   },
