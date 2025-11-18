@@ -5,6 +5,7 @@
   "workspaces": [
     "apps/*"
   ],
+  "packageManager": "pnpm@9.14.4",
   "scripts": {
     "dev": "npm run dev --workspace=apps/client",
     "build": "npm run build --workspace=apps/client"
