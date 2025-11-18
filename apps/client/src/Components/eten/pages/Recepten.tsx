@@ -1,4 +1,4 @@
-// src/features/eten/pages/Recepten.tsx
+// src/Components/eten/pages/Recepten.tsx
 import React, { useState } from 'react';
 import { Plus, Search, Heart, Clock, Link as LinkIcon, BookOpen, Loader2, Camera } from 'lucide-react';
 import { useRecipes, useUpdateRecipe, useImportRecipe, useCreateRecipe } from '../hooks';

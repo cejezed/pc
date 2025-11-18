@@ -1,4 +1,4 @@
-// src/features/eten/types.ts
+// src/Components/eten/types.ts
 // Type definitions for Mijn Keuken module
 
 export type SourceType = 'manual' | 'url' | 'book' | 'scan';

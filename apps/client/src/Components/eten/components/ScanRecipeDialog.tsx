@@ -1,4 +1,4 @@
-// src/features/eten/components/ScanRecipeDialog.tsx
+// src/Components/eten/components/ScanRecipeDialog.tsx
 import React, { useState, useCallback } from 'react';
 import { X, Upload, Loader2, Camera, CheckCircle } from 'lucide-react';
 import { useCreateRecipe } from '../hooks';

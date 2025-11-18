@@ -1,4 +1,4 @@
-// src/features/eten/components/RecipeCard.tsx
+// src/Components/eten/components/RecipeCard.tsx
 import React from 'react';
 import { Heart, Clock, Users } from 'lucide-react';
 import type { Recipe } from '../types';
