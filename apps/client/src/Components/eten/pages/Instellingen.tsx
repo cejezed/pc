@@ -1,4 +1,4 @@
-// src/features/eten/pages/Instellingen.tsx
+// src/Components/eten/pages/Instellingen.tsx
 import React, { useState, useEffect } from 'react';
 import { Save, Plus, X } from 'lucide-react';
 import { useDietSettings, useSaveDietSettings } from '../hooks';

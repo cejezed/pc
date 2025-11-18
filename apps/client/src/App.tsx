@@ -13,8 +13,8 @@ import Health from './Components/health/Health';
 import Abonnementen from './Components/abonnementen/Abonnementen';
 import TeKopen from './Components/te-kopen/TeKopen';
 import Affirmations from './Components/Affirmations/Affirmations';
-import MijnKeuken from './features/eten';
-import Boodschappen from './features/eten/pages/Boodschappen';
+import MijnKeuken from './Components/eten';
+import Boodschappen from './Components/eten/pages/Boodschappen';
 
 type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen";
 

@@ -1,4 +1,4 @@
-// src/features/eten/utils.ts
+// src/Components/eten/utils.ts
 // Utility functions for Mijn Keuken
 
 import type { MealType, IngredientCategory } from './types';

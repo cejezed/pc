@@ -1,4 +1,4 @@
-// src/features/eten/pages/Boodschappen.tsx
+// src/Components/eten/pages/Boodschappen.tsx
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Printer, Check, Plus, X } from 'lucide-react';
 import { useGenerateShoppingList } from '../hooks';

@@ -1,4 +1,4 @@
-// src/features/eten/pages/Weekplanner.tsx
+// src/Components/eten/pages/Weekplanner.tsx
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useMealPlans, useCreateMealPlan, useDeleteMealPlan, useRecipes } from '../hooks';

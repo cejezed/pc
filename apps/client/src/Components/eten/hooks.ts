@@ -1,4 +1,4 @@
-// src/features/eten/hooks.ts
+// src/Components/eten/hooks.ts
 // React Query hooks for Mijn Keuken
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
