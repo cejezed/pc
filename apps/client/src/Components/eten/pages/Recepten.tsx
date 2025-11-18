@@ -1,11 +1,32 @@
 // src/Components/eten/pages/Recepten.tsx
 import React, { useState } from 'react';
-import { Plus, Search, Heart, Clock, Link as LinkIcon, BookOpen, Loader2, Camera } from 'lucide-react';
-import { useRecipes, useUpdateRecipe, useImportRecipe, useCreateRecipe } from '../hooks';
+import {
+  Plus,
+  Search,
+  Heart,
+  Clock,
+  Link as LinkIcon,
+  BookOpen,
+  Loader2,
+  Camera,
+  Upload,
+  X,
+} from 'lucide-react';
+import {
+  useRecipes,
+  useUpdateRecipe,
+  useImportRecipe,
+  useCreateRecipe,
+} from '../hooks';
 import { RecipeCard } from '../components/RecipeCard';
 import ScanRecipeDialog from '../components/ScanRecipeDialog';
 import { COMMON_TAGS } from '../utils';
-import type { RecipeFilters } from '../types';
+import type {
+  RecipeFilters,
+  CreateRecipeFromScanInput,
+  ScannedRecipeDraft,
+  ScannedIngredient,
+} from '../types';
 
 export default function ReceptenPage() {
   const [filters, setFilters] = useState<RecipeFilters>({
@@ -18,9 +39,16 @@ export default function ReceptenPage() {
   const [showScanDialog, setShowScanDialog] = useState(false);
   const [importUrl, setImportUrl] = useState('');
 
+  // Nieuw: modal + state voor handmatige scaninput
+  const [showScanInputModal, setShowScanInputModal] = useState(false);
+  const [scanInput, setScanInput] = useState('');
+  const [scanImageUrl, setScanImageUrl] = useState('');
+  const [scanInputError, setScanInputError] = useState<string | null>(null);
+
   const { data: recipes = [], isLoading } = useRecipes(filters);
   const updateRecipe = useUpdateRecipe();
   const importRecipe = useImportRecipe();
+  const createRecipe = useCreateRecipe();
 
   const handleToggleFavourite = (id: string, isFavourite: boolean) => {
     updateRecipe.mutate({
@@ -51,13 +79,94 @@ export default function ReceptenPage() {
     }
   };
 
+  // Nieuw: importeren van handmatige scaninput (JSON)
+  const handleImportScanInput = async () => {
+    if (!scanInput.trim()) return;
+
+    setScanInputError(null);
+
+    try {
+      const parsed: any = JSON.parse(scanInput);
+
+      let draft: ScannedRecipeDraft;
+      let ingredients: ScannedIngredient[];
+
+      // Variant 1: volledig CreateRecipeFromScanInput
+      if (parsed.recipe && parsed.ingredients) {
+        const fromScan = parsed as CreateRecipeFromScanInput;
+
+        const instructionsArray = Array.isArray(fromScan.recipe.instructions)
+          ? fromScan.recipe.instructions
+          : String(fromScan.recipe.instructions)
+              .split(/\n{2,}/)
+              .map((s) => s.trim())
+              .filter(Boolean);
+
+        draft = {
+          title: fromScan.recipe.title,
+          default_servings: fromScan.recipe.default_servings,
+          prep_time_min: fromScan.recipe.prep_time_min,
+          tags: fromScan.recipe.tags ?? [],
+          instructions: instructionsArray,
+          notes: fromScan.recipe.notes,
+          image_url: fromScan.recipe.image_url,
+          ingredients: fromScan.ingredients,
+        };
+
+        ingredients = fromScan.ingredients;
+      } else {
+        // Variant 2: direct een ScannedRecipeDraft
+        draft = parsed as ScannedRecipeDraft;
+        ingredients = draft.ingredients;
+      }
+
+      const imageUrl =
+        scanImageUrl.trim() || draft.image_url || '';
+
+      await createRecipe.mutateAsync({
+        title: draft.title,
+        source_type: 'scan',
+        source_url: undefined,
+        source_note: draft.notes,
+        default_servings: draft.default_servings,
+        prep_time_min: draft.prep_time_min ?? undefined,
+        instructions: draft.instructions.join('\n\n'),
+        tags: draft.tags ?? [],
+        image_url: imageUrl,
+        ingredients: ingredients.map((ing) => ({
+          name: ing.name,
+          quantity: ing.quantity ?? undefined,
+          unit: ing.unit ?? undefined,
+          category: ing.category ?? undefined,
+          is_optional: ing.is_optional,
+        })),
+      });
+
+      setShowScanInputModal(false);
+      setScanInput('');
+      setScanImageUrl('');
+      setScanInputError(null);
+      alert('Recept succesvol aangemaakt!');
+    } catch (error: any) {
+      console.error(error);
+      setScanInputError(
+        error?.message ||
+          'Import mislukt: controleer of de JSON-structuur klopt.'
+      );
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Recepten</h1>
-          <p className="text-sm sm:text-base text-gray-600">Jouw persoonlijke receptenbibliotheek</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Recepten
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Jouw persoonlijke receptenbibliotheek
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -77,8 +186,19 @@ export default function ReceptenPage() {
             <span className="hidden sm:inline">Scan Kaart</span>
             <span className="sm:hidden">Scan</span>
           </button>
+          {/* Nieuw: scaninput plakken */}
           <button
-            onClick={() => {/* TODO: Open create modal */}}
+            onClick={() => setShowScanInputModal(true)}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Plak scaninput</span>
+            <span className="sm:hidden">Scan JSON</span>
+          </button>
+          <button
+            onClick={() => {
+              /* TODO: Open create modal */
+            }}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm"
           >
             <Plus className="w-4 h-4" />
@@ -98,20 +218,31 @@ export default function ReceptenPage() {
               type="text"
               placeholder="Zoek recepten..."
               value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, search: e.target.value })
+              }
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base"
             />
           </div>
 
           <button
-            onClick={() => setFilters({ ...filters, favouritesOnly: !filters.favouritesOnly })}
+            onClick={() =>
+              setFilters({
+                ...filters,
+                favouritesOnly: !filters.favouritesOnly,
+              })
+            }
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${
               filters.favouritesOnly
                 ? 'bg-red-50 border-red-200 text-red-700'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <Heart className={`w-4 h-4 ${filters.favouritesOnly ? 'fill-current' : ''}`} />
+            <Heart
+              className={`w-4 h-4 ${
+                filters.favouritesOnly ? 'fill-current' : ''
+              }`}
+            />
             <span className="hidden sm:inline">Favorieten</span>
           </button>
         </div>
@@ -149,7 +280,9 @@ export default function ReceptenPage() {
               onChange={(e) =>
                 setFilters({
                   ...filters,
-                  maxPrepTime: e.target.value ? parseInt(e.target.value) : undefined,
+                  maxPrepTime: e.target.value
+                    ? parseInt(e.target.value)
+                    : undefined,
                 })
               }
               className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
@@ -196,7 +329,9 @@ export default function ReceptenPage() {
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                onClick={() => {/* TODO: Navigate to detail */}}
+                onClick={() => {
+                  /* TODO: Navigate to detail */
+                }}
                 onToggleFavourite={handleToggleFavourite}
               />
             ))}
@@ -204,15 +339,17 @@ export default function ReceptenPage() {
         </>
       )}
 
-      {/* Import Modal */}
+      {/* Import Modal (URL) */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold mb-4">Importeer recept van URL</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Importeer recept van URL
+            </h2>
 
             <p className="text-sm text-gray-600 mb-4">
-              Plak de URL van een recept. We proberen automatisch de ingrediënten en
-              bereidingswijze te extraheren.
+              Plak de URL van een recept. We proberen automatisch de
+              ingrediënten en bereidingswijze te extraheren.
             </p>
 
             <input
@@ -254,7 +391,98 @@ export default function ReceptenPage() {
         </div>
       )}
 
-      {/* Scan Recipe Dialog */}
+      {/* Nieuw: Scaninput Modal (JSON + afbeelding-URL) */}
+      {showScanInputModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full p-6 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-semibold">Importeer scaninput</h2>
+              <button
+                onClick={() => {
+                  setShowScanInputModal(false);
+                  setScanInput('');
+                  setScanImageUrl('');
+                  setScanInputError(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              Plak hier de JSON van een{' '}
+              <code className="font-mono">CreateRecipeFromScanInput</code> of{' '}
+              <code className="font-mono">ScannedRecipeDraft</code>. Optioneel
+              kun je hieronder een afbeelding-URL invullen als omslag.
+            </p>
+
+            <textarea
+              value={scanInput}
+              onChange={(e) => setScanInput(e.target.value)}
+              className="w-full h-56 font-mono text-xs sm:text-sm border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              placeholder='{"recipe": { ... }, "ingredients": [ ... ]}'
+            />
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Afbeelding-URL (optioneel)
+              </label>
+              <input
+                type="url"
+                value={scanImageUrl}
+                onChange={(e) => setScanImageUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm"
+              />
+              <p className="text-xs text-gray-500">
+                Deze URL wordt gebruikt als omslagafbeelding voor het recept.
+                Laat leeg om de waarde uit de JSON te gebruiken.
+              </p>
+            </div>
+
+            {scanInputError && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {scanInputError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setShowScanInputModal(false);
+                  setScanInput('');
+                  setScanImageUrl('');
+                  setScanInputError(null);
+                }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                disabled={createRecipe.isPending}
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleImportScanInput}
+                disabled={!scanInput.trim() || createRecipe.isPending}
+                className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {createRecipe.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Opslaan...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Maak recept
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scan Recipe Dialog (afbeelding upload + OCR/LLM) */}
       <ScanRecipeDialog
         isOpen={showScanDialog}
         onClose={() => setShowScanDialog(false)}
