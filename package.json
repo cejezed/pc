@@ -2,10 +2,12 @@
   "name": "pc-workspace",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@9.14.4",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "pnpm --filter client dev",
-    "build": "pnpm --filter client build"
+    "dev": "npm run dev --workspace=apps/client",
+    "build": "npm run build --workspace=apps/client"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
