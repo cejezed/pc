@@ -330,7 +330,7 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
     queryFn: async () => {
       if (!input) throw new Error('Input is required');
 
-      // Fetch meal plans with recipes for the date range
+      // 1. Haal alle maaltijdplannen met receptdetails op voor de geselecteerde week
       const { data: mealPlans, error: mealPlansError } = await supabase
         .from('meal_plans')
         .select('*, recipe:recipes(id, title, default_servings)')
@@ -342,7 +342,7 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         return { items: [], grouped: {} };
       }
 
-      // Get unique recipe IDs
+      // 2. Verzamel unieke recept ID's
       const recipeIds = [...new Set(
         mealPlans
           .filter(mp => mp.recipe_id)
@@ -353,7 +353,7 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         return { items: [], grouped: {} };
       }
 
-      // Fetch ingredients for these recipes
+      // 3. Haal de ingrediënten op voor alle gevonden recepten
       const { data: ingredients, error: ingredientsError } = await supabase
         .from('recipe_ingredients')
         .select('*')
@@ -361,23 +361,26 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
 
       if (ingredientsError) throw ingredientsError;
 
-      // Aggregate ingredients
+      // 4. Aggregeer en schaal de ingrediënten (Client-Side Logica)
       const aggregated = new Map();
 
       for (const mealPlan of mealPlans) {
         if (!mealPlan.recipe || !mealPlan.recipe_id) continue;
 
         const recipe = mealPlan.recipe as any;
+        // Bepaal de schaalfactor (aantal porties in het plan / standaard porties van het recept)
         const scaleFactor = mealPlan.servings / (recipe.default_servings || 1);
 
         const recipeIngredients = ingredients?.filter(ing => ing.recipe_id === mealPlan.recipe_id) || [];
 
         for (const ingredient of recipeIngredients) {
           if (ingredient.is_optional) continue;
-
+          
+          // Gebruik naam, eenheid en categorie voor een unieke sleutel om dubbele items op te tellen
           const normalizedName = ingredient.name.toLowerCase().trim();
           const key = `${normalizedName}_${ingredient.unit || 'stuk'}_${ingredient.category}`;
 
+          // Pas de hoeveelheid aan met de schaalfactor
           const scaledQuantity = (ingredient.quantity || 0) * scaleFactor;
 
           if (aggregated.has(key)) {
@@ -401,7 +404,7 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         }
       }
 
-      // Convert to array and group by category
+      // 5. Converteer naar array en groepeer op categorie
       const items = Array.from(aggregated.values());
       const grouped: any = {};
 
@@ -412,7 +415,7 @@ export function useGenerateShoppingList(input: GenerateShoppingListInput | null)
         grouped[item.category].push(item);
       }
 
-      // Sort categories
+      // 6. Sorteer categorieën
       const categoryOrder = ['produce', 'meat', 'dairy', 'pantry', 'spices', 'frozen', 'other'];
       const sortedGrouped: any = {};
       for (const category of categoryOrder) {

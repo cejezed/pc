@@ -5,6 +5,7 @@ import { useCreateRecipe } from '../hooks';
 import { useMutation } from '@tanstack/react-query';
 import type { ScannedRecipeDraft, ScannedIngredient } from '../types';
 import { getAuthToken } from '@/lib/AuthContext';
+import { detectIngredientTags } from '../utils';
 
 interface ScanRecipeDialogProps {
   isOpen: boolean;
@@ -98,6 +99,12 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
     setStep('saving');
 
     try {
+      // Auto-tags op basis van ingrediënten
+      const autoTags = detectIngredientTags(recipeDraft.ingredients);
+      const finalTags = Array.from(
+        new Set([...(recipeDraft.tags ?? []), ...autoTags])
+      );
+
       await createRecipe.mutateAsync({
         title: recipeDraft.title,
         source_type: 'scan',
@@ -106,7 +113,7 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
         default_servings: recipeDraft.default_servings,
         prep_time_min: recipeDraft.prep_time_min ?? undefined,
         instructions: recipeDraft.instructions.join('\n\n'),
-        tags: recipeDraft.tags,
+        tags: finalTags,
         image_url: recipeDraft.image_url,
         ingredients: recipeDraft.ingredients.map((ing) => ({
           name: ing.name,
@@ -293,7 +300,11 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                     type="number"
                     min="0"
                     value={recipeDraft.prep_time_min || ''}
-                    onChange={(e) => updateRecipeDraft({ prep_time_min: e.target.value ? parseInt(e.target.value) : null })}
+                    onChange={(e) =>
+                      updateRecipeDraft({
+                        prep_time_min: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
                   />
                 </div>
@@ -307,9 +318,16 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                 <input
                   type="text"
                   value={recipeDraft.tags.join(', ')}
-                  onChange={(e) => updateRecipeDraft({ tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                  onChange={(e) =>
+                    updateRecipeDraft({
+                      tags: e.target.value
+                        .split(',')
+                        .map((t) => t.trim())
+                        .filter(Boolean),
+                    })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
-                  placeholder="bijv. kip, rijst, snel"
+                  placeholder="bijv. Kip, Rijst, Snel"
                 />
               </div>
 
@@ -328,7 +346,10 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {recipeDraft.ingredients.map((ing, index) => (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg"
+                    >
                       <input
                         type="text"
                         value={ing.name}
@@ -339,14 +360,20 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                       <input
                         type="number"
                         value={ing.quantity || ''}
-                        onChange={(e) => updateIngredient(index, { quantity: e.target.value ? parseFloat(e.target.value) : null })}
+                        onChange={(e) =>
+                          updateIngredient(index, {
+                            quantity: e.target.value ? parseFloat(e.target.value) : null,
+                          })
+                        }
                         placeholder="Hoeveelheid"
                         className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         value={ing.unit || ''}
-                        onChange={(e) => updateIngredient(index, { unit: e.target.value || null })}
+                        onChange={(e) =>
+                          updateIngredient(index, { unit: e.target.value || null })
+                        }
                         placeholder="Eenheid"
                         className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm"
                       />
@@ -368,10 +395,14 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                 </label>
                 <textarea
                   value={recipeDraft.instructions.join('\n\n')}
-                  onChange={(e) => updateRecipeDraft({ instructions: e.target.value.split('\n\n').filter(Boolean) })}
+                  onChange={(e) =>
+                    updateRecipeDraft({
+                      instructions: e.target.value.split('\n\n').filter(Boolean),
+                    })
+                  }
                   rows={8}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
-                  placeholder="Elke stap op een nieuwe regel (gescheiden door lege regel)"
+                  placeholder="Elke stap op een nieuwe regel (gescheiden door een lege regel)"
                 />
               </div>
 
@@ -385,7 +416,7 @@ export default function ScanRecipeDialog({ isOpen, onClose, onSuccess }: ScanRec
                   onChange={(e) => updateRecipeDraft({ notes: e.target.value })}
                   rows={2}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
-                  placeholder="Bijv. merknaam, versie, etc."
+                  placeholder="Bijv. bron, variaties, tips"
                 />
               </div>
             </div>

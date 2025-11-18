@@ -20,7 +20,7 @@ import {
 } from '../hooks';
 import { RecipeCard } from '../components/RecipeCard';
 import ScanRecipeDialog from '../components/ScanRecipeDialog';
-import { COMMON_TAGS } from '../utils';
+import { COMMON_TAGS, detectIngredientTags } from '../utils';
 import type {
   RecipeFilters,
   CreateRecipeFromScanInput,
@@ -39,12 +39,12 @@ export default function ReceptenPage() {
   const [showScanDialog, setShowScanDialog] = useState(false);
   const [importUrl, setImportUrl] = useState('');
 
-  // Nieuw: modal + state voor handmatige scaninput
+  // Modal + state voor handmatige scaninput
   const [showScanInputModal, setShowScanInputModal] = useState(false);
   const [scanInput, setScanInput] = useState('');
   const [scanInputError, setScanInputError] = useState<string | null>(null);
 
-  // Nieuw: afbeelding-upload voor handmatige scaninput
+  // Afbeelding-upload voor handmatige scaninput
   const [scanImageFile, setScanImageFile] = useState<File | null>(null);
   const [scanImagePreview, setScanImagePreview] = useState<string | null>(null);
 
@@ -82,24 +82,49 @@ export default function ReceptenPage() {
     }
   };
 
-  // helper om een File -> data URL te lezen
+  // Helper: File -> data URL
   const readFileAsDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = () => reject(new Error('Afbeelding kon niet gelezen worden'));
+      reader.onerror = () =>
+        reject(new Error('Afbeelding kon niet gelezen worden'));
       reader.readAsDataURL(file);
     });
   };
 
-  // Nieuw: importeren van handmatige scaninput (JSON) + optionele afbeelding
+  // Helper: veilig JSON-blok uit de input halen (ook als er tekst/HTML omheen staat)
+  const safeJsonParse = (raw: string) => {
+    const text = raw.trim();
+
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      console.error('RAW INPUT THAT FAILED:', text);
+      throw new Error(
+        "Kon geen geldig JSON-blok vinden. Zorg dat er ergens `{ ... }` staat."
+      );
+    }
+
+    const jsonBlock = text.slice(firstBrace, lastBrace + 1);
+
+    try {
+      return JSON.parse(jsonBlock);
+    } catch (err: any) {
+      console.error('JSON BLOCK THAT FAILED TO PARSE:', jsonBlock);
+      throw new Error('JSON is ongeldig: ' + err.message);
+    }
+  };
+
+  // Importeren van handmatige scaninput (JSON) + optionele afbeelding
   const handleImportScanInput = async () => {
     if (!scanInput.trim()) return;
 
     setScanInputError(null);
 
     try {
-      const parsed: any = JSON.parse(scanInput);
+      const parsed: any = safeJsonParse(scanInput);
 
       let draft: ScannedRecipeDraft;
       let ingredients: ScannedIngredient[];
@@ -123,7 +148,7 @@ export default function ReceptenPage() {
           instructions: instructionsArray,
           notes: fromScan.recipe.notes,
           image_url: fromScan.recipe.image_url,
-          ingredients: parsed.ingredients,
+          ingredients: fromScan.ingredients,
         };
 
         ingredients = fromScan.ingredients;
@@ -139,6 +164,12 @@ export default function ReceptenPage() {
         imageUrl = await readFileAsDataUrl(scanImageFile);
       }
 
+      // Auto-tags op basis van ingrediënten
+      const autoTags = detectIngredientTags(ingredients);
+      const finalTags = Array.from(
+        new Set([...(draft.tags ?? []), ...autoTags])
+      );
+
       await createRecipe.mutateAsync({
         title: draft.title,
         source_type: 'scan',
@@ -147,7 +178,7 @@ export default function ReceptenPage() {
         default_servings: draft.default_servings,
         prep_time_min: draft.prep_time_min ?? undefined,
         instructions: draft.instructions.join('\n\n'),
-        tags: draft.tags ?? [],
+        tags: finalTags,
         image_url: imageUrl,
         ingredients: ingredients.map((ing) => ({
           name: ing.name,
@@ -158,17 +189,13 @@ export default function ReceptenPage() {
         })),
       });
 
-      setShowScanInputModal(false);
-      setScanInput('');
-      setScanInputError(null);
-      setScanImageFile(null);
-      setScanImagePreview(null);
+      handleResetScanInputModal();
       alert('Recept succesvol aangemaakt!');
     } catch (error: any) {
       console.error(error);
       setScanInputError(
-        error?.message ||
-          'Import mislukt: controleer of de JSON-structuur klopt (geen "const ..." eromheen).'
+        (error?.message || 'Import mislukt.') +
+          ' Tip: plak de JSON exact zoals gekregen, zonder extra tekst.'
       );
     }
   };
@@ -238,7 +265,7 @@ export default function ReceptenPage() {
             <span className="hidden sm:inline">Scan Kaart</span>
             <span className="sm:hidden">Scan</span>
           </button>
-          {/* Nieuw: scaninput plakken */}
+          {/* Scaninput plakken */}
           <button
             onClick={() => setShowScanInputModal(true)}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
@@ -443,7 +470,7 @@ export default function ReceptenPage() {
         </div>
       )}
 
-      {/* Nieuw: Scaninput Modal (JSON + afbeelding-upload) */}
+      {/* Scaninput Modal (JSON + afbeelding-upload) */}
       {showScanInputModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full p-6 space-y-4">
@@ -467,7 +494,8 @@ export default function ReceptenPage() {
               of{' '}
               <code className="font-mono text-xs">ScannedRecipeDraft</code>.
               Gebruik <strong>geen</strong> TypeScript-snippet met{' '}
-              <code className="font-mono text-xs">const ... =</code>.
+              <code className="font-mono text-xs">const ... =</code>. Tekst
+              vóór/na het JSON-blok wordt automatisch weggefilterd.
             </p>
 
             <textarea
@@ -544,7 +572,7 @@ export default function ReceptenPage() {
         isOpen={showScanDialog}
         onClose={() => setShowScanDialog(false)}
         onSuccess={() => {
-          // Recipe list refresht via query invalidation
+          // Recipe list refresh via query invalidation
         }}
       />
     </div>

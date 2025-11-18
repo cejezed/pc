@@ -1,7 +1,7 @@
 // src/Components/eten/utils.ts
 // Utility functions for Mijn Keuken
 
-import type { MealType, IngredientCategory } from './types';
+import type { MealType, IngredientCategory, ScannedIngredient } from './types';
 
 // ==============================================
 // Date helpers
@@ -116,6 +116,7 @@ export function formatQuantity(quantity: number | null, unit: string | null): st
 // ==============================================
 
 export const COMMON_TAGS = [
+  // Lifestyle / dieet
   'Snel',
   'Vegetarisch',
   'Vegan',
@@ -124,11 +125,13 @@ export const COMMON_TAGS = [
   'Kidsproof',
   'High-protein',
   'Low-carb',
-  'Comfort food',
   'Healthy',
+  'Comfort food',
   'Batch cooking',
   'Slowcooker',
   'One-pot',
+
+  // Type gerecht
   'Pasta',
   'Rijst',
   'Soep',
@@ -138,6 +141,15 @@ export const COMMON_TAGS = [
   'Diner',
   'Snack',
   'Dessert',
+
+  // Vlees / vis / eiwitbron
+  'Kip',
+  'Varken',
+  'Rund',
+  'Lam',
+  'Vis',
+  'Zalm',
+  'Vlees',
 ];
 
 export function getTagColor(tag: string): string {
@@ -150,9 +162,135 @@ export function getTagColor(tag: string): string {
     'Low-carb': 'bg-blue-100 text-blue-800',
     'Healthy': 'bg-teal-100 text-teal-800',
     'Comfort food': 'bg-pink-100 text-pink-800',
+
+    // Nieuwe eiwit-tags
+    'Kip': 'bg-red-100 text-red-800',
+    'Varken': 'bg-red-200 text-red-800',
+    'Rund': 'bg-red-300 text-red-900',
+    'Lam': 'bg-red-100 text-red-700',
+
+    'Vis': 'bg-blue-100 text-blue-800',
+    'Zalm': 'bg-orange-100 text-orange-800',
+
+    'Vlees': 'bg-red-200 text-red-900',
   };
 
   return tagColors[tag] || 'bg-gray-100 text-gray-800';
+}
+
+// ==============================================
+// Auto-tagging helpers (vlees / vis / eiwitbron)
+// ==============================================
+
+export function detectIngredientTags(ingredients: ScannedIngredient[]): string[] {
+  const names = ingredients.map((ing) => ing.name.toLowerCase());
+  const tags = new Set<string>();
+
+  // Kip
+  if (names.some((n) => n.includes('kip'))) {
+    tags.add('Kip');
+    tags.add('Vlees');
+  }
+
+  // Varken
+  if (
+    names.some(
+      (n) =>
+        n.includes('vark') ||
+        n.includes('ham') ||
+        n.includes('spek') ||
+        n.includes('worst')
+    )
+  ) {
+    tags.add('Varken');
+    tags.add('Vlees');
+  }
+
+  // Rund (incl. gehakt, biefstuk)
+  if (
+    names.some(
+      (n) =>
+        n.includes('rund') ||
+        n.includes('runder') ||
+        n.includes('gehakt') ||
+        n.includes('biefstuk') ||
+        n.includes('entrecote')
+    )
+  ) {
+    tags.add('Rund');
+    tags.add('Vlees');
+  }
+
+  // Lam
+  if (names.some((n) => n.includes('lam'))) {
+    tags.add('Lam');
+    tags.add('Vlees');
+  }
+
+  // Vis algemeen
+  if (
+    names.some(
+      (n) =>
+        n.includes('vis') ||
+        n.includes('kabeljauw') ||
+        n.includes('tonijn') ||
+        n.includes('garnalen') ||
+        n.includes('gamba') ||
+        n.includes('makreel') ||
+        n.includes('zeebaars')
+    )
+  ) {
+    tags.add('Vis');
+  }
+
+  // Zalm specifiek
+  if (names.some((n) => n.includes('zalm'))) {
+    tags.add('Zalm');
+    tags.add('Vis');
+  }
+
+  // Groffe vegetarisch/vegan heuristiek
+  const meatFishKeywords = [
+    'kip',
+    'vark',
+    'rund',
+    'lam',
+    'vis',
+    'zalm',
+    'tonijn',
+    'gehakt',
+    'spek',
+    'worst',
+    'ham',
+  ];
+
+  const hasMeatOrFish = meatFishKeywords.some((kw) =>
+    names.some((n) => n.includes(kw))
+  );
+
+  if (!hasMeatOrFish) {
+    const plantProteinKeywords = [
+      'tofu',
+      'tempeh',
+      'linzen',
+      'kikkererwten',
+      'bonen',
+      'sojabonen',
+      'soja',
+    ];
+
+    const hasPlantProtein = plantProteinKeywords.some((kw) =>
+      names.some((n) => n.includes(kw))
+    );
+
+    if (hasPlantProtein) {
+      tags.add('High-protein');
+    }
+
+    tags.add('Vegetarisch');
+  }
+
+  return Array.from(tags);
 }
 
 // ==============================================
