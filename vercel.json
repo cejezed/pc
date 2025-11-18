@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build --workspace=apps/client",
+  "buildCommand": "cd apps/client && npm run build",
   "outputDirectory": "apps/client/dist",
-  "installCommand": "npm install",
+  "installCommand": "npm install && npm install --prefix apps/client",
   "functions": {
     "api/**/*.ts": {
       "runtime": "nodejs20.x"
