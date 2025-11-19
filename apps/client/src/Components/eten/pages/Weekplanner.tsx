@@ -113,24 +113,24 @@ export default function WeekplannerPage() {
         </button>
       </div>
 
-      {/* Week Grid */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto -mx-4 sm:mx-0">
-        <table className="w-full min-w-max">
+      {/* Week Grid - Desktop (Table) */}
+      <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table className="w-full table-fixed">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-700 w-20 sm:w-32">
+              <th className="w-32 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Maaltijd
               </th>
               {weekDates.map((date) => (
                 <th
                   key={formatDate(date)}
-                  className={`px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold min-w-[140px] sm:min-w-[180px] ${isToday(date)
-                      ? 'bg-brikx-teal text-white'
-                      : 'text-gray-700'
+                  className={`px-4 py-3 text-center text-sm font-semibold ${isToday(date)
+                    ? 'bg-brikx-teal text-white'
+                    : 'text-gray-700'
                     }`}
                 >
-                  <div className="text-xs sm:text-sm">{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
-                  <div className="text-[10px] sm:text-xs font-normal">
+                  <div>{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
+                  <div className="text-xs font-normal">
                     {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'short' })}
                   </div>
                 </th>
@@ -140,10 +140,10 @@ export default function WeekplannerPage() {
           <tbody className="divide-y divide-gray-200">
             {MEAL_TYPES.map((mealType) => (
               <tr key={mealType}>
-                <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-700">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="text-base sm:text-lg">{getMealTypeEmoji(mealType)}</span>
-                    <span className="hidden sm:inline">{getMealTypeLabel(mealType)}</span>
+                <td className="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50/50">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{getMealTypeEmoji(mealType)}</span>
+                    <span>{getMealTypeLabel(mealType)}</span>
                   </div>
                 </td>
                 {weekDates.map((date) => {
@@ -153,54 +153,14 @@ export default function WeekplannerPage() {
                   return (
                     <td
                       key={`${dateStr}-${mealType}`}
-                      className={`px-2 py-2 ${isToday(date) ? 'bg-blue-50' : ''
+                      className={`p-2 border-l border-gray-100 align-top h-32 ${isToday(date) ? 'bg-blue-50/30' : ''
                         }`}
                     >
-                      {mealPlan ? (
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 group hover:shadow-md transition-shadow">
-                          {mealPlan.recipe && (
-                            <>
-                              {mealPlan.recipe.image_url && (
-                                <img
-                                  src={mealPlan.recipe.image_url}
-                                  alt={mealPlan.recipe.title}
-                                  className="w-full h-24 object-cover rounded mb-2"
-                                />
-                              )}
-                              <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                                {mealPlan.title_override || mealPlan.recipe.title}
-                              </p>
-                              <p className="text-xs text-gray-600 mb-2">
-                                {mealPlan.servings} personen
-                              </p>
-                            </>
-                          )}
-                          {mealPlan.notes && (
-                            <p className="text-xs text-gray-500 mb-2">{mealPlan.notes}</p>
-                          )}
-                          {mealPlan.is_leftover && (
-                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                              Kliekjes
-                            </span>
-                          )}
-                          <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleDeleteMeal(mealPlan.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
-                              title="Verwijderen"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setShowAddModal({ date: dateStr, mealType })}
-                          className="w-full h-full min-h-[80px] flex items-center justify-center text-gray-400 hover:text-brikx-teal hover:bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg transition-colors"
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                      )}
+                      <MealSlot
+                        mealPlan={mealPlan}
+                        onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
+                        onDelete={(id) => handleDeleteMeal(id)}
+                      />
                     </td>
                   );
                 })}
@@ -208,6 +168,60 @@ export default function WeekplannerPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Week List - Mobile/Tablet */}
+      <div className="lg:hidden space-y-6">
+        {weekDates.map((date) => (
+          <div key={formatDate(date)} className={`bg-white rounded-xl border shadow-sm overflow-hidden ${isToday(date) ? 'border-brikx-teal ring-1 ring-brikx-teal' : 'border-gray-200'}`}>
+            {/* Day Header */}
+            <div className={`px-4 py-3 flex items-center justify-between ${isToday(date) ? 'bg-brikx-teal text-white' : 'bg-gray-50 border-b border-gray-200'}`}>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-lg capitalize">
+                  {date.toLocaleDateString('nl-NL', { weekday: 'long' })}
+                </span>
+                <span className={`text-sm ${isToday(date) ? 'text-white/90' : 'text-gray-500'}`}>
+                  {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'long' })}
+                </span>
+              </div>
+              {isToday(date) && (
+                <span className="text-xs font-bold bg-white text-brikx-teal px-2 py-1 rounded-full">
+                  Vandaag
+                </span>
+              )}
+            </div>
+
+            {/* Meals List */}
+            <div className="divide-y divide-gray-100">
+              {MEAL_TYPES.map((mealType) => {
+                const dateStr = formatDate(date);
+                const mealPlan = mealPlansByDate[dateStr]?.[mealType];
+
+                return (
+                  <div key={mealType} className="p-3 flex gap-3">
+                    {/* Meal Type Icon/Label */}
+                    <div className="w-24 flex-shrink-0 flex flex-col justify-center text-gray-500">
+                      <div className="flex items-center gap-2 font-medium text-sm text-gray-900">
+                        <span>{getMealTypeEmoji(mealType)}</span>
+                        <span>{getMealTypeLabel(mealType)}</span>
+                      </div>
+                    </div>
+
+                    {/* Slot Content */}
+                    <div className="flex-1 min-w-0">
+                      <MealSlot
+                        mealPlan={mealPlan}
+                        onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
+                        onDelete={(id) => handleDeleteMeal(id)}
+                        compact
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Add Meal Modal */}
@@ -295,4 +309,66 @@ function getWeekNumber(date: Date): number {
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+interface MealSlotProps {
+  mealPlan: MealPlanWithRecipe | undefined;
+  onClickAdd: () => void;
+  onDelete: (id: string) => void;
+  compact?: boolean;
+}
+
+function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
+  if (!mealPlan) {
+    return (
+      <button
+        onClick={onClickAdd}
+        className={`w-full flex items-center justify-center text-gray-300 hover:text-brikx-teal hover:bg-brikx-teal/5 border-2 border-dashed border-gray-200 rounded-lg transition-all ${compact ? 'h-12' : 'h-full min-h-[100px]'}`}
+      >
+        <Plus className="w-5 h-5" />
+      </button>
+    );
+  }
+
+  return (
+    <div className={`bg-white border border-gray-200 rounded-lg group hover:shadow-md transition-all relative overflow-hidden ${compact ? 'flex items-center gap-3 p-2' : 'p-3 h-full'}`}>
+      {mealPlan.recipe?.image_url && (
+        <img
+          src={mealPlan.recipe.image_url}
+          alt={mealPlan.recipe.title}
+          className={`object-cover rounded-md bg-gray-100 ${compact ? 'w-12 h-12 flex-shrink-0' : 'w-full h-24 mb-2'}`}
+        />
+      )}
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight mb-0.5">
+          {mealPlan.title_override || mealPlan.recipe?.title || 'Onbekend recept'}
+        </p>
+        <p className="text-xs text-gray-500">
+          {mealPlan.servings} pers.
+        </p>
+
+        {mealPlan.notes && (
+          <p className="text-xs text-gray-400 mt-1 line-clamp-1 italic">{mealPlan.notes}</p>
+        )}
+
+        {mealPlan.is_leftover && (
+          <span className="inline-block mt-1 text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full">
+            Kliekjes
+          </span>
+        )}
+      </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(mealPlan.id);
+        }}
+        className={`absolute text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1 transition-colors ${compact ? 'right-2 top-1/2 -translate-y-1/2' : 'top-2 right-2 opacity-0 group-hover:opacity-100'}`}
+        title="Verwijderen"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
 }
