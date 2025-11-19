@@ -21,7 +21,7 @@ import {
 } from '../hooks';
 import { RecipeCard } from '../components/RecipeCard';
 import ScanRecipeDialog from '../components/ScanRecipeDialog';
-import { COMMON_TAGS, detectIngredientTags } from '../utils';
+import { detectIngredientTags } from '../utils';
 import type {
   RecipeFilters,
   CreateRecipeFromScanInput,
@@ -317,8 +317,8 @@ export default function ReceptenPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-3 sm:space-y-4">
-        {/* Search & Favourites */}
+      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-4">
+        {/* Search & Main Toggles */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -333,39 +333,86 @@ export default function ReceptenPage() {
             />
           </div>
 
-          <button
-            onClick={() =>
-              setFilters({
-                ...filters,
-                favouritesOnly: !filters.favouritesOnly,
-              })
-            }
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${filters.favouritesOnly
-              ? 'bg-red-50 border-red-200 text-red-700'
-              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-          >
-            <Heart
-              className={`w-4 h-4 ${filters.favouritesOnly ? 'fill-current' : ''
+          <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <button
+              onClick={() =>
+                setFilters({
+                  ...filters,
+                  favouritesOnly: !filters.favouritesOnly,
+                })
+              }
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${filters.favouritesOnly
+                ? 'bg-red-50 border-red-200 text-red-700'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
-            />
-            <span className="hidden sm:inline">Favorieten</span>
-          </button>
+            >
+              <Heart
+                className={`w-4 h-4 ${filters.favouritesOnly ? 'fill-current' : ''
+                  }`}
+              />
+              <span>Favorieten</span>
+            </button>
+
+            <button
+              onClick={() =>
+                setFilters({
+                  ...filters,
+                  maxPrepTime: filters.maxPrepTime === 30 ? undefined : 30,
+                })
+              }
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${filters.maxPrepTime === 30
+                ? 'bg-orange-50 border-orange-200 text-orange-700'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+            >
+              <Clock className="w-4 h-4" />
+              <span>Snel (&lt; 30 min)</span>
+            </button>
+          </div>
         </div>
 
-        {/* Tags */}
+        {/* Category Filters */}
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">Filters:</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Categorieën
+          </p>
           <div className="flex flex-wrap gap-2">
-            {COMMON_TAGS.slice(0, 12).map((tag) => {
+            {['ontbijt', 'lunch', 'avond', 'toetje'].map((cat) => {
+              const tag = `cat:${cat}`;
+              const isActive = filters.tags?.includes(tag);
+              const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => handleToggleTag(tag)}
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${isActive
+                    ? 'bg-brikx-teal text-white border-brikx-teal shadow-sm'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal hover:text-brikx-teal'
+                    }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Ingredient Filters */}
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Ingrediënten & Type
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {['Kip', 'Varken', 'Rund', 'Vlees', 'Vis', 'Hamburger', 'Soep', 'Pasta'].map((tag) => {
               const isActive = filters.tags?.includes(tag);
               return (
                 <button
                   key={tag}
                   onClick={() => handleToggleTag(tag)}
-                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${isActive
-                    ? 'bg-brikx-teal text-white border-brikx-teal'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal'
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${isActive
+                    ? 'bg-brikx-teal text-white border-brikx-teal shadow-sm'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal hover:text-brikx-teal'
                     }`}
                 >
                   {tag}
@@ -373,32 +420,6 @@ export default function ReceptenPage() {
               );
             })}
           </div>
-        </div>
-
-        {/* Max cook time */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-          <Clock className="w-4 h-4 text-gray-600 hidden sm:block" />
-          <label className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-700">
-            <span>Max. bereidingstijd:</span>
-            <select
-              value={filters.maxPrepTime || ''}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  maxPrepTime: e.target.value
-                    ? parseInt(e.target.value)
-                    : undefined,
-                })
-              }
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">Alle</option>
-              <option value="15">15 min</option>
-              <option value="30">30 min</option>
-              <option value="45">45 min</option>
-              <option value="60">1 uur</option>
-            </select>
-          </label>
         </div>
       </div>
 

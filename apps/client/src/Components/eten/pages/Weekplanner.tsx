@@ -1,9 +1,9 @@
-// src/Components/eten/pages/Weekplanner.tsx
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart, Plus, Trash2, Edit2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, ShoppingCart, Wand2 } from 'lucide-react';
 import { useMealPlans, useCreateMealPlan, useDeleteMealPlan, useRecipes } from '../hooks';
-import { getWeekDates, formatDate, formatDateNL, MEAL_TYPES, getMealTypeLabel, getMealTypeEmoji, isToday } from '../utils';
-import type { MealType, Recipe, MealPlanWithRecipe } from '../types';
+import { getWeekDates, formatDate, formatDateNL, getMealTypeLabel, getMealTypeEmoji } from '../utils';
+import { MealType, MEAL_TYPES, MealPlanWithRecipe } from '../types';
+import { isToday } from 'date-fns';
 
 export default function WeekplannerPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekDates()[0]);
@@ -66,8 +66,62 @@ export default function WeekplannerPage() {
   };
 
   const handleDeleteMeal = async (id: string) => {
-    if (!confirm('Weet je zeker dat je deze maaltijd wilt verwijderen?')) return;
-    await deleteMealPlan.mutateAsync(id);
+    if (confirm('Weet je zeker dat je deze maaltijd wilt verwijderen?')) {
+      await deleteMealPlan.mutateAsync(id);
+    }
+  };
+
+  const handleGenerateMealPlan = async () => {
+    if (!confirm('Weet je zeker dat je een weekmenu wilt genereren? Dit vult lege plekken in je weekplanning.')) {
+      return;
+    }
+
+    const daysToPlan = weekDates;
+    const mealTypes: MealType[] = ['ontbijt', 'lunch', 'avond'];
+    const newMealPlans: { date: string; mealType: MealType; recipeId: string; servings: number }[] = [];
+
+    // Helper to get random recipe by category
+    const getRandomRecipe = (type: MealType) => {
+      const categoryTag = `cat:${type}`;
+      const eligibleRecipes = recipes.filter(r => r.tags.includes(categoryTag));
+      if (eligibleRecipes.length === 0) return null;
+      return eligibleRecipes[Math.floor(Math.random() * eligibleRecipes.length)];
+    };
+
+    for (const date of daysToPlan) {
+      const dateStr = formatDate(date);
+
+      for (const type of mealTypes) {
+        // Check if meal already exists
+        if (mealPlansByDate[dateStr]?.[type]) continue;
+
+        const recipe = getRandomRecipe(type);
+        if (recipe) {
+          newMealPlans.push({
+            date: dateStr,
+            mealType: type,
+            recipeId: recipe.id,
+            servings: recipe.default_servings
+          });
+        }
+      }
+    }
+
+    if (newMealPlans.length === 0) {
+      alert('Geen nieuwe maaltijden om toe te voegen. Misschien zijn alle plekken al gevuld of zijn er geen recepten voor de categorieën.');
+      return;
+    }
+
+    // Execute mutations
+    // We do this sequentially to avoid overwhelming the server/client state
+    for (const plan of newMealPlans) {
+      await createMealPlan.mutateAsync({
+        date: plan.date,
+        meal_type: plan.mealType,
+        recipe_id: plan.recipeId,
+        servings: plan.servings,
+      });
+    }
   };
 
   return (
@@ -80,12 +134,12 @@ export default function WeekplannerPage() {
         </div>
 
         <button
-          onClick={() => {/* TODO: Generate shopping list */ }}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm sm:text-base"
+          onClick={handleGenerateMealPlan}
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-brikx-teal to-blue-500 text-white rounded-lg hover:from-brikx-teal/90 hover:to-blue-600 transition-all text-sm sm:text-base shadow-md hover:shadow-lg"
         >
-          <ShoppingCart className="w-4 h-4" />
-          <span className="hidden sm:inline">Boodschappenlijst maken</span>
-          <span className="sm:hidden">Boodschappen</span>
+          <Wand2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Weekmenu voorstel</span>
+          <span className="sm:hidden">Voorstel</span>
         </button>
       </div>
 
@@ -323,51 +377,70 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
     return (
       <button
         onClick={onClickAdd}
-        className={`w-full flex items-center justify-center text-gray-300 hover:text-brikx-teal hover:bg-brikx-teal/5 border-2 border-dashed border-gray-200 rounded-lg transition-all ${compact ? 'h-12' : 'h-full min-h-[100px]'}`}
+        className={`w-full flex items-center justify-center text-gray-300 hover:text-brikx-teal hover:bg-brikx-teal/5 border-2 border-dashed border-gray-200 rounded-xl transition-all ${compact ? 'h-16' : 'h-full min-h-[100px]'}`}
       >
         <Plus className="w-5 h-5" />
       </button>
     );
   }
 
+  const hasImage = !!mealPlan.recipe?.image_url;
+
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg group hover:shadow-md transition-all relative overflow-hidden ${compact ? 'flex items-center gap-3 p-2' : 'p-3 h-full'}`}>
-      {mealPlan.recipe?.image_url && (
-        <img
-          src={mealPlan.recipe.image_url}
-          alt={mealPlan.recipe.title}
-          className={`object-cover rounded-md bg-gray-100 ${compact ? 'w-12 h-12 flex-shrink-0' : 'w-full h-24 mb-2'}`}
-        />
+    <div
+      className={`
+        relative group overflow-hidden rounded-xl transition-all hover:shadow-lg cursor-pointer
+        ${compact ? 'h-24' : 'h-full min-h-[120px]'}
+        ${hasImage ? 'bg-gray-900' : 'bg-white border border-gray-200'}
+      `}
+    >
+      {/* Background Image */}
+      {hasImage && (
+        <>
+          <img
+            src={mealPlan.recipe!.image_url!}
+            alt={mealPlan.recipe?.title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        </>
       )}
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight mb-0.5">
+      {/* Content */}
+      <div className={`relative h-full flex flex-col justify-end p-3 ${hasImage ? 'text-white' : 'text-gray-900'}`}>
+        <p className={`font-semibold text-sm line-clamp-2 leading-tight ${hasImage ? 'text-shadow-sm' : ''}`}>
           {mealPlan.title_override || mealPlan.recipe?.title || 'Onbekend recept'}
         </p>
-        <p className="text-xs text-gray-500">
-          {mealPlan.servings} pers.
-        </p>
+
+        <div className={`flex items-center gap-2 text-xs mt-1 ${hasImage ? 'text-gray-300' : 'text-gray-500'}`}>
+          <span>{mealPlan.servings} pers.</span>
+          {mealPlan.is_leftover && (
+            <span className="bg-orange-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+              Kliekjes
+            </span>
+          )}
+        </div>
 
         {mealPlan.notes && (
-          <p className="text-xs text-gray-400 mt-1 line-clamp-1 italic">{mealPlan.notes}</p>
-        )}
-
-        {mealPlan.is_leftover && (
-          <span className="inline-block mt-1 text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full">
-            Kliekjes
-          </span>
+          <p className={`text-[10px] mt-1 line-clamp-1 italic ${hasImage ? 'text-gray-400' : 'text-gray-400'}`}>
+            {mealPlan.notes}
+          </p>
         )}
       </div>
 
+      {/* Delete Button */}
       <button
         onClick={(e) => {
           e.stopPropagation();
           onDelete(mealPlan.id);
         }}
-        className={`absolute text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1 transition-colors ${compact ? 'right-2 top-1/2 -translate-y-1/2' : 'top-2 right-2 opacity-0 group-hover:opacity-100'}`}
+        className={`absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${hasImage
+            ? 'bg-black/20 text-white hover:bg-red-500 hover:text-white backdrop-blur-sm'
+            : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500'
+          }`}
         title="Verwijderen"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );

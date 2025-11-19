@@ -3,6 +3,7 @@
 
 export type SourceType = 'manual' | 'url' | 'book' | 'scan';
 export type MealType = 'ontbijt' | 'lunch' | 'avond' | 'snack';
+export const MEAL_TYPES: MealType[] = ['ontbijt', 'lunch', 'avond', 'snack'];
 export type IngredientCategory = 'produce' | 'meat' | 'dairy' | 'pantry' | 'spices' | 'frozen' | 'other';
 export type DietType = 'geen' | 'vega' | 'vegan' | 'glutenvrij' | 'lactosevrij';
 
