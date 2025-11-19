@@ -15,8 +15,9 @@ import TeKopen from './Components/te-kopen/TeKopen';
 import Affirmations from './Components/Affirmations/Affirmations';
 import MijnKeuken from './Components/eten';
 import Boodschappen from './Components/eten/pages/Boodschappen';
+import SimpleImport from './Components/eten/pages/SimpleImport';
 
-type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen";
+type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen" | "simple-import";
 
 function App() {
   const { user, loading, signOut } = useAuth();
@@ -57,8 +58,8 @@ function App() {
   };
 
   return (
-    <AppLayout 
-      currentPage={currentPage} 
+    <AppLayout
+      currentPage={currentPage}
       onNavigate={setCurrentPage}
       onLogout={handleLogout}
     >
@@ -75,6 +76,7 @@ function App() {
       {currentPage === "boodschappen" && <Boodschappen />}
       {currentPage === "abonnementen" && <Abonnementen />}
       {currentPage === "tekopen" && <TeKopen />}
+      {currentPage === "simple-import" && <SimpleImport />}
     </AppLayout>
   );
 }
