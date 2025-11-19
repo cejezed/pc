@@ -20,18 +20,9 @@ import type {
 } from './types';
 
 // ==============================================
-// Helper: Get auth token
+// Helper: Parse error responses
 // ==============================================
 
-async function getAuthToken(): Promise<string> {
-  const { data } = await supabase.auth.getSession();
-  if (!data.session) throw new Error('Not authenticated');
-  return data.session.access_token;
-}
-
-// ==============================================
-// Helper: Safely parse error responses (JSON or text/HTML)
-// ==============================================
 
 export async function parseErrorResponse(
   response: Response,
@@ -76,32 +67,33 @@ export function useRecipes(filters?: RecipeFilters) {
   return useQuery({
     queryKey: ['recipes', filters],
     queryFn: async (): Promise<Recipe[]> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const params = new URLSearchParams();
-      if (filters?.search) params.append('search', filters.search);
+      let query = supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      // Apply filters
+      if (filters?.search) {
+        query = query.ilike('title', `%${filters.search}%`);
+      }
       if (filters?.tags && filters.tags.length > 0) {
-        params.append('tags', filters.tags.join(','));
+        query = query.contains('tags', filters.tags);
       }
-      if (filters?.favouritesOnly) params.append('favourites', 'true');
+      if (filters?.favouritesOnly) {
+        query = query.eq('is_favourite', true);
+      }
       if (filters?.maxPrepTime) {
-        params.append('maxPrepTime', filters.maxPrepTime.toString());
+        query = query.lte('prep_time_min', filters.maxPrepTime);
       }
 
-      const url = `/api/recipes${params.toString() ? `?${params.toString()}` : ''}`;
+      const { data, error } = await query;
+      if (error) throw error;
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to fetch recipes');
-        throw new Error(message);
-      }
-
-      return response.json() as Promise<Recipe[]>;
+      return (data || []) as Recipe[];
     },
   });
 }
@@ -113,20 +105,27 @@ export function useRecipe(id: string | undefined) {
     queryFn: async (): Promise<RecipeWithIngredients> => {
       if (!id) throw new Error('Recipe id is required');
 
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/recipes/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to fetch recipe');
-        throw new Error(message);
-      }
+      if (recipeError) throw recipeError;
 
-      return response.json() as Promise<RecipeWithIngredients>;
+      const { data: ingredients, error: ingredientsError } = await supabase
+        .from('recipe_ingredients')
+        .select('*')
+        .eq('recipe_id', id)
+        .order('sort_order', { ascending: true });
+
+      if (ingredientsError) throw ingredientsError;
+
+      return { ...recipe, ingredients: ingredients || [] } as RecipeWithIngredients;
     },
   });
 }
@@ -136,23 +135,57 @@ export function useCreateRecipe() {
 
   return useMutation({
     mutationFn: async (input: CreateRecipeInput): Promise<RecipeWithIngredients> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      // Insert recipe
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .insert({
+          user_id: user.id,
+          title: input.title,
+          source_type: input.source_type || 'manual',
+          source_url: input.source_url,
+          source_note: input.source_note,
+          default_servings: input.default_servings || 2,
+          prep_time_min: input.prep_time_min,
+          instructions: input.instructions,
+          tags: input.tags || [],
+          image_url: input.image_url,
+        })
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to create recipe');
-        throw new Error(message);
+
+      if (recipeError) throw recipeError;
+
+      // Insert ingredients
+      if (input.ingredients && input.ingredients.length > 0) {
+        const { error: ingredientsError } = await supabase
+          .from('recipe_ingredients')
+          .insert(
+            input.ingredients.map((ing, index) => ({
+              recipe_id: recipe.id,
+              name: ing.name,
+              quantity: ing.quantity,
+              unit: ing.unit,
+              category: ing.category || 'other',
+              is_optional: ing.is_optional || false,
+              sort_order: ing.sort_order ?? index,
+            }))
+          );
+
+        if (ingredientsError) throw ingredientsError;
       }
 
-      return response.json() as Promise<RecipeWithIngredients>;
+      // Fetch complete recipe with ingredients
+      const { data: ingredients } = await supabase
+        .from('recipe_ingredients')
+        .select('*')
+        .eq('recipe_id', recipe.id)
+        .order('sort_order', { ascending: true });
+
+      return { ...recipe, ingredients: ingredients || [] } as RecipeWithIngredients;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
@@ -165,23 +198,63 @@ export function useUpdateRecipe() {
 
   return useMutation({
     mutationFn: async (input: UpdateRecipeInput): Promise<RecipeWithIngredients> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/recipes/${input.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      // Update recipe
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .update({
+          title: input.title,
+          source_type: input.source_type,
+          source_url: input.source_url,
+          source_note: input.source_note,
+          default_servings: input.default_servings,
+          prep_time_min: input.prep_time_min,
+          instructions: input.instructions,
+          tags: input.tags,
+          image_url: input.image_url,
+        })
+        .eq('id', input.id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to update recipe');
-        throw new Error(message);
+      if (recipeError) throw recipeError;
+
+      // Delete existing ingredients
+      await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', input.id);
+
+      // Insert updated ingredients
+      if (input.ingredients && input.ingredients.length > 0) {
+        const { error: ingredientsError } = await supabase
+          .from('recipe_ingredients')
+          .insert(
+            input.ingredients.map((ing, index) => ({
+              recipe_id: input.id,
+              name: ing.name,
+              quantity: ing.quantity,
+              unit: ing.unit,
+              category: ing.category || 'other',
+              is_optional: ing.is_optional || false,
+              sort_order: ing.sort_order ?? index,
+            }))
+          );
+
+        if (ingredientsError) throw ingredientsError;
       }
 
-      return response.json() as Promise<RecipeWithIngredients>;
+      // Fetch complete recipe with ingredients
+      const { data: ingredients } = await supabase
+        .from('recipe_ingredients')
+        .select('*')
+        .eq('recipe_id', input.id)
+        .order('sort_order', { ascending: true });
+
+      return { ...recipe, ingredients: ingredients || [] } as RecipeWithIngredients;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
@@ -197,26 +270,23 @@ export function useDeleteRecipe() {
 
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/recipes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Delete ingredients first
+      await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', id);
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to delete recipe');
-        throw new Error(message);
-      }
+      // Delete recipe
+      const { error } = await supabase
+        .from('recipes')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
 
-      // sommige DELETE-routes geven geen body terug
-      try {
-        await response.text();
-      } catch {
-        // negeren
-      }
+      if (error) throw error;
     },
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
@@ -230,7 +300,9 @@ export function useImportRecipe() {
 
   return useMutation({
     mutationFn: async (input: ImportRecipeInput): Promise<RecipeWithIngredients> => {
-      const token = await getAuthToken();
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) throw new Error('Not authenticated');
+      const token = data.session.access_token;
 
       const response = await fetch('/api/recipes/import', {
         method: 'POST',
@@ -262,26 +334,26 @@ export function useMealPlans(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: ['meal-plans', startDate, endDate],
     queryFn: async (): Promise<MealPlanWithRecipe[]> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const params = new URLSearchParams();
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
+      let query = supabase
+        .from('meal_plans')
+        .select('*, recipe:recipes(id, title, default_servings)')
+        .eq('user_id', user.id)
+        .order('date', { ascending: true });
 
-      const url = `/api/meal-plans${params.toString() ? `?${params.toString()}` : ''}`;
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to fetch meal plans');
-        throw new Error(message);
+      if (startDate) {
+        query = query.gte('date', startDate);
+      }
+      if (endDate) {
+        query = query.lte('date', endDate);
       }
 
-      return response.json() as Promise<MealPlanWithRecipe[]>;
+      const { data, error } = await query;
+      if (error) throw error;
+
+      return (data || []) as MealPlanWithRecipe[];
     },
   });
 }
@@ -291,23 +363,23 @@ export function useCreateMealPlan() {
 
   return useMutation({
     mutationFn: async (input: CreateMealPlanInput): Promise<MealPlanWithRecipe> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch('/api/meal-plans', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      const { data, error } = await supabase
+        .from('meal_plans')
+        .insert({
+          user_id: user.id,
+          recipe_id: input.recipe_id,
+          date: input.date,
+          meal_type: input.meal_type,
+          servings: input.servings,
+        })
+        .select('*, recipe:recipes(id, title, default_servings)')
+        .single();
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to create meal plan');
-        throw new Error(message);
-      }
-
-      return response.json() as Promise<MealPlanWithRecipe>;
+      if (error) throw error;
+      return data as MealPlanWithRecipe;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
@@ -321,23 +393,24 @@ export function useUpdateMealPlan() {
 
   return useMutation({
     mutationFn: async (input: UpdateMealPlanInput): Promise<MealPlanWithRecipe> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/meal-plans/${input.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      const { data, error } = await supabase
+        .from('meal_plans')
+        .update({
+          recipe_id: input.recipe_id,
+          date: input.date,
+          meal_type: input.meal_type,
+          servings: input.servings,
+        })
+        .eq('id', input.id)
+        .eq('user_id', user.id)
+        .select('*, recipe:recipes(id, title, default_servings)')
+        .single();
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to update meal plan');
-        throw new Error(message);
-      }
-
-      return response.json() as Promise<MealPlanWithRecipe>;
+      if (error) throw error;
+      return data as MealPlanWithRecipe;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
@@ -351,25 +424,16 @@ export function useDeleteMealPlan() {
 
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      const token = await getAuthToken();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/meal-plans/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { error } = await supabase
+        .from('meal_plans')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
 
-      if (!response.ok) {
-        const message = await parseErrorResponse(response, 'Failed to delete meal plan');
-        throw new Error(message);
-      }
-
-      try {
-        await response.text();
-      } catch {
-        // negeren
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
