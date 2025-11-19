@@ -2,14 +2,16 @@
 // POST /api/recipes/import - Import recipe from URL
 
 import { createClient } from '@supabase/supabase-js';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const openaiApiKey = process.env.OPENAI_API_KEY;
 
-export const config = {
-  runtime: 'edge',
-};
+// Remove Edge config
+// export const config = {
+//   runtime: 'edge',
+// };
 
 interface ScrapedRecipe {
   title: string;
@@ -45,8 +47,8 @@ async function scrapeRecipeFromHTML(html: string): Promise<ScrapedRecipe | null>
           })),
           instructions: Array.isArray(recipe.recipeInstructions)
             ? recipe.recipeInstructions.map((step: any) =>
-                typeof step === 'string' ? step : step.text
-              ).join('\n')
+              typeof step === 'string' ? step : step.text
+            ).join('\n')
             : recipe.recipeInstructions || '',
           prepTime: recipe.prepTime ? parseDuration(recipe.prepTime) : undefined,
           servings: recipe.recipeYield ? parseInt(String(recipe.recipeYield)) : undefined,
@@ -150,23 +152,17 @@ If any field is not found, omit it. For ingredients, try to parse quantity and u
   }
 }
 
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Get user from auth header
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(
@@ -174,20 +170,14 @@ export default async function handler(req: Request) {
   );
 
   if (authError || !user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    const { url } = await req.json();
+    const { url } = req.body;
 
     if (!url) {
-      return new Response(JSON.stringify({ error: 'URL is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'URL is required' });
     }
 
     // Fetch the URL
@@ -211,12 +201,9 @@ export default async function handler(req: Request) {
     }
 
     if (!scrapedRecipe) {
-      return new Response(JSON.stringify({
+      return res.status(400).json({
         error: 'Could not extract recipe from URL',
         success: false,
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -266,22 +253,16 @@ export default async function handler(req: Request) {
 
     if (fetchError) throw fetchError;
 
-    return new Response(JSON.stringify({
+    return res.status(201).json({
       success: true,
       recipe: completeRecipe.recipe || completeRecipe,
       ingredients: completeRecipe.ingredients || [],
-    }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     console.error('Import error:', error);
-    return new Response(JSON.stringify({
+    return res.status(500).json({
       error: error.message,
       success: false,
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

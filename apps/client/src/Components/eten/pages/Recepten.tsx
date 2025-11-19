@@ -136,9 +136,9 @@ export default function ReceptenPage() {
         const instructionsArray = Array.isArray(fromScan.recipe.instructions)
           ? fromScan.recipe.instructions
           : String(fromScan.recipe.instructions)
-              .split(/\n{2,}/)
-              .map((s) => s.trim())
-              .filter(Boolean);
+            .split(/\n{2,}/)
+            .map((s) => s.trim())
+            .filter(Boolean);
 
         draft = {
           title: fromScan.recipe.title,
@@ -195,7 +195,7 @@ export default function ReceptenPage() {
       console.error(error);
       setScanInputError(
         (error?.message || 'Import mislukt.') +
-          ' Tip: plak de JSON exact zoals gekregen, zonder extra tekst.'
+        ' Tip: plak de JSON exact zoals gekregen, zonder extra tekst.'
       );
     }
   };
@@ -257,23 +257,7 @@ export default function ReceptenPage() {
             <span className="hidden sm:inline">Importeer URL</span>
             <span className="sm:hidden">URL</span>
           </button>
-          <button
-            onClick={() => setShowScanDialog(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-          >
-            <Camera className="w-4 h-4" />
-            <span className="hidden sm:inline">Scan Kaart</span>
-            <span className="sm:hidden">Scan</span>
-          </button>
-          {/* Scaninput plakken */}
-          <button
-            onClick={() => setShowScanInputModal(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-          >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Plak scaninput</span>
-            <span className="sm:hidden">Scan JSON</span>
-          </button>
+
           <button
             onClick={() => {
               /* TODO: Open create modal */
@@ -311,16 +295,14 @@ export default function ReceptenPage() {
                 favouritesOnly: !filters.favouritesOnly,
               })
             }
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${
-              filters.favouritesOnly
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${filters.favouritesOnly
                 ? 'bg-red-50 border-red-200 text-red-700'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
+              }`}
           >
             <Heart
-              className={`w-4 h-4 ${
-                filters.favouritesOnly ? 'fill-current' : ''
-              }`}
+              className={`w-4 h-4 ${filters.favouritesOnly ? 'fill-current' : ''
+                }`}
             />
             <span className="hidden sm:inline">Favorieten</span>
           </button>
@@ -336,11 +318,10 @@ export default function ReceptenPage() {
                 <button
                   key={tag}
                   onClick={() => handleToggleTag(tag)}
-                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${
-                    isActive
+                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${isActive
                       ? 'bg-brikx-teal text-white border-brikx-teal'
                       : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal'
-                  }`}
+                    }`}
                 >
                   {tag}
                 </button>
