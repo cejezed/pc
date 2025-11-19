@@ -12,3 +12,4 @@ yarn-error.log*
 # Omgeving
 .env
 .env.local
+.vercel
