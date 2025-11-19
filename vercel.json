@@ -1,7 +1,24 @@
 {
   "version": 2,
-  "buildCommand": "cd apps/client && npm run build",
-  "outputDirectory": "apps/client/dist",
-  "installCommand": "npm install",
-  "framework": null
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "framework": "vite",
+  "functions": {
+    "api/**/*.{ts,js}": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "^/api/.*",
+      "dest": "/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
