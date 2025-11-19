@@ -80,7 +80,7 @@ export default function WeekplannerPage() {
         </div>
 
         <button
-          onClick={() => {/* TODO: Generate shopping list */}}
+          onClick={() => {/* TODO: Generate shopping list */ }}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm sm:text-base"
         >
           <ShoppingCart className="w-4 h-4" />
@@ -124,11 +124,10 @@ export default function WeekplannerPage() {
               {weekDates.map((date) => (
                 <th
                   key={formatDate(date)}
-                  className={`px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold min-w-[140px] sm:min-w-[180px] ${
-                    isToday(date)
+                  className={`px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold min-w-[140px] sm:min-w-[180px] ${isToday(date)
                       ? 'bg-brikx-teal text-white'
                       : 'text-gray-700'
-                  }`}
+                    }`}
                 >
                   <div className="text-xs sm:text-sm">{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
                   <div className="text-[10px] sm:text-xs font-normal">
@@ -154,9 +153,8 @@ export default function WeekplannerPage() {
                   return (
                     <td
                       key={`${dateStr}-${mealType}`}
-                      className={`px-2 py-2 ${
-                        isToday(date) ? 'bg-blue-50' : ''
-                      }`}
+                      className={`px-2 py-2 ${isToday(date) ? 'bg-blue-50' : ''
+                        }`}
                     >
                       {mealPlan ? (
                         <div className="bg-white border border-gray-200 rounded-lg p-3 group hover:shadow-md transition-shadow">
@@ -215,42 +213,75 @@ export default function WeekplannerPage() {
       {/* Add Meal Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-auto p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4">
-              Voeg recept toe - {getMealTypeLabel(showAddModal.mealType)}
-            </h2>
-
-            <div className="space-y-2 mb-4">
-              {recipes.map((recipe) => (
-                <button
-                  key={recipe.id}
-                  onClick={() => handleAddMeal(recipe.id)}
-                  className="w-full p-2 sm:p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 sm:gap-3"
-                >
-                  {recipe.image_url && (
-                    <img
-                      src={recipe.image_url}
-                      alt={recipe.title}
-                      className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm sm:text-base truncate">{recipe.title}</p>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      {recipe.default_servings} personen
-                      {recipe.prep_time_min && ` • ${recipe.prep_time_min} min`}
-                    </p>
-                  </div>
-                </button>
-              ))}
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] flex flex-col">
+            <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Kies een recept voor {getMealTypeLabel(showAddModal.mealType)}
+              </h2>
+              <button onClick={() => setShowAddModal(null)} className="text-gray-400 hover:text-gray-600">
+                <ChevronLeft className="w-6 h-6 rotate-180" /> {/* Using Chevron as close icon substitute or just X */}
+              </button>
             </div>
 
-            <button
-              onClick={() => setShowAddModal(null)}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
-            >
-              Annuleren
-            </button>
+            <div className="p-4 sm:p-6 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {recipes
+                  .filter(r => {
+                    // Filter by category if present
+                    const categoryTag = `cat:${showAddModal.mealType}`;
+                    const hasCategory = r.tags.some(t => t.startsWith('cat:'));
+
+                    // If recipe has NO category, show it everywhere (or maybe 'other'?)
+                    // If recipe HAS category, only show if it matches current meal type
+                    // OR if the user wants to see all? For now, strict filtering if category exists.
+                    if (hasCategory) {
+                      return r.tags.includes(categoryTag);
+                    }
+                    return true; // Show uncategorized recipes in all slots
+                  })
+                  .map((recipe) => (
+                    <button
+                      key={recipe.id}
+                      onClick={() => handleAddMeal(recipe.id)}
+                      className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden text-left hover:ring-2 hover:ring-brikx-teal transition-all"
+                    >
+                      {recipe.image_url ? (
+                        <img
+                          src={recipe.image_url}
+                          alt={recipe.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <ShoppingCart className="w-8 h-8" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 flex flex-col justify-end">
+                        <p className="text-white font-medium text-sm line-clamp-2">{recipe.title}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-300 mt-1">
+                          <span>{recipe.default_servings} pers.</span>
+                          {recipe.prep_time_min && <span>• {recipe.prep_time_min} min</span>}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+
+              {recipes.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  Geen recepten gevonden. Maak eerst een recept aan!
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-100 flex justify-end">
+              <button
+                onClick={() => setShowAddModal(null)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Annuleren
+              </button>
+            </div>
           </div>
         </div>
       )}

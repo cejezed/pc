@@ -99,6 +99,32 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
         setEditedRecipe({ ...editedRecipe, tags: newTags });
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Afbeelding is te groot (max 5MB)');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            setEditedRecipe({ ...editedRecipe, image_url: base64String });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleCategoryChange = (category: string) => {
+        // Remove existing category tags (starting with 'cat:')
+        const otherTags = (editedRecipe.tags || []).filter(t => !t.startsWith('cat:'));
+        // Add new category tag
+        setEditedRecipe({ ...editedRecipe, tags: [...otherTags, `cat:${category}`] });
+    };
+
+    const currentCategory = (editedRecipe.tags || []).find(t => t.startsWith('cat:'))?.replace('cat:', '') || '';
+
     return (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full my-8 flex flex-col max-h-[90vh]">
@@ -155,15 +181,15 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                 )}
                                 {isEditing && (
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button
-                                            onClick={() => {
-                                                const url = prompt('Afbeelding URL:');
-                                                if (url) setEditedRecipe({ ...editedRecipe, image_url: url });
-                                            }}
-                                            className="px-4 py-2 bg-white text-gray-900 rounded-lg font-medium"
-                                        >
+                                        <label className="cursor-pointer px-4 py-2 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors">
                                             Wijzig foto
-                                        </button>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageUpload}
+                                            />
+                                        </label>
                                     </div>
                                 )}
                             </div>
@@ -181,6 +207,29 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                         />
                                     </div>
                                 ) : null}
+
+                                {/* Category Selector */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['ontbijt', 'lunch', 'avond', 'toetje'].map((cat) => {
+                                            const isSelected = currentCategory === cat;
+                                            return (
+                                                <button
+                                                    key={cat}
+                                                    onClick={() => isEditing && handleCategoryChange(cat)}
+                                                    disabled={!isEditing}
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors capitalize ${isSelected
+                                                        ? 'bg-brikx-teal text-white border-brikx-teal'
+                                                        : 'bg-white text-gray-700 border-gray-300'
+                                                        } ${!isEditing && !isSelected ? 'opacity-50' : ''}`}
+                                                >
+                                                    {cat}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
 
                                 <div className="flex gap-4">
                                     <div className="flex-1">
@@ -233,7 +282,7 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                 </button>
                                             ))
                                         ) : (
-                                            recipe.tags.map(tag => (
+                                            recipe.tags.filter(t => !t.startsWith('cat:')).map(tag => (
                                                 <span key={tag} className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
                                                     {tag}
                                                 </span>
