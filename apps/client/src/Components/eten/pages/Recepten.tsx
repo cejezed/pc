@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import {
   useRecipes,
+  useRecipe,
   useUpdateRecipe,
   useImportRecipe,
   useCreateRecipe,
@@ -27,6 +28,9 @@ import type {
   ScannedRecipeDraft,
   ScannedIngredient,
 } from '../types';
+
+import RecipeDetailDialog from '../components/RecipeDetailDialog';
+import type { RecipeWithIngredients } from '../types';
 
 export default function ReceptenPage() {
   const [filters, setFilters] = useState<RecipeFilters>({
@@ -47,6 +51,12 @@ export default function ReceptenPage() {
   // Afbeelding-upload voor handmatige scaninput
   const [scanImageFile, setScanImageFile] = useState<File | null>(null);
   const [scanImagePreview, setScanImagePreview] = useState<string | null>(null);
+
+  // Selected recipe ID for detail/edit view
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+
+  // Fetch full details for selected recipe
+  const { data: selectedRecipe } = useRecipe(selectedRecipeId || undefined);
 
   const { data: recipes = [], isLoading } = useRecipes(filters);
   const updateRecipe = useUpdateRecipe();
@@ -281,7 +291,7 @@ export default function ReceptenPage() {
               const title = window.prompt('Naam van het nieuwe recept:');
               if (title) {
                 try {
-                  await createRecipe.mutateAsync({
+                  const newRecipe = await createRecipe.mutateAsync({
                     title,
                     source_type: 'manual',
                     instructions: '',
@@ -290,7 +300,8 @@ export default function ReceptenPage() {
                     default_servings: 2,
                     prep_time_min: 15
                   });
-                  alert('Recept aangemaakt!');
+                  // Open detail view immediately
+                  setSelectedRecipeId(newRecipe.id);
                 } catch (e: any) {
                   alert('Fout bij aanmaken: ' + e.message);
                 }
@@ -423,9 +434,7 @@ export default function ReceptenPage() {
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                onClick={() => {
-                  /* TODO: Navigate to detail */
-                }}
+                onClick={() => setSelectedRecipeId(recipe.id)}
                 onToggleFavourite={handleToggleFavourite}
               />
             ))}
@@ -590,6 +599,15 @@ export default function ReceptenPage() {
           // Recipe list refresh via query invalidation
         }}
       />
+
+      {/* Detail/Edit Dialog */}
+      {selectedRecipeId && selectedRecipe && (
+        <RecipeDetailDialog
+          recipe={selectedRecipe}
+          isOpen={true}
+          onClose={() => setSelectedRecipeId(null)}
+        />
+      )}
     </div>
   );
 }
