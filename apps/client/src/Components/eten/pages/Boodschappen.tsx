@@ -214,6 +214,14 @@ export default function BoodschappenPage() {
     return grouped;
   }, [shoppingList, manualItems]);
 
+  // Get top frequent items
+  const topFrequentItems = useMemo(() => {
+    return Object.entries(frequentItems)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 12)
+      .map(([name]) => name);
+  }, [frequentItems]);
+
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto p-6">
@@ -232,13 +240,6 @@ export default function BoodschappenPage() {
 
   const categories = Object.keys(allItemsByCategory);
 
-  // Get top frequent items
-  const topFrequentItems = useMemo(() => {
-    return Object.entries(frequentItems)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 12)
-      .map(([name]) => name);
-  }, [frequentItems]);
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -355,7 +356,7 @@ export default function BoodschappenPage() {
 
       {/* Shopping List - Tile Layout */}
       {categories.length === 0 &&
-      manualItems.filter((m) => !m.checked).length === 0 ? (
+        manualItems.filter((m) => !m.checked).length === 0 ? (
         <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300 p-12 sm:p-16 text-center shadow-inner">
           <div className="text-7xl mb-6 animate-pulse">🛒</div>
           <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-3">
@@ -373,14 +374,14 @@ export default function BoodschappenPage() {
           </div>
         </div>
       ) : categories.filter((category) => {
-          const items = allItemsByCategory[category] || [];
-          const uncheckedItems = items.filter((item) => {
-            const itemKey = `${item.name}-${item.unit}-${category}`;
-            const isChecked = checkedItems.has(itemKey) || item.checked;
-            return !isChecked;
-          });
-          return uncheckedItems.length > 0;
-        }).length === 0 ? (
+        const items = allItemsByCategory[category] || [];
+        const uncheckedItems = items.filter((item) => {
+          const itemKey = `${item.name}-${item.unit}-${category}`;
+          const isChecked = checkedItems.has(itemKey) || item.checked;
+          return !isChecked;
+        });
+        return uncheckedItems.length > 0;
+      }).length === 0 ? (
         <div className="bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-teal-50/50 rounded-2xl border border-green-200 p-12 sm:p-16 text-center shadow-xl shadow-green-200/40">
           <div className="inline-block p-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-6 shadow-lg animate-bounce">
             <div className="text-6xl">🎉</div>
