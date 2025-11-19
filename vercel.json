@@ -1,6 +1,24 @@
 {
+  "version": 2,
   "buildCommand": "npm --workspace=client run build",
-  "installCommand": "npm install",
-  "outputDirectory": "apps/client/dist",
-  "framework": "vite"
+  "devCommand": "npm --workspace=client run dev",
+  "framework": "vite",
+  "functions": {
+    "api/**/*.{ts,js}": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "^/api/.*",
+      "dest": "/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apps/client/index.html"
+    }
+  ]
 }
