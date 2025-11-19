@@ -1,6 +1,7 @@
 {
-  "buildCommand": "npm --workspace=client run build",
+  "version": 2,
+  "buildCommand": "cd apps/client && npm run build",
   "outputDirectory": "apps/client/dist",
-  "framework": null,
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "framework": null
 }
