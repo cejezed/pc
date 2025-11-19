@@ -259,8 +259,42 @@ export default function ReceptenPage() {
           </button>
 
           <button
-            onClick={() => {
-              /* TODO: Open create modal */
+            onClick={() => setShowScanDialog(true)}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Camera className="w-4 h-4" />
+            <span className="hidden sm:inline">Scan Kaart</span>
+            <span className="sm:hidden">Scan</span>
+          </button>
+
+          <button
+            onClick={() => setShowScanInputModal(true)}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Plak JSON</span>
+            <span className="sm:hidden">JSON</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              const title = window.prompt('Naam van het nieuwe recept:');
+              if (title) {
+                try {
+                  await createRecipe.mutateAsync({
+                    title,
+                    source_type: 'manual',
+                    instructions: '',
+                    ingredients: [],
+                    tags: [],
+                    default_servings: 2,
+                    prep_time_min: 15
+                  });
+                  alert('Recept aangemaakt!');
+                } catch (e: any) {
+                  alert('Fout bij aanmaken: ' + e.message);
+                }
+              }
             }}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm"
           >
@@ -296,8 +330,8 @@ export default function ReceptenPage() {
               })
             }
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm ${filters.favouritesOnly
-                ? 'bg-red-50 border-red-200 text-red-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
           >
             <Heart
@@ -319,8 +353,8 @@ export default function ReceptenPage() {
                   key={tag}
                   onClick={() => handleToggleTag(tag)}
                   className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${isActive
-                      ? 'bg-brikx-teal text-white border-brikx-teal'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal'
+                    ? 'bg-brikx-teal text-white border-brikx-teal'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal'
                     }`}
                 >
                   {tag}

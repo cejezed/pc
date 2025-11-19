@@ -121,7 +121,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Import Handler
-  if (req.url?.includes("/api/recipes/import")) {
+  // Check for both full path and potential internal rewrites or query params
+  if (req.url && (req.url.includes("/api/recipes/import") || req.url.includes("import"))) {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
