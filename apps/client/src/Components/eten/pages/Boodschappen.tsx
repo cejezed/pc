@@ -1,53 +1,26 @@
 // src/Components/eten/pages/Boodschappen.tsx
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Printer, Check, Plus, X } from 'lucide-react';
 import { useGenerateShoppingList } from '../hooks';
+import {
+  useShoppingList,
+  useCheckedItems,
+  useToggleCheckedItem,
+  useManualItems,
+  useAddManualItem,
+  useToggleManualItem,
+  useRemoveManualItem,
+  useFrequentItems,
+  useTrackFrequentItem,
+  useClearCheckedItems,
+} from '../hooks/useShoppingListData';
 import { getWeekDates, formatDate, formatDateNL, getCategoryLabel } from '../utils';
 import type { ShoppingListItem, IngredientCategory } from '../types';
 
-interface ManualItem {
-  name: string;
-  category: IngredientCategory;
-  checked: boolean;
-}
-
 export default function BoodschappenPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekDates()[0]);
-
-  // ✅ Load from localStorage (met window-check zodat het nooit crasht in non-browser)
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(() => {
-    if (typeof window === 'undefined') return new Set<string>();
-    try {
-      const saved = window.localStorage.getItem('boodschappen-checked');
-      return saved ? new Set(JSON.parse(saved)) : new Set<string>();
-    } catch {
-      return new Set<string>();
-    }
-  });
-
-  const [manualItems, setManualItems] = useState<ManualItem[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const saved = window.localStorage.getItem('boodschappen-manual');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [frequentItems, setFrequentItems] = useState<Record<string, number>>(() => {
-    if (typeof window === 'undefined') return {};
-    try {
-      const saved = window.localStorage.getItem('boodschappen-frequent');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
   const [newItemName, setNewItemName] = useState('');
-  const [newItemCategory, setNewItemCategory] =
-    useState<IngredientCategory>('other');
+  const [newItemCategory, setNewItemCategory] = useState<IngredientCategory>('other');
 
   const weekDates = useMemo(
     () => getWeekDates(currentWeekStart),
@@ -55,6 +28,21 @@ export default function BoodschappenPage() {
   );
   const weekStart = formatDate(weekDates[0]);
   const weekEnd = formatDate(weekDates[6]);
+
+  // Supabase hooks
+  const { data: shoppingListData } = useShoppingList(weekStart);
+  const shoppingListId = shoppingListData?.id;
+
+  const { data: checkedItemKeys = [] } = useCheckedItems(shoppingListId);
+  const { data: manualItems = [] } = useManualItems(shoppingListId);
+  const { data: frequentItemsData = [] } = useFrequentItems(10);
+
+  const toggleCheckedMutation = useToggleCheckedItem();
+  const addManualMutation = useAddManualItem();
+  const toggleManualMutation = useToggleManualItem();
+  const removeManualMutation = useRemoveManualItem();
+  const trackFrequentMutation = useTrackFrequentItem();
+  const clearCheckedMutation = useClearCheckedItems();
 
   const {
     data: shoppingList,
@@ -65,42 +53,17 @@ export default function BoodschappenPage() {
     weekEnd,
   });
 
-  // ✅ Persist to localStorage
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(
-        'boodschappen-checked',
-        JSON.stringify(Array.from(checkedItems))
-      );
-    } catch {
-      // ignore
-    }
-  }, [checkedItems]);
+  // Convert checkedItemKeys array to Set for easier lookup
+  const checkedItems = useMemo(() => new Set(checkedItemKeys), [checkedItemKeys]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(
-        'boodschappen-manual',
-        JSON.stringify(manualItems)
-      );
-    } catch {
-      // ignore
-    }
-  }, [manualItems]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(
-        'boodschappen-frequent',
-        JSON.stringify(frequentItems)
-      );
-    } catch {
-      // ignore
-    }
-  }, [frequentItems]);
+  // Convert frequentItemsData to Record for suggestions
+  const frequentItems = useMemo(() => {
+    const record: Record<string, number> = {};
+    frequentItemsData.forEach(item => {
+      record[item.item_name] = item.frequency;
+    });
+    return record;
+  }, [frequentItemsData]);
 
   const handlePrevWeek = () => {
     const newStart = new Date(currentWeekStart);
@@ -115,26 +78,26 @@ export default function BoodschappenPage() {
   };
 
   const toggleItem = (itemKey: string) => {
-    setCheckedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemKey)) {
-        next.delete(itemKey);
-      } else {
-        next.add(itemKey);
-      }
-      return next;
+    if (!shoppingListId) return;
+    toggleCheckedMutation.mutate({
+      shoppingListId,
+      itemKey,
+      isChecked: checkedItems.has(itemKey),
     });
   };
 
-  const toggleManualItem = (index: number) => {
-    setManualItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, checked: !item.checked } : item
-      )
-    );
+  const toggleManualItem = (id: string, currentChecked: boolean) => {
+    if (!shoppingListId) return;
+    toggleManualMutation.mutate({
+      id,
+      checked: !currentChecked,
+      shoppingListId,
+    });
   };
 
   const addManualItem = (itemName?: string, itemCategory?: IngredientCategory) => {
+    if (!shoppingListId) return;
+
     const name = itemName || newItemName.trim();
     const category = itemCategory || newItemCategory;
 
@@ -151,33 +114,36 @@ export default function BoodschappenPage() {
         return;
       }
 
-      setManualItems((prev) => [
-        ...prev,
-        {
-          name,
-          category,
-          checked: false,
-        },
-      ]);
+      addManualMutation.mutate({
+        shoppingListId,
+        name,
+        category,
+      });
 
       // Track frequency
-      setFrequentItems((prev) => ({
-        ...prev,
-        [name.toLowerCase()]: (prev[name.toLowerCase()] || 0) + 1,
-      }));
+      trackFrequentMutation.mutate(name);
 
       setNewItemName('');
     }
   };
 
-  const removeManualItem = (index: number) => {
-    setManualItems((prev) => prev.filter((_, i) => i !== index));
+  const removeManualItem = (id: string) => {
+    if (!shoppingListId) return;
+    removeManualMutation.mutate({ id, shoppingListId });
   };
 
   const clearAllChecked = () => {
+    if (!shoppingListId) return;
     if (confirm('Alle afgevinkte items verwijderen?')) {
-      setManualItems((prev) => prev.filter((item) => !item.checked));
-      setCheckedItems(new Set());
+      const checkedManualItemIds = manualItems
+        .filter(item => item.checked)
+        .map(item => item.id);
+
+      clearCheckedMutation.mutate({
+        shoppingListId,
+        checkedItemKeys: Array.from(checkedItems),
+        checkedManualItemIds,
+      });
     }
   };
 
@@ -431,13 +397,13 @@ export default function BoodschappenPage() {
                         key={`${itemKey}-${index}`}
                         onClick={() => {
                           if (isManual) {
-                            const manualIndex = manualItems.findIndex(
+                            const manualItem = manualItems.find(
                               (m) =>
                                 m.name === item.name &&
                                 m.category === category
                             );
-                            if (manualIndex !== -1) {
-                              toggleManualItem(manualIndex);
+                            if (manualItem) {
+                              toggleManualItem(manualItem.id, manualItem.checked);
                             }
                           } else {
                             toggleItem(itemKey);
@@ -450,13 +416,13 @@ export default function BoodschappenPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const manualIndex = manualItems.findIndex(
+                              const manualItem = manualItems.find(
                                 (m) =>
                                   m.name === item.name &&
                                   m.category === category
                               );
-                              if (manualIndex !== -1) {
-                                removeManualItem(manualIndex);
+                              if (manualItem) {
+                                removeManualItem(manualItem.id);
                               }
                             }}
                             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
