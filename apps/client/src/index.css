@@ -5,18 +5,27 @@
 @import "tailwindcss";
 
 :root {
-  --zeus-bg: #0B0C10;
-  --zeus-card: #1F2833;
-  --zeus-accent: #FF6B00; /* Neon Orange */
+  --zeus-bg: #050505;
+  /* Deep Black */
+  --zeus-card: #121212;
+  /* Gunmetal / Dark Gray */
+  --zeus-card-hover: #1A1A1A;
+  --zeus-accent: #FF6B00;
+  /* Neon Orange */
   --zeus-accent-glow: rgba(255, 107, 0, 0.5);
-  --zeus-text: #C5C6C7;
-  --zeus-text-highlight: #66FCF1; /* Cyan highlight from image details */
-  --zeus-border: #2d3436;
+  --zeus-text: #E0E0E0;
+  --zeus-text-secondary: #A0A0A0;
+  --zeus-text-highlight: #66FCF1;
+  /* Cyan highlight */
+  --zeus-border: #2A2A2A;
 }
 
 /* Global resets - gebruik @theme in v4 */
 @layer base {
-  html, body, #root {
+
+  html,
+  body,
+  #root {
     height: 100%;
   }
 
@@ -61,8 +70,8 @@
 
 /* Zeus-X Utility Classes */
 .zeus-card {
-  background: linear-gradient(145deg, #1a1b20 0%, #141518 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(145deg, #121212 0%, #0A0A0A 100%);
+  border: 1px solid var(--zeus-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
 }

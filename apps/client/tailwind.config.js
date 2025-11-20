@@ -14,6 +14,17 @@ export default {
         'brikx-success': '#27AE60',
         'brikx-warning': '#F2C94C',
         'brikx-premium': '#FFB946',
+        zeus: {
+          bg: 'var(--zeus-bg)',
+          card: 'var(--zeus-card)',
+          'card-hover': 'var(--zeus-card-hover)',
+          accent: 'var(--zeus-accent)',
+          'accent-glow': 'var(--zeus-accent-glow)',
+          text: 'var(--zeus-text)',
+          'text-secondary': 'var(--zeus-text-secondary)',
+          'text-highlight': 'var(--zeus-text-highlight)',
+          border: 'var(--zeus-border)',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
