@@ -311,3 +311,41 @@ export function useClearCheckedItems() {
         },
     });
 }
+
+// Clear ENTIRE list (delete manual, check all generated)
+export function useClearList() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ shoppingListId, allGeneratedItemKeys }: {
+            shoppingListId: string;
+            allGeneratedItemKeys: string[];
+        }) => {
+            // 1. Delete ALL manual items for this list
+            const { error: manualError } = await supabase
+                .from('shopping_list_manual_items')
+                .delete()
+                .eq('shopping_list_id', shoppingListId);
+
+            if (manualError) throw manualError;
+
+            // 2. Mark ALL generated items as checked (bulk insert)
+            if (allGeneratedItemKeys.length > 0) {
+                const itemsToInsert = allGeneratedItemKeys.map(key => ({
+                    shopping_list_id: shoppingListId,
+                    item_key: key
+                }));
+
+                const { error: checkError } = await supabase
+                    .from('shopping_list_checked_items')
+                    .upsert(itemsToInsert, { onConflict: 'shopping_list_id,item_key', ignoreDuplicates: true });
+
+                if (checkError) throw checkError;
+            }
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['checked-items', variables.shoppingListId] });
+            queryClient.invalidateQueries({ queryKey: ['manual-items', variables.shoppingListId] });
+        },
+    });
+}

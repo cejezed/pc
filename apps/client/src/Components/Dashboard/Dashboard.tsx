@@ -257,6 +257,8 @@ export default function Dashboard() {
 
       const { error } = await supabase
         .from('ideas')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -495,7 +497,7 @@ export default function Dashboard() {
                   icon={Zap}
                   iconColor="text-[#FF6B00]"
                   value={dailyMetrics.energie_score || 0}
-                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, energie_score: score })}
+                  onChange={(score: number) => setDailyMetrics({ ...dailyMetrics, energie_score: score })}
                   lowLabel="Uitgeput"
                   highLabel="Energiek"
                 />
@@ -505,7 +507,7 @@ export default function Dashboard() {
                   icon={Moon}
                   iconColor="text-[#66FCF1]"
                   value={dailyMetrics.slaap_score || 0}
-                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, slaap_score: score })}
+                  onChange={(score: number) => setDailyMetrics({ ...dailyMetrics, slaap_score: score })}
                   lowLabel="Slecht"
                   highLabel="Uitgerust"
                 />
@@ -517,7 +519,7 @@ export default function Dashboard() {
                     icon={Moon}
                     iconColor="text-[#C5C6C7]"
                     value={dailyMetrics.bedtijd}
-                    onChange={(time) => setDailyMetrics({ ...dailyMetrics, bedtijd: time })}
+                    onChange={(time: string) => setDailyMetrics({ ...dailyMetrics, bedtijd: time })}
                     placeholder="22:00"
                   />
                   <TimeInput
@@ -525,7 +527,7 @@ export default function Dashboard() {
                     icon={Moon}
                     iconColor="text-[#C5C6C7]"
                     value={dailyMetrics.wakker_tijd}
-                    onChange={(time) => setDailyMetrics({ ...dailyMetrics, wakker_tijd: time })}
+                    onChange={(time: string) => setDailyMetrics({ ...dailyMetrics, wakker_tijd: time })}
                     placeholder="07:00"
                   />
                 </div>
@@ -536,7 +538,7 @@ export default function Dashboard() {
                   icon={Heart}
                   iconColor="text-red-500"
                   value={dailyMetrics.schouder_pijn || 0}
-                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, schouder_pijn: score })}
+                  onChange={(score: number) => setDailyMetrics({ ...dailyMetrics, schouder_pijn: score })}
                   lowLabel="Veel pijn"
                   highLabel="Geen pijn"
                 />
@@ -546,7 +548,7 @@ export default function Dashboard() {
                   icon={Brain}
                   iconColor="text-pink-500"
                   value={dailyMetrics.stress_niveau || 0}
-                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, stress_niveau: score })}
+                  onChange={(score: number) => setDailyMetrics({ ...dailyMetrics, stress_niveau: score })}
                   lowLabel="Zeer gestrest"
                   highLabel="Zeer relaxed"
                 />
@@ -558,21 +560,21 @@ export default function Dashboard() {
                     icon={Moon}
                     iconColor="text-[#C5C6C7]"
                     checked={dailyMetrics.lang_wakker || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, lang_wakker: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, lang_wakker: checked })}
                   />
                   <CheckboxItem
                     label="Kort wakker geweest"
                     icon={Moon}
                     iconColor="text-[#C5C6C7]"
                     checked={dailyMetrics.kort_wakker || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
                   />
                   <CheckboxItem
                     label="Powernap"
                     icon={Moon}
                     iconColor="text-[#66FCF1]"
                     checked={dailyMetrics.nap || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, nap: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, nap: checked })}
                   />
                 </div>
 
@@ -584,35 +586,35 @@ export default function Dashboard() {
                     icon={Dumbbell}
                     iconColor="text-[#FF6B00]"
                     checked={dailyMetrics.ochtend_workout || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ochtend_workout: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, ochtend_workout: checked })}
                   />
                   <CheckboxItem
                     label="Golfen geoefend"
                     icon={Activity}
                     iconColor="text-green-500"
                     checked={dailyMetrics.golf_oefenen || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golf_oefenen: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, golf_oefenen: checked })}
                   />
                   <CheckboxItem
                     label="Golfen"
                     icon={Activity}
                     iconColor="text-emerald-500"
                     checked={dailyMetrics.golfen || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golfen: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, golfen: checked })}
                   />
                   <CheckboxItem
                     label="MTB gereden"
                     icon={Activity}
                     iconColor="text-orange-500"
                     checked={dailyMetrics.mtb || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, mtb: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, mtb: checked })}
                   />
                   <CheckboxItem
                     label="Workout gedaan"
                     icon={Dumbbell}
                     iconColor="text-red-500"
                     checked={dailyMetrics.workout_done || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, workout_done: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, workout_done: checked })}
                   />
                 </div>
 
@@ -624,21 +626,21 @@ export default function Dashboard() {
                     icon={Eye}
                     iconColor="text-[#66FCF1]"
                     checked={dailyMetrics.ogen_schoonmaken || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ogen_schoonmaken: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, ogen_schoonmaken: checked })}
                   />
                   <CheckboxItem
                     label="Oogdruppels"
                     icon={Eye}
                     iconColor="text-blue-500"
                     checked={dailyMetrics.oogdruppels || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, oogdruppels: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, oogdruppels: checked })}
                   />
                   <CheckboxItem
                     label="Allergie medicatie"
                     icon={Pill}
                     iconColor="text-pink-500"
                     checked={dailyMetrics.allergie_medicatie || false}
-                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, allergie_medicatie: checked })}
+                    onChange={(checked: boolean) => setDailyMetrics({ ...dailyMetrics, allergie_medicatie: checked })}
                   />
                 </div>
 

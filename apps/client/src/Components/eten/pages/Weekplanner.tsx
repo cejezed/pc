@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Trash2, ShoppingCart, Wand2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, ShoppingCart, Wand2, Calendar, Utensils } from 'lucide-react';
 import { useMealPlans, useCreateMealPlan, useDeleteMealPlan, useRecipes } from '../hooks';
 import { getWeekDates, formatDate, formatDateNL, getMealTypeLabel, getMealTypeEmoji } from '../utils';
 import { MealType, MEAL_TYPES, MealPlanWithRecipe } from '../types';
@@ -117,10 +117,7 @@ export default function WeekplannerPage() {
         let availableRecipes = eligibleRecipes.filter(r => !usedRecipeIds.has(r.id));
 
         // If we ran out of unique recipes, reset the used list for this category (fallback)
-        // But try to keep the ones used in THIS generation batch if possible, or just allow duplicates if really needed
         if (availableRecipes.length === 0 && eligibleRecipes.length > 0) {
-          // Soft reset: allow reusing recipes, but prefer ones not used in this batch if possible
-          // For now, just use all eligible again
           availableRecipes = eligibleRecipes;
         }
 
@@ -148,7 +145,6 @@ export default function WeekplannerPage() {
     }
 
     // Execute mutations
-    // We do this sequentially to avoid overwhelming the server/client state
     for (const plan of newMealPlans) {
       await createMealPlan.mutateAsync({
         date: plan.date,
@@ -160,234 +156,238 @@ export default function WeekplannerPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Weekplanner</h1>
-          <p className="text-sm sm:text-base text-gray-600">Plan je maaltijden voor de week</p>
+    <div className="min-h-screen bg-[#0B0C10] text-[#C5C6C7] p-4 sm:p-6 font-sans selection:bg-[#FF6B00]/30">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[#1F2833] p-6 rounded-2xl border border-[#FF6B00]/20 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent opacity-50"></div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1 drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)]">
+              WEEKPLANNER <span className="text-[#FF6B00]">ZEUS-X</span>
+            </h1>
+            <p className="text-[#C5C6C7] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#66FCF1] animate-pulse"></span>
+              Plan je culinaire missies
+            </p>
+          </div>
+
+          <button
+            onClick={handleGenerateMealPlan}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#FF6B00] text-white rounded-lg hover:bg-[#FF6B00]/80 transition-all font-bold shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)] transform hover:-translate-y-0.5"
+          >
+            <Wand2 className="w-5 h-5" />
+            <span className="hidden sm:inline">Weekmenu Genereren</span>
+            <span className="sm:hidden">Genereren</span>
+          </button>
         </div>
 
-        <button
-          onClick={handleGenerateMealPlan}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-brikx-teal to-blue-500 text-white rounded-lg hover:from-brikx-teal/90 hover:to-blue-600 transition-all text-sm sm:text-base shadow-md hover:shadow-lg"
-        >
-          <Wand2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Weekmenu voorstel</span>
-          <span className="sm:hidden">Voorstel</span>
-        </button>
-      </div>
+        {/* Week Navigation */}
+        <div className="flex items-center justify-between bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-4 shadow-lg">
+          <button
+            onClick={handlePrevWeek}
+            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
-      {/* Week Navigation */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-        <button
-          onClick={handlePrevWeek}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+          <div className="text-center">
+            <p className="font-bold text-lg sm:text-xl text-white tracking-wide">
+              {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
+            </p>
+            <p className="text-xs sm:text-sm text-[#FF6B00] font-mono mt-1">WEEK {getWeekNumber(weekDates[0])}</p>
+          </div>
 
-        <div className="text-center">
-          <p className="font-semibold text-base sm:text-lg">
-            {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
-          </p>
-          <p className="text-xs sm:text-sm text-gray-600">Week {getWeekNumber(weekDates[0])}</p>
+          <button
+            onClick={handleNextWeek}
+            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
 
-        <button
-          onClick={handleNextWeek}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Week Grid - Desktop (Table) */}
-      <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full table-fixed">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="w-32 px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Maaltijd
-              </th>
-              {weekDates.map((date) => (
-                <th
-                  key={formatDate(date)}
-                  className={`px-4 py-3 text-center text-sm font-semibold ${isToday(date)
-                    ? 'bg-brikx-teal text-white'
-                    : 'text-gray-700'
-                    }`}
-                >
-                  <div>{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
-                  <div className="text-xs font-normal">
-                    {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'short' })}
-                  </div>
+        {/* Week Grid - Desktop (Table) */}
+        <div className="hidden lg:block bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 overflow-hidden shadow-2xl">
+          <table className="w-full table-fixed">
+            <thead className="bg-[#0B0C10] border-b border-[#FF6B00]/20">
+              <tr>
+                <th className="w-32 px-4 py-4 text-left text-sm font-bold text-[#FF6B00] uppercase tracking-wider">
+                  Maaltijd
                 </th>
+                {weekDates.map((date) => (
+                  <th
+                    key={formatDate(date)}
+                    className={`px-4 py-4 text-center border-l border-[#2d3436] ${isToday(date)
+                      ? 'bg-[#FF6B00]/10 text-white'
+                      : 'text-[#C5C6C7]'
+                      }`}
+                  >
+                    <div className="font-bold uppercase tracking-wide text-sm">{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
+                    <div className={`text-xs font-mono mt-1 ${isToday(date) ? 'text-[#FF6B00]' : 'text-[#C5C6C7]/50'}`}>
+                      {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'short' })}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#2d3436]">
+              {MEAL_TYPES.map((mealType) => (
+                <tr key={mealType} className="hover:bg-[#0B0C10]/50 transition-colors">
+                  <td className="px-4 py-3 text-sm font-medium text-[#C5C6C7] bg-[#0B0C10]/30 border-r border-[#2d3436]">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">{getMealTypeEmoji(mealType)}</span>
+                      <span className="font-bold">{getMealTypeLabel(mealType)}</span>
+                    </div>
+                  </td>
+                  {weekDates.map((date) => {
+                    const dateStr = formatDate(date);
+                    const mealPlan = mealPlansByDate[dateStr]?.[mealType];
+
+                    return (
+                      <td
+                        key={`${dateStr}-${mealType}`}
+                        className={`p-2 border-l border-[#2d3436] align-top h-40 transition-colors ${isToday(date) ? 'bg-[#FF6B00]/5' : ''
+                          }`}
+                      >
+                        <MealSlot
+                          mealPlan={mealPlan}
+                          onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
+                          onDelete={(id) => handleDeleteMeal(id)}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
               ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {MEAL_TYPES.map((mealType) => (
-              <tr key={mealType}>
-                <td className="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50/50">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{getMealTypeEmoji(mealType)}</span>
-                    <span>{getMealTypeLabel(mealType)}</span>
-                  </div>
-                </td>
-                {weekDates.map((date) => {
+            </tbody>
+          </table>
+        </div>
+
+        {/* Week List - Mobile/Tablet */}
+        <div className="lg:hidden space-y-6">
+          {weekDates.map((date) => (
+            <div key={formatDate(date)} className={`bg-[#1F2833] rounded-xl border shadow-lg overflow-hidden ${isToday(date) ? 'border-[#FF6B00] ring-1 ring-[#FF6B00]/50' : 'border-[#FF6B00]/20'}`}>
+              {/* Day Header */}
+              <div className={`px-4 py-3 flex items-center justify-between ${isToday(date) ? 'bg-[#FF6B00] text-white' : 'bg-[#0B0C10] border-b border-[#FF6B00]/10'}`}>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-lg capitalize tracking-wide">
+                    {date.toLocaleDateString('nl-NL', { weekday: 'long' })}
+                  </span>
+                  <span className={`text-sm font-mono ${isToday(date) ? 'text-white/90' : 'text-[#C5C6C7]'}`}>
+                    {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'long' })}
+                  </span>
+                </div>
+                {isToday(date) && (
+                  <span className="text-xs font-bold bg-white text-[#FF6B00] px-2 py-1 rounded-full shadow-sm">
+                    VANDAAG
+                  </span>
+                )}
+              </div>
+
+              {/* Meals List */}
+              <div className="divide-y divide-[#2d3436]">
+                {MEAL_TYPES.map((mealType) => {
                   const dateStr = formatDate(date);
                   const mealPlan = mealPlansByDate[dateStr]?.[mealType];
 
                   return (
-                    <td
-                      key={`${dateStr}-${mealType}`}
-                      className={`p-2 border-l border-gray-100 align-top h-32 ${isToday(date) ? 'bg-blue-50/30' : ''
-                        }`}
-                    >
-                      <MealSlot
-                        mealPlan={mealPlan}
-                        onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
-                        onDelete={(id) => handleDeleteMeal(id)}
-                      />
-                    </td>
+                    <div key={mealType} className="p-3 flex gap-3">
+                      {/* Meal Type Icon/Label */}
+                      <div className="w-24 flex-shrink-0 flex flex-col justify-center text-[#C5C6C7]">
+                        <div className="flex items-center gap-2 font-medium text-sm">
+                          <span className="text-lg">{getMealTypeEmoji(mealType)}</span>
+                          <span>{getMealTypeLabel(mealType)}</span>
+                        </div>
+                      </div>
+
+                      {/* Slot Content */}
+                      <div className="flex-1 min-w-0">
+                        <MealSlot
+                          mealPlan={mealPlan}
+                          onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
+                          onDelete={(id) => handleDeleteMeal(id)}
+                          compact
+                        />
+                      </div>
+                    </div>
                   );
                 })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Week List - Mobile/Tablet */}
-      <div className="lg:hidden space-y-6">
-        {weekDates.map((date) => (
-          <div key={formatDate(date)} className={`bg-white rounded-xl border shadow-sm overflow-hidden ${isToday(date) ? 'border-brikx-teal ring-1 ring-brikx-teal' : 'border-gray-200'}`}>
-            {/* Day Header */}
-            <div className={`px-4 py-3 flex items-center justify-between ${isToday(date) ? 'bg-brikx-teal text-white' : 'bg-gray-50 border-b border-gray-200'}`}>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg capitalize">
-                  {date.toLocaleDateString('nl-NL', { weekday: 'long' })}
-                </span>
-                <span className={`text-sm ${isToday(date) ? 'text-white/90' : 'text-gray-500'}`}>
-                  {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'long' })}
-                </span>
               </div>
-              {isToday(date) && (
-                <span className="text-xs font-bold bg-white text-brikx-teal px-2 py-1 rounded-full">
-                  Vandaag
-                </span>
-              )}
             </div>
-
-            {/* Meals List */}
-            <div className="divide-y divide-gray-100">
-              {MEAL_TYPES.map((mealType) => {
-                const dateStr = formatDate(date);
-                const mealPlan = mealPlansByDate[dateStr]?.[mealType];
-
-                return (
-                  <div key={mealType} className="p-3 flex gap-3">
-                    {/* Meal Type Icon/Label */}
-                    <div className="w-24 flex-shrink-0 flex flex-col justify-center text-gray-500">
-                      <div className="flex items-center gap-2 font-medium text-sm text-gray-900">
-                        <span>{getMealTypeEmoji(mealType)}</span>
-                        <span>{getMealTypeLabel(mealType)}</span>
-                      </div>
-                    </div>
-
-                    {/* Slot Content */}
-                    <div className="flex-1 min-w-0">
-                      <MealSlot
-                        mealPlan={mealPlan}
-                        onClickAdd={() => setShowAddModal({ date: dateStr, mealType })}
-                        onDelete={(id) => handleDeleteMeal(id)}
-                        compact
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add Meal Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] flex flex-col">
-            <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-lg sm:text-xl font-semibold">
-                Kies een recept voor {getMealTypeLabel(showAddModal.mealType)}
-              </h2>
-              <button onClick={() => setShowAddModal(null)} className="text-gray-400 hover:text-gray-600">
-                <ChevronLeft className="w-6 h-6 rotate-180" /> {/* Using Chevron as close icon substitute or just X */}
-              </button>
-            </div>
-
-            <div className="p-4 sm:p-6 overflow-y-auto">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {recipes
-                  .filter(r => {
-                    // Filter by category if present
-                    const categoryTag = `cat:${showAddModal.mealType}`;
-                    const hasCategory = r.tags.some(t => t.startsWith('cat:'));
-
-                    // If recipe has NO category, show it everywhere (or maybe 'other'?)
-                    // If recipe HAS category, only show if it matches current meal type
-                    // OR if the user wants to see all? For now, strict filtering if category exists.
-                    if (hasCategory) {
-                      return r.tags.includes(categoryTag);
-                    }
-                    return true; // Show uncategorized recipes in all slots
-                  })
-                  .map((recipe) => (
-                    <button
-                      key={recipe.id}
-                      onClick={() => handleAddMeal(recipe.id)}
-                      className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden text-left hover:ring-2 hover:ring-brikx-teal transition-all"
-                    >
-                      {recipe.image_url ? (
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300">
-                          <ShoppingCart className="w-8 h-8" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 flex flex-col justify-end">
-                        <p className="text-white font-medium text-sm line-clamp-2">{recipe.title}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-300 mt-1">
-                          <span>{recipe.default_servings} pers.</span>
-                          {recipe.prep_time_min && <span>• {recipe.prep_time_min} min</span>}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-              </div>
-
-              {recipes.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  Geen recepten gevonden. Maak eerst een recept aan!
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-gray-100 flex justify-end">
-              <button
-                onClick={() => setShowAddModal(null)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Annuleren
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+
+        {/* Add Meal Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-[#1F2833] border border-[#FF6B00]/30 rounded-2xl max-w-4xl w-full max-h-[80vh] flex flex-col shadow-[0_0_50px_rgba(255,107,0,0.2)]">
+              <div className="p-4 sm:p-6 border-b border-[#FF6B00]/20 flex justify-between items-center bg-[#0B0C10]/50 rounded-t-2xl">
+                <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  <Utensils className="w-5 h-5 text-[#FF6B00]" />
+                  Kies een recept voor <span className="text-[#FF6B00]">{getMealTypeLabel(showAddModal.mealType)}</span>
+                </h2>
+                <button onClick={() => setShowAddModal(null)} className="text-[#C5C6C7] hover:text-white transition-colors">
+                  <ChevronLeft className="w-6 h-6 rotate-180" />
+                </button>
+              </div>
+
+              <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {recipes
+                    .filter(r => {
+                      const categoryTag = `cat:${showAddModal.mealType}`;
+                      const hasCategory = r.tags.some(t => t.startsWith('cat:'));
+                      if (hasCategory) {
+                        return r.tags.includes(categoryTag);
+                      }
+                      return true;
+                    })
+                    .map((recipe) => (
+                      <button
+                        key={recipe.id}
+                        onClick={() => handleAddMeal(recipe.id)}
+                        className="group relative aspect-square bg-[#0B0C10] rounded-xl overflow-hidden text-left border border-[#2d3436] hover:border-[#FF6B00] transition-all hover:shadow-[0_0_20px_rgba(255,107,0,0.3)]"
+                      >
+                        {recipe.image_url ? (
+                          <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[#2d3436] group-hover:text-[#FF6B00]/50 transition-colors">
+                            <ShoppingCart className="w-12 h-12" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3 flex flex-col justify-end">
+                          <p className="text-white font-bold text-sm line-clamp-2 group-hover:text-[#FF6B00] transition-colors">{recipe.title}</p>
+                          <div className="flex items-center gap-2 text-xs text-[#C5C6C7] mt-1 font-mono">
+                            <span>{recipe.default_servings} pers.</span>
+                            {recipe.prep_time_min && <span>• {recipe.prep_time_min} min</span>}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+
+                {recipes.length === 0 && (
+                  <div className="text-center py-12 text-[#C5C6C7]/50 italic">
+                    Geen recepten gevonden. Maak eerst een recept aan!
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t border-[#FF6B00]/20 flex justify-end bg-[#0B0C10]/50 rounded-b-2xl">
+                <button
+                  onClick={() => setShowAddModal(null)}
+                  className="px-6 py-2 text-[#C5C6C7] hover:text-white hover:bg-[#FF6B00]/10 rounded-lg transition-colors font-medium"
+                >
+                  Annuleren
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -412,9 +412,9 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
     return (
       <button
         onClick={onClickAdd}
-        className={`w-full flex items-center justify-center text-gray-300 hover:text-brikx-teal hover:bg-brikx-teal/5 border-2 border-dashed border-gray-200 rounded-xl transition-all ${compact ? 'h-16' : 'h-full min-h-[100px]'}`}
+        className={`w-full flex items-center justify-center text-[#2d3436] hover:text-[#FF6B00] hover:bg-[#FF6B00]/5 border-2 border-dashed border-[#2d3436] hover:border-[#FF6B00]/50 rounded-xl transition-all group ${compact ? 'h-16' : 'h-full min-h-[100px]'}`}
       >
-        <Plus className="w-5 h-5" />
+        <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
       </button>
     );
   }
@@ -424,9 +424,9 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
   return (
     <div
       className={`
-        relative group overflow-hidden rounded-xl transition-all hover:shadow-lg cursor-pointer
+        relative group overflow-hidden rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,107,0,0.3)] cursor-pointer border
         ${compact ? 'h-24' : 'h-full min-h-[120px]'}
-        ${hasImage ? 'bg-gray-900' : 'bg-white border border-gray-200'}
+        ${hasImage ? 'bg-black border-transparent' : 'bg-[#0B0C10] border-[#FF6B00]/20'}
       `}
     >
       {/* Background Image */}
@@ -435,29 +435,29 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
           <img
             src={mealPlan.recipe!.image_url!}
             alt={mealPlan.recipe?.title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-60 group-hover:opacity-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </>
       )}
 
       {/* Content */}
-      <div className={`relative h-full flex flex-col justify-end p-3 ${hasImage ? 'text-white' : 'text-gray-900'}`}>
-        <p className={`font-semibold text-sm line-clamp-2 leading-tight ${hasImage ? 'text-shadow-sm' : ''}`}>
+      <div className={`relative h-full flex flex-col justify-end p-3 z-10`}>
+        <p className={`font-bold text-sm line-clamp-2 leading-tight text-white group-hover:text-[#FF6B00] transition-colors ${hasImage ? 'drop-shadow-md' : ''}`}>
           {mealPlan.title_override || mealPlan.recipe?.title || 'Onbekend recept'}
         </p>
 
-        <div className={`flex items-center gap-2 text-xs mt-1 ${hasImage ? 'text-gray-300' : 'text-gray-500'}`}>
+        <div className={`flex items-center gap-2 text-xs mt-1 font-mono ${hasImage ? 'text-gray-300' : 'text-[#C5C6C7]'}`}>
           <span>{mealPlan.servings} pers.</span>
           {mealPlan.is_leftover && (
-            <span className="bg-orange-500 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+            <span className="bg-[#FF6B00] text-white px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
               Kliekjes
             </span>
           )}
         </div>
 
         {mealPlan.notes && (
-          <p className={`text-[10px] mt-1 line-clamp-1 italic ${hasImage ? 'text-gray-400' : 'text-gray-400'}`}>
+          <p className={`text-[10px] mt-1 line-clamp-1 italic ${hasImage ? 'text-gray-400' : 'text-[#C5C6C7]/50'}`}>
             {mealPlan.notes}
           </p>
         )}
@@ -469,10 +469,7 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
           e.stopPropagation();
           onDelete(mealPlan.id);
         }}
-        className={`absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${hasImage
-          ? 'bg-black/20 text-white hover:bg-red-500 hover:text-white backdrop-blur-sm'
-          : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500'
-          }`}
+        className="absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 bg-black/50 text-[#FF6B00] hover:bg-red-500 hover:text-white backdrop-blur-sm z-20"
         title="Verwijderen"
       >
         <Trash2 className="w-3.5 h-3.5" />
