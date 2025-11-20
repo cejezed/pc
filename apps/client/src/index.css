@@ -4,6 +4,16 @@
 /* Tailwind directives */
 @import "tailwindcss";
 
+:root {
+  --zeus-bg: #0B0C10;
+  --zeus-card: #1F2833;
+  --zeus-accent: #FF6B00; /* Neon Orange */
+  --zeus-accent-glow: rgba(255, 107, 0, 0.5);
+  --zeus-text: #C5C6C7;
+  --zeus-text-highlight: #66FCF1; /* Cyan highlight from image details */
+  --zeus-border: #2d3436;
+}
+
 /* Global resets - gebruik @theme in v4 */
 @layer base {
   html, body, #root {
@@ -12,8 +22,8 @@
 
   body {
     margin: 0;
-    background-color: #F5F7FA;
-    color: #111827;
+    background-color: var(--zeus-bg);
+    color: var(--zeus-text);
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -24,26 +34,43 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid #2D9CDB;
+    outline: 2px solid var(--zeus-accent);
     outline-offset: 2px;
+    box-shadow: 0 0 10px var(--zeus-accent-glow);
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F7FA;
+  background: var(--zeus-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2D9CDB;
-  border-radius: 5px;
+  background: #333;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #1D7AAC;
+  background: var(--zeus-accent);
+}
+
+/* Zeus-X Utility Classes */
+.zeus-card {
+  background: linear-gradient(145deg, #1a1b20 0%, #141518 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.zeus-glow {
+  box-shadow: 0 0 15px var(--zeus-accent-glow);
+}
+
+.zeus-text-glow {
+  text-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
 }

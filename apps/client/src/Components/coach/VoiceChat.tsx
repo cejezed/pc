@@ -165,47 +165,75 @@ export function VoiceChat() {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">Voice Conversation</h2>
+        <div className="zeus-card rounded-3xl p-8 border border-[#2d3436] relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00] opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-bold text-white tracking-wider font-['Orbitron',sans-serif] flex items-center gap-2">
+                    <div className="w-1 h-6 bg-[#FF6B00]"></div>
+                    VOICE <span className="text-[#FF6B00]">LINK</span>
+                </h2>
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${isConversationActive ? 'bg-[#FF6B00] zeus-glow' : 'bg-gray-600'}`}></div>
+                    <span className="text-[10px] font-mono text-gray-400 tracking-widest">
+                        {isConversationActive ? 'LIVE' : 'OFFLINE'}
+                    </span>
+                </div>
+            </div>
 
             {/* Conversation Button */}
-            <div className="flex flex-col items-center gap-4 mb-6">
+            <div className="flex flex-col items-center gap-6 mb-8 relative">
+                {/* Ring Animation */}
+                {isConversationActive && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-[#FF6B00]/30 rounded-full animate-ping pointer-events-none"></div>
+                )}
+
                 {!isConversationActive ? (
                     <button
                         onClick={startConversation}
-                        className="w-20 h-20 rounded-full flex items-center justify-center transition-all bg-brikx-teal hover:bg-teal-700 text-white shadow-lg"
+                        className="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 bg-[#1F2833] hover:bg-[#2d3436] border-2 border-[#FF6B00] text-[#FF6B00] shadow-[0_0_20px_rgba(255,107,0,0.2)] hover:shadow-[0_0_40px_rgba(255,107,0,0.4)] group z-10"
                     >
-                        <Phone className="w-8 h-8" />
+                        <Phone className="w-8 h-8 group-hover:scale-110 transition-transform" />
                     </button>
                 ) : (
                     <button
                         onClick={endConversation}
-                        className="w-20 h-20 rounded-full flex items-center justify-center transition-all bg-red-500 hover:bg-red-600 text-white shadow-lg"
+                        className="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 bg-[#FF6B00]/10 hover:bg-[#FF6B00]/20 border-2 border-[#FF6B00] text-[#FF6B00] shadow-[0_0_30px_rgba(255,107,0,0.3)] z-10 relative"
                     >
                         <PhoneOff className="w-8 h-8" />
+                        {/* Inner glow pulse */}
+                        <div className="absolute inset-0 rounded-full bg-[#FF6B00] opacity-20 animate-pulse"></div>
                     </button>
                 )}
 
-                <div className="text-center">
-                    <p className="text-sm font-medium text-gray-700">
+                <div className="text-center z-10">
+                    <p className="text-sm font-mono text-[#66FCF1] tracking-widest uppercase mb-2">
                         {!isConversationActive
-                            ? 'Start Gesprek'
+                            ? 'INITIALIZE LINK'
                             : isProcessing
-                                ? 'Verwerken...'
+                                ? 'PROCESSING DATA...'
                                 : isSpeaking
-                                    ? 'Coach spreekt...'
+                                    ? 'INCOMING TRANSMISSION...'
                                     : isRecording
-                                        ? 'Luisteren...'
-                                        : 'Wachten...'}
+                                        ? 'LISTENING...'
+                                        : 'STANDBY...'}
                     </p>
+
+                    {/* Visualizer Bars (Fake) */}
                     {isConversationActive && (
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                            {isRecording && (
-                                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                            )}
-                            {isSpeaking && (
-                                <Volume2 className="w-4 h-4 text-brikx-teal animate-pulse" />
-                            )}
+                        <div className="flex items-center justify-center gap-1 h-8">
+                            {[...Array(5)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`w-1 bg-[#FF6B00] rounded-full transition-all duration-100 ${(isSpeaking || isRecording) ? 'animate-[bounce_1s_infinite]' : 'h-1 opacity-30'
+                                        }`}
+                                    style={{
+                                        height: (isSpeaking || isRecording) ? `${Math.random() * 20 + 10}px` : '4px',
+                                        animationDelay: `${i * 0.1}s`
+                                    }}
+                                ></div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -213,19 +241,19 @@ export function VoiceChat() {
 
             {/* Conversation History */}
             {conversationHistory.length > 0 && (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#FF6B00] scrollbar-track-[#0B0C10] border-t border-[#2d3436] pt-6">
                     {conversationHistory.map((msg, idx) => (
                         <div
                             key={idx}
-                            className={`p-3 rounded-lg ${msg.role === 'user'
-                                    ? 'bg-gray-50 ml-8'
-                                    : 'bg-teal-50 mr-8 border border-teal-200'
+                            className={`p-4 rounded-xl border ${msg.role === 'user'
+                                    ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30 ml-8 text-right'
+                                    : 'bg-[#1F2833] border-[#2d3436] mr-8'
                                 }`}
                         >
-                            <p className="text-xs text-gray-500 mb-1">
-                                {msg.role === 'user' ? 'Jij:' : 'Coach:'}
+                            <p className="text-[10px] font-mono text-[#66FCF1] mb-2 uppercase tracking-wider opacity-70">
+                                {msg.role === 'user' ? 'USER INPUT' : 'AI RESPONSE'}
                             </p>
-                            <p className="text-sm text-gray-800">{msg.text}</p>
+                            <p className="text-sm text-[#C5C6C7] leading-relaxed">{msg.text}</p>
                         </div>
                     ))}
                 </div>

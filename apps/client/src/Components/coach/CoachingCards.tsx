@@ -1,148 +1,109 @@
 import React, { useEffect, useState } from 'react';
+import { Lightbulb, ArrowRight, Brain, Target, Activity, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import type { CoachingCard } from '../../lib/types/personalCoach';
+
+interface CoachingCard {
+    id: string;
+    title: string;
+    type: 'insight' | 'question' | 'action';
+    content: string;
+    reasoning: string;
+    priority: 'high' | 'medium' | 'low';
+}
 
 export function CoachingCards() {
     const [cards, setCards] = useState<CoachingCard[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        loadCards();
+        const fetchCards = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                const response = await fetch('/api/coach/cards', {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setCards(data.cards || []);
+                }
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCards();
     }, []);
 
-    async function loadCards() {
-        try {
-            setLoading(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                setError('Not authenticated');
-                return;
-            }
-
-            const response = await fetch('/api/coach/cards', {
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to load cards: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            setCards(data.cards || []);
-        } catch (err: any) {
-            console.error('Error loading cards:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center p-8">
-                <div className="text-gray-500">Inzichten laden...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600">Fout: {error}</p>
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-[#FF6B00]" />
             </div>
         );
     }
 
     if (cards.length === 0) {
         return (
-            <div className="p-8 text-center text-gray-500">
-                <p>Nog geen inzichten beschikbaar.</p>
-                <p className="text-sm mt-2">Voeg wat data toe (slaap, energie, momenten) om patronen te ontdekken.</p>
+            <div className="text-center p-8 zeus-card rounded-3xl border border-[#2d3436]">
+                <Brain className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-[#C5C6C7]">No insights available yet. Keep tracking your data!</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Jouw Inzichten</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cards.map((card) => (
-                <CoachingCardItem key={card.id} card={card} />
-            ))}
-        </div>
-    );
-}
+                <div
+                    key={card.id}
+                    className="zeus-card rounded-3xl p-6 border border-[#2d3436] relative overflow-hidden group hover:border-[#FF6B00]/50 transition-colors duration-300"
+                >
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 bg-[#FF6B00] opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none"></div>
 
-function CoachingCardItem({ card }: { card: CoachingCard }) {
-    const priorityColors = {
-        1: 'border-red-300 bg-red-50',
-        2: 'border-yellow-300 bg-yellow-50',
-        3: 'border-blue-300 bg-blue-50',
-    };
-
-    const typeIcons = {
-        pattern: '🔍',
-        insight: '💡',
-        growth_edge: '🌱',
-        health: '❤️',
-        relationship: '🤝',
-        authenticity: '✨',
-        win: '🎉',
-    };
-
-    return (
-        <div className={`border-2 rounded-lg p-4 ${priorityColors[card.priority]}`}>
-            <div className="flex items-start gap-3">
-                <div className="text-2xl">{typeIcons[card.type]}</div>
-                <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{card.observation}</h3>
-
-                    {card.reasoning && (
-                        <div className="mb-3">
-                            <p className="text-sm text-gray-700">{card.reasoning}</p>
+                    <div className="flex items-start justify-between mb-4 relative z-10">
+                        <div className={`p-3 rounded-2xl ${card.type === 'insight' ? 'bg-[#FF6B00]/10 text-[#FF6B00]' :
+                                card.type === 'action' ? 'bg-[#66FCF1]/10 text-[#66FCF1]' :
+                                    'bg-purple-500/10 text-purple-400'
+                            }`}>
+                            {card.type === 'insight' && <Lightbulb className="w-6 h-6" />}
+                            {card.type === 'action' && <Target className="w-6 h-6" />}
+                            {card.type === 'question' && <Brain className="w-6 h-6" />}
                         </div>
-                    )}
+                        {card.priority === 'high' && (
+                            <span className="px-3 py-1 bg-red-500/10 text-red-400 text-xs font-mono rounded border border-red-500/20 uppercase tracking-wider">
+                                High Priority
+                            </span>
+                        )}
+                    </div>
 
-                    {card.blindspot && (
-                        <div className="mb-3 p-3 bg-white/50 rounded border border-orange-200">
-                            <p className="text-sm font-medium text-orange-800">⚠️ Blinde vlek:</p>
-                            <p className="text-sm text-gray-700 mt-1">{card.blindspot}</p>
-                        </div>
-                    )}
+                    <h3 className="text-lg font-bold text-white mb-2 font-['Orbitron',sans-serif] tracking-wide relative z-10">
+                        {card.title}
+                    </h3>
 
-                    {card.question && (
-                        <div className="mb-3 p-3 bg-white/50 rounded">
-                            <p className="text-sm font-medium text-gray-800">❓ Vraag voor jou:</p>
-                            <p className="text-sm text-gray-700 mt-1 italic">{card.question}</p>
-                        </div>
-                    )}
+                    <p className="text-[#C5C6C7] text-sm mb-4 leading-relaxed relative z-10">
+                        {card.content}
+                    </p>
 
-                    {card.suggested_action && (
-                        <div className="mb-3">
-                            <p className="text-sm font-medium text-gray-800">💪 Volgende stap:</p>
-                            <p className="text-sm text-gray-700 mt-1">{card.suggested_action}</p>
-                        </div>
-                    )}
+                    <div className="bg-[#0B0C10] p-4 rounded-xl border border-[#2d3436] relative z-10">
+                        <p className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-1">Analysis</p>
+                        <p className="text-xs text-gray-400 italic">"{card.reasoning}"</p>
+                    </div>
 
-                    {card.how_to_implement && (
-                        <div className="mb-3 p-3 bg-white/50 rounded border border-green-200">
-                            <p className="text-sm font-medium text-green-800">✅ Hoe:</p>
-                            <p className="text-sm text-gray-700 mt-1">{card.how_to_implement}</p>
-                        </div>
-                    )}
-
-                    {card.evidence && (
-                        <div className="mt-3 pt-3 border-t border-gray-300">
-                            <p className="text-xs text-gray-500">
-                                Gebaseerd op {card.evidence.data_points} datapunten
-                                {card.evidence.confidence && ` (${(card.evidence.confidence * 100).toFixed(0)}% zekerheid)`}
-                            </p>
-                        </div>
+                    {card.type === 'action' && (
+                        <button className="mt-4 w-full py-3 bg-[#FF6B00] text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#ff8533] transition-colors shadow-[0_0_15px_rgba(255,107,0,0.2)] flex items-center justify-center gap-2 relative z-10">
+                            Accept Mission <ArrowRight className="w-4 h-4" />
+                        </button>
                     )}
                 </div>
-            </div>
+            ))}
         </div>
     );
 }

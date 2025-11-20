@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { CoachingCards } from './CoachingCards';
-import { QuickMoment } from './QuickMoment';
-import { VoiceChat } from './VoiceChat';
 
 interface Message {
     id: string;
@@ -17,13 +15,13 @@ export default function Coach() {
         {
             id: 'welcome',
             role: 'assistant',
-            content: 'Hoi! Ik ben je Personal Coach. Ik heb inzicht in je gezondheid, gewoontes en zakelijke voortgang. Waar kan ik je vandaag mee helpen?',
+            content: 'SYSTEM ONLINE. Personal Coach v2.0 initialized. Accessing health and business metrics... Ready for input.',
             timestamp: new Date(),
         },
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'chat' | 'insights' | 'capture' | 'voice'>('chat');
+    const [activeTab, setActiveTab] = useState<'chat' | 'insights'>('chat');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -108,7 +106,7 @@ export default function Coach() {
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'Sorry, ik kon even geen verbinding maken. Probeer het later nog eens.',
+                content: 'CONNECTION ERROR. Retrying...',
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMessage]);
@@ -125,102 +123,95 @@ export default function Coach() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] max-w-6xl mx-auto p-4">
+        <div className="flex flex-col h-[calc(100vh-4rem)] max-w-6xl mx-auto p-4 text-[#C5C6C7]">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6 p-4 bg-gradient-to-r from-brikx-teal to-teal-600 rounded-2xl text-white shadow-lg">
-                <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
-                    <Sparkles className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-8 p-6 zeus-card rounded-3xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B00] opacity-80"></div>
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-3 bg-[#1F2833] rounded-2xl border border-[#2d3436] shadow-[0_0_15px_rgba(255,107,0,0.2)]">
+                        <Sparkles className="w-6 h-6 text-[#FF6B00]" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-wider text-white mb-1 font-['Orbitron',sans-serif]">
+                            AI <span className="text-[#FF6B00]">COACH</span>
+                        </h1>
+                        <p className="text-[#66FCF1] text-xs uppercase tracking-[0.2em] font-semibold opacity-80">
+                            System Online • v2.0
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-2xl font-bold">Personal Coach</h1>
-                    <p className="text-teal-100 text-sm">Jouw slimme assistent voor gezondheid & business</p>
+                <div className="hidden md:block">
+                    <div className="flex items-center gap-2 text-xs font-mono text-[#FF6B00] bg-[#FF6B00]/10 px-3 py-1 rounded border border-[#FF6B00]/20">
+                        <div className="w-2 h-2 bg-[#FF6B00] rounded-full animate-pulse"></div>
+                        CONNECTED
+                    </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-4 border-b border-gray-200">
-                <button
-                    onClick={() => setActiveTab('chat')}
-                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'chat'
-                            ? 'text-brikx-teal border-b-2 border-brikx-teal'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                >
-                    Chat
-                </button>
-                <button
-                    onClick={() => setActiveTab('insights')}
-                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'insights'
-                            ? 'text-brikx-teal border-b-2 border-brikx-teal'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                >
-                    Inzichten
-                </button>
-                <button
-                    onClick={() => setActiveTab('capture')}
-                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'capture'
-                            ? 'text-brikx-teal border-b-2 border-brikx-teal'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                >
-                    Snel Vastleggen
-                </button>
-                <button
-                    onClick={() => setActiveTab('voice')}
-                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'voice'
-                            ? 'text-brikx-teal border-b-2 border-brikx-teal'
-                            : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                >
-                    Spraak
-                </button>
+            <div className="flex gap-4 mb-6 p-1 overflow-x-auto">
+                {[
+                    { id: 'chat', label: 'CHAT' },
+                    { id: 'insights', label: 'INZICHTEN' }
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`px-6 py-3 font-bold text-sm tracking-wider rounded-xl transition-all duration-300 uppercase whitespace-nowrap ${activeTab === tab.id
+                            ? 'bg-[#FF6B00] text-white shadow-[0_0_20px_rgba(255,107,0,0.4)] translate-y-[-2px]'
+                            : 'bg-[#1F2833] text-gray-400 hover:text-white hover:bg-[#2d3436] border border-transparent hover:border-[#FF6B00]/30'
+                            }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto zeus-card rounded-3xl p-6 border border-[#2d3436]">
                 {activeTab === 'chat' && (
                     <div className="flex flex-col h-full">
                         {/* Chat Area */}
-                        <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        <div className="flex-1 overflow-y-auto mb-6 space-y-6 pr-4 scrollbar-thin scrollbar-thumb-[#FF6B00] scrollbar-track-[#0B0C10]">
                             {messages.map((msg) => (
                                 <div
                                     key={msg.id}
-                                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {msg.role === 'assistant' && (
-                                        <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                                            <Bot className="w-5 h-5 text-brikx-teal" />
+                                        <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-[#FF6B00]/30 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(255,107,0,0.1)]">
+                                            <Bot className="w-5 h-5 text-[#FF6B00]" />
                                         </div>
                                     )}
 
                                     <div
-                                        className={`max-w-[80%] p-4 rounded-2xl shadow-sm ${msg.role === 'user'
-                                            ? 'bg-brikx-teal text-white rounded-tr-none'
-                                            : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'
+                                        className={`max-w-[80%] p-5 rounded-2xl backdrop-blur-sm ${msg.role === 'user'
+                                            ? 'bg-[#FF6B00] text-white rounded-tr-none shadow-[0_4px_15px_rgba(255,107,0,0.3)]'
+                                            : 'bg-[#1F2833] border border-[#2d3436] text-[#C5C6C7] rounded-tl-none'
                                             }`}
                                     >
-                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                        <span className={`text-[10px] mt-2 block ${msg.role === 'user' ? 'text-teal-100' : 'text-gray-400'}`}>
+                                        <p className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</p>
+                                        <span className={`text-[10px] mt-3 block uppercase tracking-wider font-mono opacity-60 ${msg.role === 'user' ? 'text-white' : 'text-[#FF6B00]'
+                                            }`}>
                                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
 
                                     {msg.role === 'user' && (
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                            <User className="w-5 h-5 text-gray-600" />
+                                        <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-gray-700 flex items-center justify-center flex-shrink-0">
+                                            <User className="w-5 h-5 text-gray-400" />
                                         </div>
                                     )}
                                 </div>
                             ))}
                             {isLoading && (
-                                <div className="flex gap-3 justify-start">
-                                    <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="w-5 h-5 text-brikx-teal" />
+                                <div className="flex gap-4 justify-start">
+                                    <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-[#FF6B00]/30 flex items-center justify-center flex-shrink-0">
+                                        <Bot className="w-5 h-5 text-[#FF6B00]" />
                                     </div>
-                                    <div className="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                                        <Loader2 className="w-4 h-4 animate-spin text-brikx-teal" />
-                                        <span className="text-sm text-gray-500">Aan het nadenken...</span>
+                                    <div className="bg-[#1F2833] border border-[#2d3436] p-5 rounded-2xl rounded-tl-none flex items-center gap-3">
+                                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6B00]" />
+                                        <span className="text-xs font-mono text-[#FF6B00] tracking-widest uppercase">Processing...</span>
                                     </div>
                                 </div>
                             )}
@@ -228,19 +219,19 @@ export default function Coach() {
                         </div>
 
                         {/* Input Area */}
-                        <div className="bg-white p-2 rounded-2xl border border-gray-200 shadow-lg flex items-end gap-2">
+                        <div className="bg-[#0B0C10] p-2 rounded-2xl border border-[#2d3436] shadow-inner flex items-end gap-2 relative group focus-within:border-[#FF6B00] transition-colors duration-300">
                             <textarea
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Stel een vraag over je gezondheid, werk of planning..."
-                                className="flex-1 p-3 max-h-32 min-h-[50px] bg-transparent border-none focus:ring-0 resize-none text-gray-800 placeholder-gray-400"
+                                placeholder="TYPE COMMAND..."
+                                className="flex-1 p-4 max-h-32 min-h-[60px] bg-transparent border-none focus:ring-0 resize-none text-white placeholder-gray-600 font-mono text-sm"
                                 rows={1}
                             />
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || isLoading}
-                                className="p-3 bg-brikx-teal text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-1"
+                                className="p-4 bg-[#FF6B00] text-white rounded-xl hover:bg-[#ff8533] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mb-1 shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)]"
                             >
                                 <Send className="w-5 h-5" />
                             </button>
@@ -251,18 +242,6 @@ export default function Coach() {
                 {activeTab === 'insights' && (
                     <div className="p-4">
                         <CoachingCards />
-                    </div>
-                )}
-
-                {activeTab === 'capture' && (
-                    <div className="p-4 max-w-2xl mx-auto">
-                        <QuickMoment />
-                    </div>
-                )}
-
-                {activeTab === 'voice' && (
-                    <div className="p-4 max-w-2xl mx-auto">
-                        <VoiceChat />
                     </div>
                 )}
             </div>
