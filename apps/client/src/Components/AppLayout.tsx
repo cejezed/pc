@@ -82,13 +82,8 @@ export default function AppLayout({
             }}
             className={
               active
-                ? "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all rounded-brikx"
-                : "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all text-white/80 hover:text-white hover:bg-white/10 rounded-brikx"
-            }
-            style={
-              active
-                ? { backgroundColor: '#2D9CDB', color: 'white', boxShadow: '0 4px 12px rgba(45, 156, 219, 0.3)' }
-                : undefined
+                ? "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all rounded-xl bg-[#FF6B00] text-white shadow-[0_0_15px_rgba(255,107,0,0.4)]"
+                : "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all text-[#C5C6C7] hover:text-white hover:bg-[#FF6B00]/10 rounded-xl border border-transparent hover:border-[#FF6B00]/30"
             }
           >
             <span className="shrink-0">{item.icon}</span>
@@ -100,25 +95,24 @@ export default function AppLayout({
   );
 
   return (
-    <div className="min-h-screen text-gray-900" style={{ background: '#d9e0ebff' }}>
+    <div className="min-h-screen text-[#C5C6C7] bg-[#0B0C10]">
       {/* Topbar - RESPONSIVE */}
       <header
-        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between text-white px-3 sm:px-4 md:px-6 shadow-md"
-        style={{ background: '#0A2540' }}
+        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between px-3 sm:px-4 md:px-6 zeus-card border-b border-[#2d3436]"
       >
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Hamburger (mobiel) */}
           <button
             aria-label="Open menu"
-            className="inline-flex items-center justify-center rounded-md p-2 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 md:hidden"
-            style={{ '--tw-ring-color': '#2D9CDB' } as React.CSSProperties}
+            className="inline-flex items-center justify-center rounded-md p-2 hover:bg-[#FF6B00]/10 text-[#FF6B00] focus-visible:outline-none focus-visible:ring-2 md:hidden"
+            style={{ '--tw-ring-color': '#FF6B00' } as React.CSSProperties}
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="text-sm sm:text-base font-semibold tracking-wide">
+          <div className="text-sm sm:text-base font-bold tracking-wider font-['Orbitron',sans-serif] text-white">
             <span className="hidden sm:inline">Brikx </span>
-            <span style={{ color: '#2D9CDB' }}>
+            <span className="text-[#FF6B00]">
               <span className="sm:hidden">Brikx</span>
               <span className="hidden sm:inline">PersonalCoach</span>
             </span>
@@ -127,11 +121,7 @@ export default function AppLayout({
         <div className="flex items-center gap-2">
           <button
             onClick={onLogout}
-            className="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 text-xs sm:text-sm hover:bg-white/10 transition-colors"
-            style={{
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.15)'
-            }}
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 text-xs sm:text-sm hover:bg-[#FF6B00]/10 hover:text-[#FF6B00] hover:border-[#FF6B00]/50 transition-all rounded-xl border border-[#2d3436] text-[#C5C6C7]"
           >
             <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline">Logout</span>
@@ -147,32 +137,24 @@ export default function AppLayout({
 
             {/* Sidebar (desktop only) */}
             <aside className="hidden md:block">
-              <div
-                className="sticky top-16 text-white p-3 lg:p-4 shadow-md"
-                style={{
-                  background: 'linear-gradient(135deg, #0A2540 0%, #0A3552 100%)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(29, 58, 92, 0.4)'
-                }}
-              >
-                <div className="text-xs uppercase tracking-wider px-1 mb-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+              <div className="sticky top-20 zeus-card p-4 rounded-3xl border border-[#2d3436]">
+                <div className="text-xs uppercase tracking-[0.2em] px-1 mb-2 text-[#66FCF1] opacity-70 font-semibold">
                   Navigatie
                 </div>
                 <NavList />
-                <div className="mt-4 pt-3 border-t border-white/10">
+                <div className="mt-6 pt-4 border-t border-[#2d3436]">
                   <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
-                        style={{ backgroundColor: '#2D9CDB' }}
+                        className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-[#1F2833] border border-[#FF6B00] text-[#FF6B00] shadow-[0_0_10px_rgba(255,107,0,0.2)]"
                       >
                         {useAuth().user?.email?.[0].toUpperCase()}
                       </div>
                       <div className="text-xs min-w-0 flex-1">
-                        <p className="font-medium truncate text-white">
+                        <p className="font-bold truncate text-white tracking-wide">
                           {useAuth().user?.user_metadata?.full_name || 'User'}
                         </p>
-                        <p className="text-white/60 truncate">
+                        <p className="text-[#C5C6C7] truncate opacity-60">
                           {useAuth().user?.email}
                         </p>
                       </div>
@@ -195,23 +177,21 @@ export default function AppLayout({
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}
           <div
-            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] text-white p-4 shadow-lg md:hidden overflow-y-auto"
-            style={{
-              background: 'linear-gradient(135deg, #0A2540 0%, #0A3552 100%)',
-              boxShadow: '0 4px 12px rgba(45, 156, 219, 0.3)'
-            }}
+            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] zeus-card p-4 shadow-2xl md:hidden overflow-y-auto border-r border-[#FF6B00]/20"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-semibold text-lg">Menu</div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="font-bold text-lg text-white font-['Orbitron',sans-serif]">
+                MENU
+              </div>
               <button
                 aria-label="Sluit menu"
-                className="rounded-md p-2 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2"
-                style={{ '--tw-ring-color': '#2D9CDB' } as React.CSSProperties}
+                className="rounded-md p-2 hover:bg-[#FF6B00]/10 text-[#FF6B00] focus-visible:outline-none focus-visible:ring-2"
+                style={{ '--tw-ring-color': '#FF6B00' } as React.CSSProperties}
                 onClick={() => setMobileOpen(false)}
               >
                 <X className="w-5 h-5" />

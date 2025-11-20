@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import type { DailyMetric, Task, Idea } from './types';
 import { VoiceChat } from '../coach/VoiceChat';
 import { QuickMoment } from '../coach/QuickMoment';
+import { format } from 'date-fns';
+import { nl } from 'date-fns/locale';
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
@@ -255,9 +257,6 @@ export default function Dashboard() {
 
       const { error } = await supabase
         .from('ideas')
-        .delete()
-        .eq('id', id);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -290,499 +289,463 @@ export default function Dashboard() {
     }
   }, [todayMetrics]);
 
-  const ScoreSelector = ({
-    label,
-    icon: Icon,
-    iconColor,
-    value,
-    onChange,
-    lowLabel,
-    highLabel
-  }: {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    iconColor: string;
-    value: number;
-    onChange: (score: number) => void;
-    lowLabel: string;
-    highLabel: string;
-  }) => (
-    <div>
-      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-        <Icon className={`w-4 h-4 ${iconColor}`} />
-        {label}
-      </label>
-      <div className="flex gap-2 mb-2">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+  return (
+    <div className="min-h-screen bg-[#0B0C10] text-[#C5C6C7] p-4 md:p-8 font-sans selection:bg-[#FF6B00]/30">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1F2833] p-6 rounded-2xl border border-[#FF6B00]/20 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent opacity-50"></div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-1 drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)]">
+              DASHBOARD <span className="text-[#FF6B00]">ZEUS-X</span>
+            </h1>
+            <p className="text-[#C5C6C7] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#66FCF1] animate-pulse"></span>
+              {format(today, 'EEEE d MMMM yyyy', { locale: nl })}
+            </p>
+          </div>
+
           <button
-            key={score}
-            onClick={() => onChange(score)}
-            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${value === score
-              ? 'bg-brikx-teal text-white shadow-lg'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+            onClick={() => setShowVoice(!showVoice)}
+            className={`p-4 rounded-full shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-all transform hover:scale-105 ${showVoice
+              ? 'bg-[#FF6B00] text-white ring-4 ring-[#FF6B00]/30'
+              : 'bg-[#1F2833] text-[#FF6B00] border border-[#FF6B00] hover:bg-[#FF6B00] hover:text-white'
               }`}
           >
-            {score}
+            <Phone className="w-6 h-6" />
           </button>
-        ))}
+        </div>
+
+        {/* Voice Chat Overlay */}
+        {showVoice && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-2xl relative">
+              <button
+                onClick={() => setShowVoice(false)}
+                className="absolute -top-12 right-0 text-[#C5C6C7] hover:text-[#FF6B00] transition-colors font-medium"
+              >
+                Sluiten [ESC]
+              </button>
+              <VoiceChat />
+            </div>
+          </div>
+        )}
+
+        {/* Pending Affirmation */}
+        {pendingAffirmation && (
+          <div className="bg-gradient-to-r from-[#1F2833] to-[#0B0C10] border border-[#FF6B00]/30 rounded-xl p-6 text-white shadow-[0_0_15px_rgba(255,107,0,0.1)] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-[#FF6B00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="flex items-start justify-between gap-4 relative z-10">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-[#FF6B00] animate-pulse" />
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-white tracking-wide">
+                    Jouw dagelijkse affirmatie
+                    {new Date().getHours() >= 20 && (
+                      <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/50 px-2 py-1 rounded font-semibold">
+                        Laatste kans vandaag!
+                      </span>
+                    )}
+                  </h3>
+                </div>
+                <p className="text-xl mb-6 text-[#C5C6C7] italic font-light leading-relaxed">
+                  "{pendingAffirmation.statement}"
+                </p>
+                <button
+                  onClick={() => window.location.hash = '#affirmaties'}
+                  className="bg-[#FF6B00] text-white hover:bg-[#FF6B00]/80 px-6 py-2.5 rounded-lg font-bold transition-all shadow-[0_0_10px_rgba(255,107,0,0.3)] hover:shadow-[0_0_20px_rgba(255,107,0,0.5)] transform hover:-translate-y-0.5"
+                >
+                  Start Ritueel Nu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Quick Capture & Tasks */}
+          <div className="lg:col-span-2 space-y-6">
+            <QuickMoment />
+
+            {/* Tasks */}
+            <div className="bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-6 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                  <CheckSquare className="w-5 h-5 text-[#FF6B00]" />
+                  Taken
+                </h3>
+                <span className="text-xs font-mono text-[#FF6B00] bg-[#FF6B00]/10 px-2 py-1 rounded border border-[#FF6B00]/20">
+                  {tasks.filter(t => t.status === 'done').length}/{tasks.length}
+                </span>
+              </div>
+
+              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                {tasks.filter(t => t.status !== 'done').map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-3 p-3 hover:bg-[#0B0C10] rounded-lg transition-all group border border-transparent hover:border-[#FF6B00]/10"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={task.status === 'done'}
+                      onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
+                      className="w-5 h-5 text-[#FF6B00] bg-[#0B0C10] border-[#2d3436] rounded focus:ring-[#FF6B00] focus:ring-offset-0 transition-all cursor-pointer"
+                    />
+                    <span className={`flex-1 text-sm font-medium transition-colors ${task.status === 'done' ? 'line-through text-[#66FCF1]/50' : 'text-[#C5C6C7] group-hover:text-white'
+                      }`}>
+                      {task.title}
+                    </span>
+                    <button
+                      onClick={() => deleteTask.mutate(task.id)}
+                      className="opacity-0 group-hover:opacity-100 text-[#FF6B00] hover:text-red-500 transition-all p-2 hover:bg-[#FF6B00]/10 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {tasks.length === 0 && (
+                  <p className="text-sm text-[#C5C6C7]/50 text-center py-8 italic">Geen taken. Tijd voor actie?</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 relative z-10">
+                <input
+                  type="text"
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
+                  placeholder="Nieuwe taak toevoegen..."
+                  className="flex-1 bg-[#0B0C10] border border-[#2d3436] rounded-lg px-4 py-3 text-sm text-white placeholder-[#C5C6C7]/30 focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent transition-all shadow-inner"
+                />
+                <button
+                  onClick={() => newTask.trim() && addTask.mutate(newTask)}
+                  disabled={!newTask.trim()}
+                  className="bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Ideas */}
+            <div className="bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-6 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                  <Lightbulb className="w-5 h-5 text-[#FF6B00]" />
+                  Ideeën
+                </h3>
+                <span className="text-xs font-mono text-[#FF6B00] bg-[#FF6B00]/10 px-2 py-1 rounded border border-[#FF6B00]/20">{ideas.length}</span>
+              </div>
+
+              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                {ideas.map((idea) => (
+                  <div
+                    key={idea.id}
+                    className="flex items-start gap-3 p-3 hover:bg-[#0B0C10] rounded-lg transition-all group border border-transparent hover:border-[#FF6B00]/10"
+                  >
+                    <span className="text-[#FF6B00] mt-0.5 shrink-0 drop-shadow-[0_0_5px_rgba(255,107,0,0.5)]">💡</span>
+                    <span className="flex-1 text-sm text-[#C5C6C7] font-medium group-hover:text-white transition-colors">{idea.title}</span>
+                    <button
+                      onClick={() => deleteIdea.mutate(idea.id)}
+                      className="opacity-0 group-hover:opacity-100 text-[#FF6B00] hover:text-red-500 transition-all p-2 hover:bg-[#FF6B00]/10 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {ideas.length === 0 && (
+                  <p className="text-sm text-[#C5C6C7]/50 text-center py-8 italic">Geen ideeën. Laat je creativiteit stromen!</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 relative z-10">
+                <input
+                  type="text"
+                  value={newIdea}
+                  onChange={(e) => setNewIdea(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
+                  placeholder="Nieuw idee vastleggen..."
+                  className="flex-1 bg-[#0B0C10] border border-[#2d3436] rounded-lg px-4 py-3 text-sm text-white placeholder-[#C5C6C7]/30 focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent transition-all shadow-inner"
+                />
+                <button
+                  onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
+                  disabled={!newIdea.trim()}
+                  className="bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Daily Check-in */}
+          <div className="space-y-6">
+            <div className="bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-6 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              <h3 className="text-lg font-bold text-white mb-6 relative z-10 tracking-wide border-b border-[#FF6B00]/20 pb-2">
+                Dagelijkse Check-in
+              </h3>
+
+              <div className="space-y-6 relative z-10">
+                {/* Energie & Slaap Scores */}
+                <ScoreSelector
+                  label="Energie niveau"
+                  icon={Zap}
+                  iconColor="text-[#FF6B00]"
+                  value={dailyMetrics.energie_score || 0}
+                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, energie_score: score })}
+                  lowLabel="Uitgeput"
+                  highLabel="Energiek"
+                />
+
+                <ScoreSelector
+                  label="Slaap kwaliteit"
+                  icon={Moon}
+                  iconColor="text-[#66FCF1]"
+                  value={dailyMetrics.slaap_score || 0}
+                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, slaap_score: score })}
+                  lowLabel="Slecht"
+                  highLabel="Uitgerust"
+                />
+
+                {/* Slaap Tijden */}
+                <div className="grid grid-cols-2 gap-4">
+                  <TimeInput
+                    label="Bedtijd"
+                    icon={Moon}
+                    iconColor="text-[#C5C6C7]"
+                    value={dailyMetrics.bedtijd}
+                    onChange={(time) => setDailyMetrics({ ...dailyMetrics, bedtijd: time })}
+                    placeholder="22:00"
+                  />
+                  <TimeInput
+                    label="Wakker tijd"
+                    icon={Moon}
+                    iconColor="text-[#C5C6C7]"
+                    value={dailyMetrics.wakker_tijd}
+                    onChange={(time) => setDailyMetrics({ ...dailyMetrics, wakker_tijd: time })}
+                    placeholder="07:00"
+                  />
+                </div>
+
+                {/* Pijn & Stress Scores */}
+                <ScoreSelector
+                  label="Schouderpijn"
+                  icon={Heart}
+                  iconColor="text-red-500"
+                  value={dailyMetrics.schouder_pijn || 0}
+                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, schouder_pijn: score })}
+                  lowLabel="Veel pijn"
+                  highLabel="Geen pijn"
+                />
+
+                <ScoreSelector
+                  label="Stress niveau"
+                  icon={Brain}
+                  iconColor="text-pink-500"
+                  value={dailyMetrics.stress_niveau || 0}
+                  onChange={(score) => setDailyMetrics({ ...dailyMetrics, stress_niveau: score })}
+                  lowLabel="Zeer gestrest"
+                  highLabel="Zeer relaxed"
+                />
+
+                {/* Slaap Details */}
+                <div className="space-y-2">
+                  <CheckboxItem
+                    label="Lang wakker geweest"
+                    icon={Moon}
+                    iconColor="text-[#C5C6C7]"
+                    checked={dailyMetrics.lang_wakker || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, lang_wakker: checked })}
+                  />
+                  <CheckboxItem
+                    label="Kort wakker geweest"
+                    icon={Moon}
+                    iconColor="text-[#C5C6C7]"
+                    checked={dailyMetrics.kort_wakker || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
+                  />
+                  <CheckboxItem
+                    label="Powernap"
+                    icon={Moon}
+                    iconColor="text-[#66FCF1]"
+                    checked={dailyMetrics.nap || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, nap: checked })}
+                  />
+                </div>
+
+                {/* Activiteiten */}
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-white mb-3 uppercase tracking-wider text-xs opacity-70">Activiteiten vandaag</p>
+                  <CheckboxItem
+                    label="Ochtend workout"
+                    icon={Dumbbell}
+                    iconColor="text-[#FF6B00]"
+                    checked={dailyMetrics.ochtend_workout || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ochtend_workout: checked })}
+                  />
+                  <CheckboxItem
+                    label="Golfen geoefend"
+                    icon={Activity}
+                    iconColor="text-green-500"
+                    checked={dailyMetrics.golf_oefenen || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golf_oefenen: checked })}
+                  />
+                  <CheckboxItem
+                    label="Golfen"
+                    icon={Activity}
+                    iconColor="text-emerald-500"
+                    checked={dailyMetrics.golfen || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golfen: checked })}
+                  />
+                  <CheckboxItem
+                    label="MTB gereden"
+                    icon={Activity}
+                    iconColor="text-orange-500"
+                    checked={dailyMetrics.mtb || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, mtb: checked })}
+                  />
+                  <CheckboxItem
+                    label="Workout gedaan"
+                    icon={Dumbbell}
+                    iconColor="text-red-500"
+                    checked={dailyMetrics.workout_done || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, workout_done: checked })}
+                  />
+                </div>
+
+                {/* Gezondheid */}
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-white mb-3 uppercase tracking-wider text-xs opacity-70">Gezondheid</p>
+                  <CheckboxItem
+                    label="Ogen schoonmaken"
+                    icon={Eye}
+                    iconColor="text-[#66FCF1]"
+                    checked={dailyMetrics.ogen_schoonmaken || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ogen_schoonmaken: checked })}
+                  />
+                  <CheckboxItem
+                    label="Oogdruppels"
+                    icon={Eye}
+                    iconColor="text-blue-500"
+                    checked={dailyMetrics.oogdruppels || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, oogdruppels: checked })}
+                  />
+                  <CheckboxItem
+                    label="Allergie medicatie"
+                    icon={Pill}
+                    iconColor="text-pink-500"
+                    checked={dailyMetrics.allergie_medicatie || false}
+                    onChange={(checked) => setDailyMetrics({ ...dailyMetrics, allergie_medicatie: checked })}
+                  />
+                </div>
+
+                {/* Save Button */}
+                <button
+                  onClick={() => saveDailyMetrics.mutate()}
+                  disabled={
+                    (dailyMetrics.energie_score || 0) === 0 ||
+                    (dailyMetrics.slaap_score || 0) === 0 ||
+                    saveDailyMetrics.isPending
+                  }
+                  className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)] disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                >
+                  {saveDailyMetrics.isPending ? 'Opslaan...' : 'Check-in Opslaan'}
+                </button>
+
+                {/* Success Message */}
+                {todayMetrics && (
+                  <div className="bg-[#0B0C10] border border-green-500/30 rounded-lg p-4 shadow-[0_0_10px_rgba(0,255,0,0.1)]">
+                    <p className="text-sm text-green-400 font-bold mb-2 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                      Vandaag opgeslagen
+                    </p>
+                    <div className="text-xs text-[#C5C6C7] space-y-1 font-mono">
+                      <p>🔋 Energie: {todayMetrics.energie_score}/10</p>
+                      <p>😴 Slaap: {todayMetrics.slaap_score}/10</p>
+                      {todayMetrics.bedtijd && todayMetrics.wakker_tijd && (
+                        <p>🌙 Slaap: {todayMetrics.bedtijd} - {todayMetrics.wakker_tijd}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="flex justify-between text-xs text-gray-500">
+    </div>
+  );
+}
+
+function ScoreSelector({ label, icon: Icon, iconColor, value, onChange, lowLabel, highLabel }: any) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-[#C5C6C7] flex items-center gap-2">
+          <Icon className={`w-4 h-4 ${iconColor}`} />
+          {label}
+        </label>
+        <span className="text-lg font-bold text-white">{value}/10</span>
+      </div>
+      <input
+        type="range"
+        min="0"
+        max="10"
+        step="1"
+        value={value}
+        onChange={(e) => onChange(parseInt(e.target.value))}
+        className="w-full h-2 bg-[#0B0C10] rounded-lg appearance-none cursor-pointer accent-[#FF6B00]"
+      />
+      <div className="flex justify-between text-xs text-[#C5C6C7]/50 font-mono">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>
     </div>
   );
+}
 
-  const CheckboxItem = ({
-    label,
-    icon: Icon,
-    iconColor,
-    checked,
-    onChange,
-  }: {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    iconColor: string;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-  }) => (
-    <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-gray-200 rounded-lg hover:border-brikx-teal transition-colors">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="w-5 h-5 text-brikx-teal rounded focus:ring-2 focus:ring-brikx-teal"
-      />
-      <Icon className={`w-5 h-5 ${iconColor}`} />
-      <span className="flex-1 font-medium text-gray-900">{label}</span>
-    </label>
+function CheckboxItem({ label, icon: Icon, iconColor, checked, onChange }: any) {
+  return (
+    <div
+      onClick={() => onChange(!checked)}
+      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border ${checked
+        ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30'
+        : 'bg-[#0B0C10] border-[#2d3436] hover:border-[#FF6B00]/30'
+        }`}
+    >
+      <div className={`p-2 rounded-full ${checked ? 'bg-[#FF6B00]/20' : 'bg-[#1F2833]'}`}>
+        <Icon className={`w-4 h-4 ${checked ? 'text-[#FF6B00]' : 'text-[#C5C6C7]'}`} />
+      </div>
+      <span className={`flex-1 text-sm font-medium ${checked ? 'text-white' : 'text-[#C5C6C7]'}`}>
+        {label}
+      </span>
+      <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${checked
+        ? 'bg-[#FF6B00] border-[#FF6B00]'
+        : 'border-[#2d3436]'
+        }`}>
+        {checked && <CheckSquare className="w-3 h-3 text-white" />}
+      </div>
+    </div>
   );
+}
 
-  const TimeInput = ({
-    label,
-    icon: Icon,
-    iconColor,
-    value,
-    onChange,
-    placeholder,
-  }: {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    iconColor: string;
-    value?: string;
-    onChange: (time: string) => void;
-    placeholder: string;
-  }) => (
-    <div>
-      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-        <Icon className={`w-4 h-4 ${iconColor}`} />
+function TimeInput({ label, icon: Icon, iconColor, value, onChange, placeholder }: any) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-medium text-[#C5C6C7] flex items-center gap-1.5 mb-1.5">
+        <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
         {label}
       </label>
       <input
         type="time"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-[#0B0C10] border border-[#2d3436] rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent transition-all"
         placeholder={placeholder}
-        className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-brikx-teal focus:border-brikx-teal transition-all"
       />
-    </div>
-  );
-
-  return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6 relative">
-      {/* Header with Voice Button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-brikx-dark mb-2">Dashboard</h1>
-          <p className="text-gray-600">Goedemorgen! Hier is je dagelijkse overzicht.</p>
-        </div>
-        <button
-          onClick={() => setShowVoice(!showVoice)}
-          className={`p-4 rounded-full shadow-lg transition-all transform hover:scale-105 ${showVoice
-            ? 'bg-[#FF6B00] text-white ring-4 ring-[#FF6B00]/30'
-            : 'bg-white text-[#FF6B00] border-2 border-[#FF6B00]'
-            }`}
-        >
-          <Phone className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Voice Chat Overlay */}
-      {showVoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl relative">
-            <button
-              onClick={() => setShowVoice(false)}
-              className="absolute -top-12 right-0 text-white hover:text-[#FF6B00] transition-colors"
-            >
-              Sluiten [ESC]
-            </button>
-            <VoiceChat />
-          </div>
-        </div>
-      )}
-
-      {pendingAffirmation && (
-        <div className="bg-gradient-to-r from-brikx-teal to-brikx-teal-dark rounded-brikx p-6 text-white shadow-lg">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5" />
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  Jouw dagelijkse affirmatie
-                  {new Date().getHours() >= 20 && (
-                    <span className="text-xs bg-red-500 px-2 py-1 rounded font-semibold">
-                      Laatste kans vandaag!
-                    </span>
-                  )}
-                </h3>
-              </div>
-              <p className="text-lg mb-4 text-white/95">
-                "{pendingAffirmation.statement}"
-              </p>
-              <button
-                onClick={() => window.location.hash = '#affirmaties'}
-                className="bg-white text-brikx-teal hover:bg-gray-100 px-6 py-2.5 rounded-brikx font-semibold transition-all shadow-lg"
-              >
-                Start Ritueel Nu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Quick Capture & Tasks */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Quick Capture Section */}
-          <QuickMoment />
-
-          {/* Tasks */}
-          <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-brikx-dark flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-brikx-teal" />
-                Taken
-              </h3>
-              <span className="text-sm text-gray-500">
-                {tasks.filter(t => t.status === 'done').length}/{tasks.length}
-              </span>
-            </div>
-
-            <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {tasks.filter(t => t.status !== 'done').map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.status === 'done'}
-                    onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
-                    className="w-4 h-4 text-brikx-teal rounded focus:ring-2 focus:ring-brikx-teal shrink-0"
-                  />
-                  <span className={`flex-1 text-sm font-medium ${task.status === 'done' ? 'line-through text-gray-400' : 'text-gray-900'
-                    }`}>
-                    {task.title}
-                  </span>
-                  <button
-                    onClick={() => deleteTask.mutate(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all p-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              {tasks.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">Geen taken. Voeg er een toe!</p>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
-                placeholder="Nieuwe taak..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
-              />
-              <button
-                onClick={() => newTask.trim() && addTask.mutate(newTask)}
-                disabled={!newTask.trim()}
-                className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-4 py-2 rounded-lg transition-all disabled:bg-gray-300"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Ideas */}
-          <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-brikx-dark flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-yellow-500" />
-                Ideeën
-              </h3>
-              <span className="text-sm text-gray-500">{ideas.length}</span>
-            </div>
-
-            <div className="space-y-2 mb-4 max-h-80 overflow-y-auto">
-              {ideas.map((idea) => (
-                <div
-                  key={idea.id}
-                  className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
-                >
-                  <span className="text-yellow-500 mt-0.5 shrink-0">💡</span>
-                  <span className="flex-1 text-sm text-gray-900 font-medium">{idea.title}</span>
-                  <button
-                    onClick={() => deleteIdea.mutate(idea.id)}
-                    className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all p-1 shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              {ideas.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">Geen ideeën. Voeg er een toe!</p>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newIdea}
-                onChange={(e) => setNewIdea(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
-                placeholder="Nieuw idee..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500"
-              />
-              <button
-                onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
-                disabled={!newIdea.trim()}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-all disabled:bg-gray-300"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Daily Check-in */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-brikx-dark mb-6">
-              Dagelijkse Check-in
-            </h3>
-
-            <div className="space-y-6">
-              {/* Energie & Slaap Scores */}
-              <ScoreSelector
-                label="Energie niveau"
-                icon={Zap}
-                iconColor="text-orange-500"
-                value={dailyMetrics.energie_score || 0}
-                onChange={(score) => setDailyMetrics({ ...dailyMetrics, energie_score: score })}
-                lowLabel="Uitgeput"
-                highLabel="Energiek"
-              />
-
-              <ScoreSelector
-                label="Slaap kwaliteit"
-                icon={Moon}
-                iconColor="text-blue-500"
-                value={dailyMetrics.slaap_score || 0}
-                onChange={(score) => setDailyMetrics({ ...dailyMetrics, slaap_score: score })}
-                lowLabel="Slecht"
-                highLabel="Uitgerust"
-              />
-
-              {/* Slaap Tijden */}
-              <div className="grid grid-cols-2 gap-4">
-                <TimeInput
-                  label="Bedtijd"
-                  icon={Moon}
-                  iconColor="text-indigo-500"
-                  value={dailyMetrics.bedtijd}
-                  onChange={(time) => setDailyMetrics({ ...dailyMetrics, bedtijd: time })}
-                  placeholder="22:00"
-                />
-                <TimeInput
-                  label="Wakker tijd"
-                  icon={Moon}
-                  iconColor="text-amber-500"
-                  value={dailyMetrics.wakker_tijd}
-                  onChange={(time) => setDailyMetrics({ ...dailyMetrics, wakker_tijd: time })}
-                  placeholder="07:00"
-                />
-              </div>
-
-              {/* Pijn & Stress Scores */}
-              <ScoreSelector
-                label="Schouderpijn"
-                icon={Heart}
-                iconColor="text-red-500"
-                value={dailyMetrics.schouder_pijn || 0}
-                onChange={(score) => setDailyMetrics({ ...dailyMetrics, schouder_pijn: score })}
-                lowLabel="Veel pijn"
-                highLabel="Geen pijn"
-              />
-
-              <ScoreSelector
-                label="Stress niveau"
-                icon={Brain}
-                iconColor="text-pink-500"
-                value={dailyMetrics.stress_niveau || 0}
-                onChange={(score) => setDailyMetrics({ ...dailyMetrics, stress_niveau: score })}
-                lowLabel="Zeer gestrest"
-                highLabel="Zeer relaxed"
-              />
-
-              {/* Slaap Details */}
-              <div className="space-y-2">
-                <CheckboxItem
-                  label="Lang wakker geweest"
-                  icon={Moon}
-                  iconColor="text-purple-500"
-                  checked={dailyMetrics.lang_wakker || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, lang_wakker: checked })}
-                />
-                <CheckboxItem
-                  label="Kort wakker geweest"
-                  icon={Moon}
-                  iconColor="text-indigo-500"
-                  checked={dailyMetrics.kort_wakker || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, kort_wakker: checked })}
-                />
-                <CheckboxItem
-                  label="Powernap"
-                  icon={Moon}
-                  iconColor="text-blue-400"
-                  checked={dailyMetrics.nap || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, nap: checked })}
-                />
-              </div>
-
-
-              {/* Activiteiten */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 mb-2">Activiteiten vandaag</p>
-                <CheckboxItem
-                  label="Ochtend workout"
-                  icon={Dumbbell}
-                  iconColor="text-purple-500"
-                  checked={dailyMetrics.ochtend_workout || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ochtend_workout: checked })}
-                />
-                <CheckboxItem
-                  label="Golfen geoefend"
-                  icon={Activity}
-                  iconColor="text-green-500"
-                  checked={dailyMetrics.golf_oefenen || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golf_oefenen: checked })}
-                />
-                <CheckboxItem
-                  label="Golfen"
-                  icon={Activity}
-                  iconColor="text-emerald-500"
-                  checked={dailyMetrics.golfen || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, golfen: checked })}
-                />
-                <CheckboxItem
-                  label="MTB gereden"
-                  icon={Activity}
-                  iconColor="text-orange-500"
-                  checked={dailyMetrics.mtb || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, mtb: checked })}
-                />
-                <CheckboxItem
-                  label="Workout gedaan"
-                  icon={Dumbbell}
-                  iconColor="text-red-500"
-                  checked={dailyMetrics.workout_done || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, workout_done: checked })}
-                />
-              </div>
-
-              {/* Gezondheid */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 mb-2">Gezondheid</p>
-                <CheckboxItem
-                  label="Ogen schoonmaken"
-                  icon={Eye}
-                  iconColor="text-cyan-500"
-                  checked={dailyMetrics.ogen_schoonmaken || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, ogen_schoonmaken: checked })}
-                />
-                <CheckboxItem
-                  label="Oogdruppels"
-                  icon={Eye}
-                  iconColor="text-blue-600"
-                  checked={dailyMetrics.oogdruppels || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, oogdruppels: checked })}
-                />
-                <CheckboxItem
-                  label="Allergie medicatie"
-                  icon={Pill}
-                  iconColor="text-pink-500"
-                  checked={dailyMetrics.allergie_medicatie || false}
-                  onChange={(checked) => setDailyMetrics({ ...dailyMetrics, allergie_medicatie: checked })}
-                />
-              </div>
-
-
-              {/* Save Button */}
-              <button
-                onClick={() => saveDailyMetrics.mutate()}
-                disabled={
-                  (dailyMetrics.energie_score || 0) === 0 ||
-                  (dailyMetrics.slaap_score || 0) === 0 ||
-                  saveDailyMetrics.isPending
-                }
-                className="w-full bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-3 rounded-brikx font-semibold transition-all shadow-brikx disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                {saveDailyMetrics.isPending ? 'Opslaan...' : 'Check-in Opslaan'}
-              </button>
-
-              {/* Success Message */}
-              {todayMetrics && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-800 font-medium mb-2">
-                    ✅ Vandaag opgeslagen
-                  </p>
-                  <div className="text-xs text-green-700 space-y-1">
-                    <p>🔋 Energie: {todayMetrics.energie_score}/10</p>
-                    <p>😴 Slaap: {todayMetrics.slaap_score}/10</p>
-                    {todayMetrics.bedtijd && todayMetrics.wakker_tijd && (
-                      <p>🌙 Slaap: {todayMetrics.bedtijd} - {todayMetrics.wakker_tijd}</p>
-                    )}
-                    {todayMetrics.schouder_pijn > 0 && (
-                      <p>💪 Schouderpijn: {todayMetrics.schouder_pijn}/10</p>
-                    )}
-                    {todayMetrics.stress_niveau > 0 && (
-                      <p>🧠 Stress: {todayMetrics.stress_niveau}/10</p>
-                    )}
-                    <p className="mt-2 font-medium">Activiteiten:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {todayMetrics.ochtend_workout && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Ochtend workout</span>}
-                      {todayMetrics.golf_oefenen && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">Golf oefenen</span>}
-                      {todayMetrics.golfen && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs">Golfen</span>}
-                      {todayMetrics.mtb && <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">MTB</span>}
-                      {todayMetrics.workout_done && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs">Workout</span>}
-                      {todayMetrics.lang_wakker && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Lang wakker</span>}
-                      {todayMetrics.kort_wakker && <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">Kort wakker</span>}
-                      {todayMetrics.nap && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Powernap</span>}
-                      {todayMetrics.ogen_schoonmaken && <span className="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-xs">Ogen schoonmaken</span>}
-                      {todayMetrics.oogdruppels && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Oogdruppels</span>}
-                      {todayMetrics.allergie_medicatie && <span className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">Allergie medicatie</span>}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
