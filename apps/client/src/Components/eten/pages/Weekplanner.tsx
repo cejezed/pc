@@ -80,12 +80,26 @@ export default function WeekplannerPage() {
     const mealTypes: MealType[] = ['ontbijt', 'lunch', 'avond'];
     const newMealPlans: { date: string; mealType: MealType; recipeId: string; servings: number }[] = [];
 
-    // Helper to get random recipe by category
-    const getRandomRecipe = (type: MealType) => {
-      const categoryTag = `cat:${type}`;
-      const eligibleRecipes = recipes.filter(r => r.tags.includes(categoryTag));
-      if (eligibleRecipes.length === 0) return null;
-      return eligibleRecipes[Math.floor(Math.random() * eligibleRecipes.length)];
+    // Track used recipes to prevent duplicates
+    const usedRecipeIds = new Set<string>();
+
+    // Initialize with recipes already in the current week
+    Object.values(mealPlansByDate).forEach(day => {
+      Object.values(day).forEach(plan => {
+        if (plan?.recipe_id) {
+          usedRecipeIds.add(plan.recipe_id);
+        }
+      });
+    });
+
+    // Helper to shuffle array
+    const shuffleArray = <T,>(array: T[]): T[] => {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
     };
 
     for (const date of daysToPlan) {
@@ -95,14 +109,35 @@ export default function WeekplannerPage() {
         // Check if meal already exists
         if (mealPlansByDate[dateStr]?.[type]) continue;
 
-        const recipe = getRandomRecipe(type);
-        if (recipe) {
+        // Get eligible recipes for this category
+        const categoryTag = `cat:${type}`;
+        let eligibleRecipes = recipes.filter(r => r.tags.includes(categoryTag));
+
+        // Filter out already used recipes
+        let availableRecipes = eligibleRecipes.filter(r => !usedRecipeIds.has(r.id));
+
+        // If we ran out of unique recipes, reset the used list for this category (fallback)
+        // But try to keep the ones used in THIS generation batch if possible, or just allow duplicates if really needed
+        if (availableRecipes.length === 0 && eligibleRecipes.length > 0) {
+          // Soft reset: allow reusing recipes, but prefer ones not used in this batch if possible
+          // For now, just use all eligible again
+          availableRecipes = eligibleRecipes;
+        }
+
+        if (availableRecipes.length > 0) {
+          // Pick a random one from the available list
+          const shuffled = shuffleArray(availableRecipes);
+          const selectedRecipe = shuffled[0];
+
           newMealPlans.push({
             date: dateStr,
             mealType: type,
-            recipeId: recipe.id,
-            servings: recipe.default_servings
+            recipeId: selectedRecipe.id,
+            servings: selectedRecipe.default_servings
           });
+
+          // Mark as used
+          usedRecipeIds.add(selectedRecipe.id);
         }
       }
     }
@@ -435,8 +470,8 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
           onDelete(mealPlan.id);
         }}
         className={`absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${hasImage
-            ? 'bg-black/20 text-white hover:bg-red-500 hover:text-white backdrop-blur-sm'
-            : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500'
+          ? 'bg-black/20 text-white hover:bg-red-500 hover:text-white backdrop-blur-sm'
+          : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500'
           }`}
         title="Verwijderen"
       >

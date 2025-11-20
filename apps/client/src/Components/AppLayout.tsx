@@ -35,7 +35,8 @@ type Page =
   | "abonnementen"
   | "tekopen"
   | "affirmaties"
-  | "simple-import";
+  | "simple-import"
+  | "coach";
 
 type AppLayoutProps = PropsWithChildren<{
   currentPage: Page;
@@ -45,6 +46,7 @@ type AppLayoutProps = PropsWithChildren<{
 
 const NAV: Array<{ key: Page; label: string; icon: React.ReactNode }> = [
   { key: "home", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+  { key: "coach", label: "Personal Coach", icon: <Sparkles size={18} /> },
   { key: "analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
   { key: "uren", label: "Uren", icon: <Clock size={18} /> },
   { key: "facturen", label: "Facturen", icon: <FileText size={18} /> },
@@ -222,85 +224,3 @@ export default function AppLayout({
     </div>
   );
 }
-
-/* 
-===================================
-KEY RESPONSIVE CHANGES EXPLAINED:
-===================================
-
-1. TOPBAR:
-   - Height: h-12 sm:h-14 (smaller on mobile)
-   - Padding: px-3 sm:px-4 md:px-6 (scales up)
-   - Logo: "Brikx" only on mobile, full name on desktop
-   - Logout button: Icon only on mobile, text on desktop
-
-2. MAIN CONTAINER:
-   - REMOVED max-w-7xl (was limiting width too much)
-   - Added max-w-[1920px] for ultra-wide screens only
-   - Padding: px-3 sm:px-4 md:px-6 (responsive)
-   - Full width until very large screens
-
-3. GRID LAYOUT:
-   - Mobile: No grid, full width content
-   - md: 220px sidebar + remaining space
-   - lg: 240px sidebar (slightly wider)
-   - xl: 260px sidebar (even more space)
-   - Gap: gap-4 lg:gap-6 (more space on large screens)
-
-4. SIDEBAR:
-   - Hidden on mobile (hamburger menu instead)
-   - Padding: p-3 lg:p-4 (scales with screen)
-   - Sticky positioning with top-16
-
-5. MOBILE DRAWER:
-   - Width: w-[280px] sm:w-72 (280px on small phones, 288px on larger)
-   - Max width: max-w-[85%] (never covers entire screen)
-   - Overflow-y-auto (scrollable if many nav items)
-
-6. CONTENT AREA:
-   - min-w-0: Prevents content from overflowing grid
-   - w-full: Always full width of available space
-   - No max-width constraint on content itself
-
-7. SPACING SCALE:
-   xs (< 640px):   px-3, py-3, gap-2
-   sm (640px):     px-4, py-4, gap-3
-   md (768px):     px-6, py-6, gap-4
-   lg (1024px):    Same but larger sidebar
-   xl (1280px):    Even larger sidebar
-
-8. TYPOGRAPHY:
-   - Logo: text-sm sm:text-base (smaller on mobile)
-   - Nav items: text-sm (consistent, good on all sizes)
-   - Buttons: text-xs sm:text-sm (scales)
-
-===================================
-WAAROM WERKT DIT BETER:
-===================================
-
-❌ OUDE PROBLEMEN:
-- max-w-7xl was te beperkt (1280px max)
-- Content werd niet full-width op tablets
-- Sidebar te breed op medium screens
-- Topbar te hoog op mobile
-- Logo te lang op kleine screens
-
-✅ NIEUWE OPLOSSINGEN:
-- Content gebruikt alle beschikbare ruimte
-- Sidebar schaalt mee met viewport
-- Topbar compacter op mobile
-- Logo past zich aan
-- Spacing past zich aan aan schermgrootte
-
-===================================
-TESTING CHECKLIST:
-===================================
-
-□ iPhone SE (375px): Logo leesbaar, menu werkt
-□ iPhone 14 (390px): Content full width
-□ iPad Mini (768px): Sidebar verschijnt, content niet te smal
-□ iPad Pro (1024px): Grotere sidebar, goede balans
-□ Laptop (1440px): Ruime layout
-□ Desktop (1920px): Gebruikt alle ruimte, niet te uitgerekt
-
-*/

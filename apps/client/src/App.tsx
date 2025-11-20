@@ -16,8 +16,9 @@ import Affirmations from './Components/Affirmations/Affirmations';
 import MijnKeuken from './Components/eten';
 import Boodschappen from './Components/eten/pages/Boodschappen';
 import SimpleImport from './Components/eten/pages/SimpleImport';
+import Coach from './Components/coach/Coach';
 
-type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen" | "simple-import";
+type Page = "home" | "analytics" | "uren" | "budget" | "taken" | "ideas" | "health" | "abonnementen" | "tekopen" | "affirmaties" | "facturen" | "eten" | "boodschappen" | "simple-import" | "coach";
 
 function App() {
   const { user, loading, signOut } = useAuth();
@@ -64,6 +65,7 @@ function App() {
       onLogout={handleLogout}
     >
       {currentPage === "home" && <Dashboard />}
+      {currentPage === "coach" && <Coach />}
       {currentPage === "analytics" && <Analytics />}
       {currentPage === "uren" && <Uren />}
       {currentPage === "facturen" && <Facturen />}

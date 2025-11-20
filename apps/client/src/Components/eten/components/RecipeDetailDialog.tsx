@@ -34,6 +34,7 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                 instructions: editedRecipe.instructions || '',
                 tags: editedRecipe.tags,
                 image_url: editedRecipe.image_url || undefined,
+                calories: editedRecipe.calories || undefined, // New field
                 ingredients: editedRecipe.ingredients.map((ing, index) => ({
                     name: ing.name,
                     quantity: ing.quantity || undefined,
@@ -260,6 +261,22 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                             />
                                         ) : (
                                             <p className="text-gray-900">{recipe.default_servings} personen</p>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            🔥 Kcal/portie
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="number"
+                                                value={editedRecipe.calories || ''}
+                                                onChange={(e) => setEditedRecipe({ ...editedRecipe, calories: parseInt(e.target.value) || null })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                placeholder="Optioneel"
+                                            />
+                                        ) : (
+                                            <p className="text-gray-900">{recipe.calories ? `${recipe.calories} kcal` : '-'}</p>
                                         )}
                                     </div>
                                 </div>

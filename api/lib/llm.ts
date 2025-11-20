@@ -1,0 +1,63 @@
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function callLLM(
+    systemPrompt: string,
+    userPrompt: string
+): Promise<string> {
+    // Using OpenAI GPT-4o as a stand-in for Claude 3.5 Sonnet until Anthropic key is available
+    const completion = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+        ],
+        max_tokens: 500,
+    });
+
+    return completion.choices[0].message.content || '';
+}
+
+// Voice transcription with Whisper
+export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+    const form = new FormData();
+    form.append('file', audioBlob, 'audio.wav');
+    form.append('model', 'whisper-1');
+
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: form,
+    });
+
+    const data = await response.json() as { text: string };
+    return data.text;
+}
+
+// Text-to-speech with OpenAI TTS
+export async function generateSpeech(text: string): Promise<ArrayBuffer> {
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            model: 'tts-1',
+            voice: 'nova', // warm, natural voice
+            input: text,
+            speed: 1.0,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`TTS API error: ${response.statusText}`);
+    }
+
+    return await response.arrayBuffer();
+}

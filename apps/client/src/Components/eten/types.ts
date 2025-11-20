@@ -31,6 +31,9 @@ export interface Recipe {
   image_url: string | null;
   is_favourite: boolean;
 
+  calories: number | null; // New field
+  nutrition: NutritionInfo | null; // New field
+
   created_at: string;
   updated_at: string;
 }
@@ -129,6 +132,8 @@ export interface CreateRecipeInput {
   instructions?: string;
   tags?: string[];
   image_url?: string;
+  calories?: number; // New field
+  nutrition?: NutritionInfo; // New field
   ingredients: CreateIngredientInput[];
 }
 
