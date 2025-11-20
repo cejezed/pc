@@ -1,41 +1,73 @@
 import React, { useState, useRef } from 'react';
-import { Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, Loader2, Phone, PhoneOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export function VoiceChat() {
+    const [isConversationActive, setIsConversationActive] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [response, setResponse] = useState('');
+    const [conversationHistory, setConversationHistory] = useState<Array<{ role: 'user' | 'coach', text: string }>>([]);
+
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
 
-    async function startRecording() {
+    async function startConversation() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            audioChunksRef.current = [];
+            streamRef.current = stream;
+            setIsConversationActive(true);
+            setConversationHistory([]);
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                await processAudio(audioBlob);
-                stream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-            setIsRecording(true);
+            // Start first recording automatically
+            startRecording(stream);
         } catch (error) {
-            console.error('Error starting recording:', error);
+            console.error('Error starting conversation:', error);
             alert('Kon microfoon niet starten. Geef toestemming voor microfoon toegang.');
         }
+    }
+
+    function endConversation() {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+        }
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+        setIsConversationActive(false);
+        setIsRecording(false);
+        setIsSpeaking(false);
+    }
+
+    function startRecording(stream?: MediaStream) {
+        const activeStream = stream || streamRef.current;
+        if (!activeStream) return;
+
+        const mediaRecorder = new MediaRecorder(activeStream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                audioChunksRef.current.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            await processAudio(audioBlob);
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
     }
 
     function stopRecording() {
@@ -51,6 +83,7 @@ export function VoiceChat() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 alert('Niet ingelogd');
+                endConversation();
                 return;
             }
 
@@ -78,76 +111,123 @@ export function VoiceChat() {
                 }
 
                 const data = await response.json();
-                setTranscript(data.transcript || '');
-                setResponse(data.reply || '');
+                const userText = data.transcript || '';
+                const coachText = data.reply || '';
+
+                setTranscript(userText);
+                setResponse(coachText);
+
+                // Add to conversation history
+                setConversationHistory(prev => [
+                    ...prev,
+                    { role: 'user', text: userText },
+                    { role: 'coach', text: coachText }
+                ]);
+
+                setIsProcessing(false);
 
                 // Play TTS audio if available
-                if (data.voiceUrl) {
+                if (data.voiceUrl && isConversationActive) {
                     playAudio(data.voiceUrl);
                 }
             };
         } catch (error) {
             console.error('Error processing audio:', error);
             alert('Fout bij verwerken audio. Probeer opnieuw.');
-        } finally {
             setIsProcessing(false);
+
+            // Continue conversation if still active
+            if (isConversationActive) {
+                setTimeout(() => startRecording(), 1000);
+            }
         }
     }
 
     function playAudio(audioUrl: string) {
         if (audioRef.current) {
+            setIsSpeaking(true);
             audioRef.current.src = audioUrl;
             audioRef.current.play();
+
+            // When audio finishes, start listening again if conversation is still active
+            audioRef.current.onended = () => {
+                setIsSpeaking(false);
+                if (isConversationActive) {
+                    // Small delay before starting to listen again
+                    setTimeout(() => {
+                        if (isConversationActive) {
+                            startRecording();
+                        }
+                    }, 500);
+                }
+            };
         }
     }
 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">Voice Chat</h2>
+            <h2 className="text-lg font-semibold mb-4">Voice Conversation</h2>
 
-            {/* Recording Button */}
+            {/* Conversation Button */}
             <div className="flex flex-col items-center gap-4 mb-6">
-                <button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isProcessing}
-                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isRecording
-                            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                            : 'bg-brikx-teal hover:bg-teal-700'
-                        } text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
-                >
-                    {isProcessing ? (
-                        <Loader2 className="w-8 h-8 animate-spin" />
-                    ) : isRecording ? (
-                        <MicOff className="w-8 h-8" />
-                    ) : (
-                        <Mic className="w-8 h-8" />
+                {!isConversationActive ? (
+                    <button
+                        onClick={startConversation}
+                        className="w-20 h-20 rounded-full flex items-center justify-center transition-all bg-brikx-teal hover:bg-teal-700 text-white shadow-lg"
+                    >
+                        <Phone className="w-8 h-8" />
+                    </button>
+                ) : (
+                    <button
+                        onClick={endConversation}
+                        className="w-20 h-20 rounded-full flex items-center justify-center transition-all bg-red-500 hover:bg-red-600 text-white shadow-lg"
+                    >
+                        <PhoneOff className="w-8 h-8" />
+                    </button>
+                )}
+
+                <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700">
+                        {!isConversationActive
+                            ? 'Start Gesprek'
+                            : isProcessing
+                                ? 'Verwerken...'
+                                : isSpeaking
+                                    ? 'Coach spreekt...'
+                                    : isRecording
+                                        ? 'Luisteren...'
+                                        : 'Wachten...'}
+                    </p>
+                    {isConversationActive && (
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                            {isRecording && (
+                                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                            )}
+                            {isSpeaking && (
+                                <Volume2 className="w-4 h-4 text-brikx-teal animate-pulse" />
+                            )}
+                        </div>
                     )}
-                </button>
-                <p className="text-sm text-gray-600">
-                    {isProcessing
-                        ? 'Verwerken...'
-                        : isRecording
-                            ? 'Klik om opname te stoppen'
-                            : 'Klik om te praten'}
-                </p>
+                </div>
             </div>
 
-            {/* Transcript */}
-            {transcript && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Jij zei:</p>
-                    <p className="text-gray-800">{transcript}</p>
-                </div>
-            )}
-
-            {/* Response */}
-            {response && (
-                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Volume2 className="w-4 h-4 text-brikx-teal" />
-                        <p className="text-xs text-gray-500">Coach antwoord:</p>
-                    </div>
-                    <p className="text-gray-800">{response}</p>
+            {/* Conversation History */}
+            {conversationHistory.length > 0 && (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {conversationHistory.map((msg, idx) => (
+                        <div
+                            key={idx}
+                            className={`p-3 rounded-lg ${msg.role === 'user'
+                                    ? 'bg-gray-50 ml-8'
+                                    : 'bg-teal-50 mr-8 border border-teal-200'
+                                }`}
+                        >
+                            <p className="text-xs text-gray-500 mb-1">
+                                {msg.role === 'user' ? 'Jij:' : 'Coach:'}
+                            </p>
+                            <p className="text-sm text-gray-800">{msg.text}</p>
+                        </div>
+                    ))}
                 </div>
             )}
 

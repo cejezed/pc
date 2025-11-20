@@ -413,13 +413,32 @@ Respond to the user in Dutch. Be concise but meaningful.
     if (authError || !user) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-      const { message } = req.body;
+      const { audio } = req.body;
+
+      if (!audio) {
+        return res.status(400).json({ error: 'Audio data required' });
+      }
+
+      // Convert base64 to buffer
+      const base64Data = audio.replace(/^data:audio\/\w+;base64,/, '');
+      const audioBuffer = Buffer.from(base64Data, 'base64');
+
+      // Create a Blob-like object for Whisper
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+
+      // Transcribe with Whisper
+      const { transcribeAudio } = await import('./lib/llm');
+      const transcript = await transcribeAudio(audioBlob);
+
+      if (!transcript) {
+        return res.status(400).json({ error: 'Could not transcribe audio' });
+      }
 
       // Store user msg
       await supabase.from('conversations').insert({
         user_id: user.id,
         role: 'user',
-        text: message
+        text: transcript
       });
 
       // Generate response
@@ -428,12 +447,12 @@ Respond to the user in Dutch. Be concise but meaningful.
 
       const { reply, cards } = await coachCore({
         userId: user.id,
-        latestUserMessage: message
+        latestUserMessage: transcript
       });
 
       // Generate Audio
-      const audioBuffer = await generateSpeech(reply);
-      const audioBase64 = Buffer.from(audioBuffer).toString('base64');
+      const ttsBuffer = await generateSpeech(reply);
+      const audioBase64 = Buffer.from(ttsBuffer).toString('base64');
       const audioUrl = `data:audio/mp3;base64,${audioBase64}`;
 
       // Store coach msg
@@ -441,10 +460,15 @@ Respond to the user in Dutch. Be concise but meaningful.
         user_id: user.id,
         role: 'coach',
         text: reply,
-        voice_url: audioUrl // In real app, upload to storage and save URL
+        voice_url: audioUrl
       });
 
-      return res.status(200).json({ reply, voiceUrl: audioUrl, cards });
+      return res.status(200).json({
+        transcript,
+        reply,
+        voiceUrl: audioUrl,
+        cards
+      });
     } catch (error: any) {
       console.error('Voice error:', error);
       return res.status(500).json({ error: error.message });

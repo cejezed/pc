@@ -23,17 +23,31 @@ export async function callLLM(
 
 // Voice transcription with Whisper
 export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+    // In Node.js, we need to use FormData from a library
+    const FormData = require('form-data');
     const form = new FormData();
-    form.append('file', audioBlob, 'audio.wav');
+
+    // Convert Blob to Buffer for Node.js
+    const buffer = Buffer.from(await audioBlob.arrayBuffer());
+    form.append('file', buffer, {
+        filename: 'audio.webm',
+        contentType: 'audio/webm',
+    });
     form.append('model', 'whisper-1');
 
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            ...form.getHeaders(),
         },
         body: form,
     });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Whisper API error: ${response.status} - ${errorText}`);
+    }
 
     const data = await response.json() as { text: string };
     return data.text;
