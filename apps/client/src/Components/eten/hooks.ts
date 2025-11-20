@@ -339,7 +339,7 @@ export function useMealPlans(startDate?: string, endDate?: string) {
 
       let query = supabase
         .from('meal_plans')
-        .select('*, recipe:recipes(id, title, default_servings)')
+        .select('*, recipe:recipes(id, title, default_servings, image_url)')
         .eq('user_id', user.id)
         .order('date', { ascending: true });
 
@@ -375,7 +375,7 @@ export function useCreateMealPlan() {
           meal_type: input.meal_type,
           servings: input.servings,
         })
-        .select('*, recipe:recipes(id, title, default_servings)')
+        .select('*, recipe:recipes(id, title, default_servings, image_url)')
         .single();
 
       if (error) throw error;
@@ -406,7 +406,7 @@ export function useUpdateMealPlan() {
         })
         .eq('id', input.id)
         .eq('user_id', user.id)
-        .select('*, recipe:recipes(id, title, default_servings)')
+        .select('*, recipe:recipes(id, title, default_servings, image_url)')
         .single();
 
       if (error) throw error;

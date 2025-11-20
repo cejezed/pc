@@ -34,7 +34,7 @@ export default function Coach() {
             if (!session) return;
 
             const { data, error } = await supabase
-                .from('coach_messages')
+                .from('conversations')
                 .select('*')
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: true });
@@ -47,8 +47,8 @@ export default function Coach() {
             if (data && data.length > 0) {
                 const history: Message[] = data.map((msg) => ({
                     id: msg.id,
-                    role: msg.role as 'user' | 'assistant',
-                    content: msg.content,
+                    role: msg.role === 'coach' ? 'assistant' : 'user',
+                    content: msg.text,
                     timestamp: new Date(msg.created_at),
                 }));
                 setMessages(history);

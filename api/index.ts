@@ -57,7 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         supabase.from('facturen').select('*, project:projects(name)').or(`status.eq.sent,status.eq.overdue,payment_date.gte.${twoWeeksAgoStr}`),
         supabase.from('time_entries').select('*, projects(name)').is('invoiced_at', null).order('occurred_on', { ascending: false }).limit(50),
         supabase.from('projects').select('*').eq('archived', false),
-        supabase.from('coach_messages').select('role, content').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
+        supabase.from('conversations').select('role, text').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
       ]);
 
       // 2. Construct System Prompt
@@ -82,8 +82,8 @@ Respond to the user in Dutch. Be concise but meaningful.
 `;
 
       const historyMessages = (chatHistory || []).reverse().map(msg => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content
+        role: (msg.role === 'coach' ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: msg.text
       }));
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -109,12 +109,12 @@ Respond to the user in Dutch. Be concise but meaningful.
         throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
       const reply = data.choices[0]?.message?.content;
 
       await Promise.all([
-        supabase.from('coach_messages').insert({ user_id: user.id, role: 'user', content: message }),
-        supabase.from('coach_messages').insert({ user_id: user.id, role: 'assistant', content: reply })
+        supabase.from('conversations').insert({ user_id: user.id, role: 'user', text: message }),
+        supabase.from('conversations').insert({ user_id: user.id, role: 'coach', text: reply })
       ]);
 
       return res.status(200).json({ reply });
