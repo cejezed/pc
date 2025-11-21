@@ -1,31 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Database, Link, Check, X, AlertCircle, ExternalLink } from 'lucide-react';
+import { useIntegrations, useSaveIntegrations } from './hooks';
 
 const IntegrationsTab = () => {
-  const [calendarConnected, setCalendarConnected] = useState(true);
-  const [calendarUrl, setCalendarUrl] = useState('https://calendar.google.com/calendar/ical/example@gmail.com/private-abc123/basic.ics');
+  const { data: integrations, isLoading } = useIntegrations();
+  const saveIntegrations = useSaveIntegrations();
+
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [calendarUrl, setCalendarUrl] = useState('');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
 
-  const handleTestConnection = () => {
+  useEffect(() => {
+    if (integrations?.google_calendar_ics) {
+      setCalendarUrl(integrations.google_calendar_ics);
+      setCalendarConnected(true);
+    }
+  }, [integrations]);
+
+  const handleSave = (url: string) => {
+    setCalendarUrl(url);
+  };
+
+  const handleTestConnection = async () => {
     setTesting(true);
-    setTimeout(() => {
+    setTestResult(null);
+
+    try {
+      // Test via API
+      const response = await fetch(`/api/calendar?limit=1&start=${new Date().toISOString()}`, {
+        headers: {
+          'x-ics-url': calendarUrl // Pass URL in header for testing
+        }
+      });
+
+      if (response.ok) {
+        const events = await response.json();
+        if (Array.isArray(events)) {
+          setTestResult('success');
+          // Save confirmed working URL to DB
+          saveIntegrations.mutate({ google_calendar_ics: calendarUrl });
+        } else {
+          throw new Error('Invalid response');
+        }
+      } else {
+        throw new Error('Fetch failed');
+      }
+    } catch (e) {
+      console.error(e);
+      setTestResult('error');
+    } finally {
       setTesting(false);
-      setTestResult('success');
       setTimeout(() => setTestResult(null), 3000);
-    }, 1500);
+    }
   };
 
   const handleDisconnect = () => {
     if (confirm('Weet je zeker dat je de verbinding wilt verbreken?')) {
       setCalendarConnected(false);
       setCalendarUrl('');
+      saveIntegrations.mutate({ google_calendar_ics: null });
     }
   };
 
   const handleConnect = () => {
     setCalendarConnected(true);
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-center text-[var(--zeus-text)]">Laden...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -42,8 +86,8 @@ const IntegrationsTab = () => {
             </div>
           </div>
           <span className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 ${calendarConnected
-              ? 'bg-green-900/20 text-green-400 border border-green-500/30'
-              : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]'
+            ? 'bg-green-900/20 text-green-400 border border-green-500/30'
+            : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]'
             }`}>
             {calendarConnected ? (
               <>
@@ -65,8 +109,8 @@ const IntegrationsTab = () => {
               <input
                 type="text"
                 value={calendarUrl}
-                onChange={(e) => setCalendarUrl(e.target.value)}
-                className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
+                onChange={(e) => handleSave(e.target.value)}
+                className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-gray-600"
                 placeholder="https://calendar.google.com/calendar/ical/..."
               />
               <p className="text-xs text-[var(--zeus-text-secondary)] mt-1">
@@ -77,7 +121,7 @@ const IntegrationsTab = () => {
             {testResult === 'success' && (
               <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-400" />
-                <span className="text-sm text-green-200">Verbinding succesvol getest!</span>
+                <span className="text-sm text-green-200">Verbinding succesvol getest en opgeslagen!</span>
               </div>
             )}
 
@@ -91,10 +135,10 @@ const IntegrationsTab = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleTestConnection}
-                disabled={testing}
+                disabled={testing || !calendarUrl}
                 className="btn-zeus-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {testing ? 'Testen...' : 'Test Verbinding'}
+                {testing ? 'Testen...' : 'Test & Opslaan'}
               </button>
               <button
                 onClick={handleDisconnect}

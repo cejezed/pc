@@ -1,11 +1,11 @@
 ﻿import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from '@supabase/supabase-js';
+// @ts-ignore
+import ical from "node-ical";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const openaiApiKey = process.env.OPENAI_API_KEY;
-
-// --- Main Handler ---
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`API Request: ${req.method} ${req.url}`);
@@ -234,6 +234,43 @@ Respond to the user in Dutch. Be concise but meaningful.
         return res.status(400).json({ error: 'Audio data required' });
       }
 
+      // Fetch ICS URL from DB
+      const { data: integrations } = await supabase
+        .from('user_integrations')
+        .select('google_calendar_ics')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const icsUrl = integrations?.google_calendar_ics;
+
+      // Fetch Calendar Events if URL provided
+      let calendarEvents: any[] = [];
+      if (icsUrl) {
+        try {
+          const events = await ical.async.fromURL(icsUrl);
+          const now = new Date();
+          const end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // Next 7 days
+
+          for (const k in events) {
+            const ev = events[k];
+            if (ev.type === 'VEVENT' && ev.start) {
+              const start = new Date(ev.start);
+              if (start >= now && start <= end) {
+                calendarEvents.push({
+                  title: ev.summary || 'Untitled',
+                  start: start.toLocaleString('nl-NL', { weekday: 'short', hour: '2-digit', minute: '2-digit' }),
+                  description: ev.description
+                });
+              }
+            }
+          }
+          calendarEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+          calendarEvents = calendarEvents.slice(0, 5);
+        } catch (e) {
+          console.error('Calendar fetch error:', e);
+        }
+      }
+
       // Convert base64 to buffer
       const base64Data = audio.replace(/^data:audio\/\w+;base64,/, '');
       const audioBuffer = Buffer.from(base64Data, 'base64');
@@ -262,7 +299,8 @@ Respond to the user in Dutch. Be concise but meaningful.
 
       const { reply, cards } = await coachCore({
         userId: user.id,
-        latestUserMessage: transcript
+        latestUserMessage: transcript,
+        calendarEvents
       });
 
       // Generate Audio

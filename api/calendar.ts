@@ -14,15 +14,14 @@ type CalendarEvent = {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const ICS_URL = process.env.GOOGLE_CALENDAR_ICS_URL;
+    // Allow passing URL via header for testing, otherwise use env (or potentially DB in future)
+    const ICS_URL = (req.headers['x-ics-url'] as string) || process.env.GOOGLE_CALENDAR_ICS_URL;
+
     if (!ICS_URL) {
-      return res.status(500).json({ error: "GOOGLE_CALENDAR_ICS_URL not configured" });
+      return res.status(500).json({ error: "GOOGLE_CALENDAR_ICS_URL not configured and no x-ics-url header provided" });
     }
 
-    // Query params voor window
-    const limitParam = req.query.limit as string;
-    const startParam = req.query.start as string;
-    const endParam = req.query.end as string;
+    const { limit: limitParam, start: startParam, end: endParam } = req.query as { [key: string]: string };
 
     const limit = limitParam ? parseInt(limitParam) : 20;
     const now = new Date();
@@ -34,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Fetch ICS
     const events = await ical.async.fromURL(ICS_URL);
-    
+
     const parsedEvents: CalendarEvent[] = [];
 
     for (const k in events) {

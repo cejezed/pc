@@ -10,6 +10,7 @@ export interface CoachCoreInput {
     userId: string;
     latestUserMessage?: string;
     now?: Date;
+    calendarEvents?: any[];
 }
 
 export async function coachCore(input: CoachCoreInput): Promise<CoachResponse> {
@@ -33,7 +34,7 @@ export async function coachCore(input: CoachCoreInput): Promise<CoachResponse> {
     // 6. Generate LLM response if there is a user message
     let reply = '';
     if (input.latestUserMessage) {
-        reply = await generateReplyLLM(input.latestUserMessage, patterns, knowledge);
+        reply = await generateReplyLLM(input.latestUserMessage, patterns, knowledge, input.calendarEvents);
     }
 
     return { reply, cards };
@@ -42,7 +43,8 @@ export async function coachCore(input: CoachCoreInput): Promise<CoachResponse> {
 async function generateReplyLLM(
     latestUserMessage: string,
     patterns: any[],
-    knowledge: any[]
+    knowledge: any[],
+    calendarEvents?: any[]
 ): Promise<string> {
     const safeMessage = sanitizeForLLM(latestUserMessage);
     const topPatterns = patterns
@@ -75,9 +77,14 @@ ${topPatterns.map((p) => `- ${p}`).join('\n')}
 What we know about them long-term:
 ${topKnowledge.map((k) => `- ${k}`).join('\n')}
 
+${calendarEvents && calendarEvents.length > 0 ? `
+Upcoming Calendar Events:
+${calendarEvents.map(e => `- ${e.start}: ${e.title}`).join('\n')}
+` : ''}
+
 Respond by:
 1. Acknowledging the feeling/question briefly
-2. Connecting gently to at most one pattern or knowledge item
+2. Connecting gently to at most one pattern or knowledge item (or calendar event if relevant)
 3. Suggesting one small, concrete experiment or next step
 
 Keep it short and human. Be curious, not prescriptive.

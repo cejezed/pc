@@ -195,7 +195,7 @@ export function VoiceChat() {
                         'Authorization': `Bearer ${session.access_token}`,
                     },
                     body: JSON.stringify({
-                        audio: base64Audio,
+                        audio: base64Audio
                     }),
                 });
 
