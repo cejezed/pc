@@ -8,7 +8,7 @@
   "packageManager": "pnpm@9.14.4",
   "scripts": {
     "dev": "npm run dev --workspace=apps/client",
-    "build": "npm run build --workspace=apps/client"
+    "build": "cd apps/client && npm run build && cd ../.."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
