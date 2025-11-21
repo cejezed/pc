@@ -1,24 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
   "framework": "vite",
-  "functions": {
-    "api/**/*.{ts,js}": {
-      "runtime": "nodejs20.x"
-    }
-  },
+  "functions": { "api/**/*.{ts,js}": { "runtime": "nodejs20.x" } },
   "routes": [
-    {
-      "src": "^/api/.*",
-      "dest": "/api/index.ts"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "^/api/.*", "dest": "/api/index.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "apps/client/index.html" }
   ]
 }
