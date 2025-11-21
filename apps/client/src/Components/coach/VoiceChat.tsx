@@ -19,7 +19,7 @@ export function VoiceChat() {
     // Silence detection refs
     const audioContextRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
-    const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const silenceTimerRef = useRef<number | null>(null);
     const speechDetectedRef = useRef<boolean>(false);
 
     useEffect(() => {
