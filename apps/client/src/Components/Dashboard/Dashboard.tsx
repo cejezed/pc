@@ -687,15 +687,21 @@ function ScoreSelector({ label, icon: Icon, iconColor, value, onChange, lowLabel
         </label>
         <span className="text-lg font-bold text-white">{value}/10</span>
       </div>
-      <input
-        type="range"
-        min="0"
-        max="10"
-        step="1"
-        value={value}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-zeus-bg rounded-lg appearance-none cursor-pointer accent-zeus-accent"
-      />
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+          <button
+            key={num}
+            onClick={() => onChange(num)}
+            className={`flex-1 py-2 text-xs font-bold rounded transition-all ${
+              value === num
+                ? 'bg-zeus-accent text-white shadow-[0_0_10px_rgba(255,107,0,0.4)]'
+                : 'bg-zeus-bg text-zeus-text hover:bg-zeus-accent/20 hover:text-white border border-zeus-border'
+            }`}
+          >
+            {num}
+          </button>
+        ))}
+      </div>
       <div className="flex justify-between text-xs text-zeus-text/50 font-mono">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
