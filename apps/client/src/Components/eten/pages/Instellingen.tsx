@@ -1,14 +1,14 @@
 // src/Components/eten/pages/Instellingen.tsx
 import React, { useState } from 'react';
 import { Save, Trash2, Plus, AlertTriangle, Settings } from 'lucide-react';
-import { useDietSettings, useUpdateDietSettings } from '../hooks';
+import { useDietSettings, useSaveDietSettings } from '../hooks';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 
 export default function InstellingenPage() {
   const { data: settings, isLoading } = useDietSettings();
-  const updateSettings = useUpdateDietSettings();
+  const updateSettings = useSaveDietSettings();
 
   const [newCategory, setNewCategory] = useState('');
 

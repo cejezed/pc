@@ -95,7 +95,7 @@ export function VoiceChat() {
                             stopRecording();
                             speechDetectedRef.current = false; // Reset for next turn
                         }
-                    }, SILENCE_DURATION);
+                    }, SILENCE_DURATION) as unknown as number;
                 }
             }
 
