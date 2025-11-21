@@ -3,9 +3,10 @@
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
   "framework": "vite",
-  "outputDirectory": "apps/client/dist",
   "functions": { "api/**/*.{ts,js}": { "runtime": "nodejs20.x" } },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" }
+  "routes": [
+    { "src": "^/api/.*", "dest": "/api/index.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "apps/client/index.html" }
   ]
 }
