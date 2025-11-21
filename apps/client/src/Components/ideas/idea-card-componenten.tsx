@@ -38,11 +38,11 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-brikx-teal transition-all group">
+    <div className="zeus-card border border-zeus-border rounded-lg p-4 hover:shadow-lg hover:border-zeus-accent transition-all group">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-brikx-teal transition-colors">
+          <h3 className="font-semibold text-white line-clamp-2 mb-2 group-hover:text-zeus-accent transition-colors">
             {idea.title}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -62,7 +62,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onEdit(idea)}
-            className="text-gray-400 hover:text-brikx-teal p-1 transition-colors"
+            className="text-gray-400 hover:text-zeus-accent p-1 transition-colors"
             title="Bewerken"
           >
             <Edit className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
 
       {/* Note (Description) */}
       {idea.note && (
-        <p className="text-gray-600 text-sm line-clamp-3 mb-3">
+        <p className="text-gray-400 text-sm line-clamp-3 mb-3">
           {idea.note}
         </p>
       )}
@@ -91,7 +91,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
           {idea.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
+              className="inline-flex items-center gap-1 bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs"
             >
               <Tag className="w-3 h-3" />
               {tag}
@@ -106,7 +106,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-3 border-t border-zeus-border">
         <div className="flex items-center gap-2">
           {statusInfo && (
             <span
@@ -147,18 +147,18 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm hover:border-brikx-teal transition-all">
+    <div className="zeus-card border border-zeus-border rounded-lg p-4 hover:shadow-lg hover:border-zeus-accent transition-all">
       <div className="flex items-start gap-4">
         {/* Content */}
         <div className="flex-1">
           <div className="flex items-start justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 hover:text-brikx-teal transition-colors">
+            <h3 className="font-semibold text-white hover:text-zeus-accent transition-colors">
               {idea.title}
             </h3>
             <div className="flex items-center gap-1 ml-2">
               <button
                 onClick={() => onEdit(idea)}
-                className="text-gray-400 hover:text-brikx-teal p-1 transition-colors"
+                className="text-gray-400 hover:text-zeus-accent p-1 transition-colors"
                 title="Bewerken"
               >
                 <Edit className="w-4 h-4" />
@@ -175,7 +175,7 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
           </div>
 
           {idea.note && (
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            <p className="text-gray-400 text-sm mb-3 line-clamp-2">
               {idea.note}
             </p>
           )}
@@ -213,7 +213,7 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
                 {idea.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
-                    className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
+                    className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs"
                   >
                     #{tag}
                   </span>

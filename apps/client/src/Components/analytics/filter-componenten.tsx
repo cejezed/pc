@@ -21,10 +21,10 @@ export function PeriodSelector({
   ] as const;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-[0_0_20px_rgba(0,0,0,0.2)]">
       <div className="flex items-center gap-2 mb-3">
-        <Calendar className="w-4 h-4 text-gray-500" />
-        <span className="text-sm font-medium">Periode</span>
+        <Calendar className="w-4 h-4 text-[var(--zeus-primary)]" />
+        <span className="text-sm font-medium text-[var(--zeus-text)]">Periode</span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
@@ -32,11 +32,10 @@ export function PeriodSelector({
           <button
             key={period.value}
             onClick={() => onChange(period.value)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              value === period.value
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${value === period.value
+                ? "bg-[var(--zeus-primary)] text-white shadow-[0_0_10px_var(--zeus-primary-glow)]"
+                : "bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-primary)]/10 border border-transparent hover:border-[var(--zeus-primary)]/30"
+              }`}
           >
             {period.label}
           </button>
@@ -44,9 +43,9 @@ export function PeriodSelector({
       </div>
 
       {value === "custom" && (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200">
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[var(--zeus-border)]">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-[var(--zeus-text-secondary)] mb-1">
               Van
             </label>
             <input
@@ -55,11 +54,11 @@ export function PeriodSelector({
               onChange={(e) =>
                 onCustomRangeChange({ ...customRange, from: e.target.value })
               }
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 py-2 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-[var(--zeus-text-secondary)] mb-1">
               Tot
             </label>
             <input
@@ -68,7 +67,7 @@ export function PeriodSelector({
               onChange={(e) =>
                 onCustomRangeChange({ ...customRange, to: e.target.value })
               }
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 py-2 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
             />
           </div>
         </div>
@@ -87,16 +86,15 @@ export function ViewToggle({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="inline-flex bg-gray-100 rounded-lg p-1">
+    <div className="inline-flex bg-[var(--zeus-bg-secondary)] rounded-lg p-1 border border-[var(--zeus-border)]">
       {options.map((option) => (
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
-            value === option.value
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${value === option.value
+              ? "bg-[var(--zeus-card)] text-[var(--zeus-primary)] shadow-sm border border-[var(--zeus-border)]"
+              : "text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-card)]/50"
+            }`}
         >
           {option.icon}
           {option.label}

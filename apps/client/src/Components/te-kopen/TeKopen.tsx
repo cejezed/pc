@@ -116,7 +116,7 @@ export default function TeKopen() {
   if (isError) {
     return (
       <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+        <div className="bg-red-900/20 border border-red-800/50 rounded-lg p-4 text-red-400">
           ⚠️ Kan shopping items niet laden. Controleer je backend connectie.
         </div>
       </div>
@@ -127,10 +127,10 @@ export default function TeKopen() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-brikx-dark">Te Kopen</h1>
+        <h1 className="text-3xl font-bold text-[var(--zeus-text)]">Te Kopen</h1>
         <button
           onClick={handleAddClick}
-          className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-semibold shadow-lg hover:shadow-brikx transition-all"
+          className="btn-zeus-primary flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Nieuw item
@@ -142,21 +142,21 @@ export default function TeKopen() {
 
       {/* Filters & Sort */}
       {filteredItems.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div className="zeus-card p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Filter className="w-4 h-4 text-brikx-teal" />
-            <span className="font-semibold text-gray-700">Filters & Sortering</span>
+            <Filter className="w-4 h-4 text-[var(--zeus-primary)]" />
+            <span className="font-semibold text-[var(--zeus-text)]">Filters & Sortering</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Categorie
               </label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               >
                 <option value="">Alle categorieën</option>
                 {CATEGORIES.map((cat) => (
@@ -168,13 +168,13 @@ export default function TeKopen() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Prioriteit
               </label>
               <select
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               >
                 <option value="">Alle prioriteiten</option>
                 {PRIORITIES.map((pri) => (
@@ -186,13 +186,13 @@ export default function TeKopen() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Sorteer op
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               >
                 <option value="date">Datum (nieuwste eerst)</option>
                 <option value="price">Prijs (hoogste eerst)</option>
@@ -205,12 +205,12 @@ export default function TeKopen() {
 
       {/* Items Grid */}
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Laden...</div>
+        <div className="text-center py-12 text-[var(--zeus-text-secondary)]">Laden...</div>
       ) : filteredItems.length === 0 ? (
         items.filter((i) => !i.purchased_at).length === 0 ? (
           <EmptyState onAddClick={handleAddClick} />
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-[var(--zeus-text-secondary)]">
             Geen items gevonden met deze filters
           </div>
         )

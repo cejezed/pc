@@ -20,20 +20,20 @@ export function StatCard({
   trend?: "up" | "down" | "neutral";
 }) {
   return (
-    <Card>
+    <Card className="zeus-card">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-medium text-[var(--zeus-text-secondary)]">
           {title}
         </CardTitle>
         {icon}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold text-[var(--zeus-text)]">
           {value}
-          {unit && <span className="text-sm font-normal ml-1">{unit}</span>}
+          {unit && <span className="text-sm font-normal ml-1 text-[var(--zeus-text-secondary)]">{unit}</span>}
         </div>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+          <p className="text-xs text-[var(--zeus-text-secondary)] mt-1">{subtitle}</p>
         )}
         {trend && (
           <div className="mt-2">
@@ -47,9 +47,9 @@ export function StatCard({
 
 export function TrendBadge({ trend }: { trend: "up" | "down" | "neutral" }) {
   const config = {
-    up: { label: "↑ Stijgend", className: "bg-green-100 text-green-700" },
-    down: { label: "↓ Dalend", className: "bg-red-100 text-red-700" },
-    neutral: { label: "→ Stabiel", className: "bg-gray-100 text-gray-700" },
+    up: { label: "↑ Stijgend", className: "bg-green-900/20 text-green-400 border border-green-800/50" },
+    down: { label: "↓ Dalend", className: "bg-red-900/20 text-red-400 border border-red-800/50" },
+    neutral: { label: "→ Stabiel", className: "bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]" },
   };
 
   return (
@@ -80,7 +80,7 @@ export function StarRating({
           onClick={() => onChange?.(star)}
           className={cn(
             "text-xl transition-colors",
-            star <= rating ? "text-yellow-500" : "text-gray-300",
+            star <= rating ? "text-yellow-500" : "text-[var(--zeus-border)]",
             !readonly && "hover:text-yellow-400 cursor-pointer"
           )}
         >
@@ -93,11 +93,11 @@ export function StarRating({
 
 export function IntensityBadge({ level }: { level: 1 | 2 | 3 | 4 | 5 }) {
   const config = {
-    1: { label: "Licht", className: "bg-green-100 text-green-700" },
-    2: { label: "Matig", className: "bg-blue-100 text-blue-700" },
-    3: { label: "Medium", className: "bg-yellow-100 text-yellow-700" },
-    4: { label: "Intensief", className: "bg-orange-100 text-orange-700" },
-    5: { label: "Zeer intensief", className: "bg-red-100 text-red-700" },
+    1: { label: "Licht", className: "bg-green-900/20 text-green-400 border border-green-800/50" },
+    2: { label: "Matig", className: "bg-blue-900/20 text-blue-400 border border-blue-800/50" },
+    3: { label: "Medium", className: "bg-yellow-900/20 text-yellow-400 border border-yellow-800/50" },
+    4: { label: "Intensief", className: "bg-orange-900/20 text-orange-400 border border-orange-800/50" },
+    5: { label: "Zeer intensief", className: "bg-red-900/20 text-red-400 border border-red-800/50" },
   };
 
   return (
@@ -134,7 +134,7 @@ export function EnergyIndicator({
     <div className="flex items-center gap-2">
       <span className="text-2xl">{emojis[level]}</span>
       {showLabel && (
-        <span className="text-sm text-muted-foreground">{labels[level]}</span>
+        <span className="text-sm text-[var(--zeus-text-secondary)]">{labels[level]}</span>
       )}
     </div>
   );
@@ -156,7 +156,7 @@ export function MealTypeIcon({ type }: { type: string }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 text-[var(--zeus-text)]">
       <span className="text-xl">{icons[type] || "🍽️"}</span>
       <span className="text-sm font-medium">{labels[type] || type}</span>
     </div>
@@ -165,7 +165,7 @@ export function MealTypeIcon({ type }: { type: string }) {
 
 export function LoadingState({ message = "Laden..." }: { message?: string }) {
   return (
-    <div className="p-6 flex items-center gap-2 text-muted-foreground">
+    <div className="p-6 flex items-center gap-2 text-[var(--zeus-text-secondary)]">
       <Loader2 className="h-4 w-4 animate-spin" /> {message}
     </div>
   );
@@ -185,9 +185,9 @@ export function EmptyState({
   return (
     <div className="text-center py-12">
       {icon && <div className="mb-4 flex justify-center text-4xl">{icon}</div>}
-      <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+      <h3 className="text-lg font-medium text-[var(--zeus-text)]">{title}</h3>
       {description && (
-        <p className="mt-2 text-sm text-gray-500">{description}</p>
+        <p className="mt-2 text-sm text-[var(--zeus-text-secondary)]">{description}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>
@@ -220,7 +220,7 @@ export function ProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-gray-200"
+          className="text-[var(--zeus-border)]"
         />
         {/* Progress circle */}
         <circle
@@ -233,11 +233,11 @@ export function ProgressRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="text-blue-500 transition-all duration-300"
+          className="text-[var(--zeus-primary)] transition-all duration-300"
         />
       </svg>
       {label && (
-        <span className="absolute text-xs font-medium">{label}</span>
+        <span className="absolute text-xs font-medium text-[var(--zeus-text)]">{label}</span>
       )}
     </div>
   );
@@ -263,8 +263,8 @@ export function DateHeader({ date }: { date: string }) {
 
   return (
     <div className="flex items-center gap-3 mb-3">
-      <h3 className="text-sm font-medium text-muted-foreground">{label}</h3>
-      <div className="flex-1 border-t border-gray-200" />
+      <h3 className="text-sm font-medium text-[var(--zeus-text-secondary)]">{label}</h3>
+      <div className="flex-1 border-t border-[var(--zeus-border)]" />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 } from '../hooks/useShoppingListData';
 import { getWeekDates, formatDate, formatDateNL, getCategoryLabel } from '../utils';
 import type { ShoppingListItem, IngredientCategory } from '../types';
+import { Button } from '@/Components/ui/button';
 
 export default function BoodschappenPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekDates()[0]);
@@ -212,8 +213,8 @@ export default function BoodschappenPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B0C10] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B00]"></div>
+      <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--zeus-primary)]"></div>
       </div>
     );
   }
@@ -221,46 +222,48 @@ export default function BoodschappenPage() {
   const categories = Object.keys(allItemsByCategory);
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] text-[#C5C6C7] p-4 sm:p-6 font-sans selection:bg-[#FF6B00]/30">
+    <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text-secondary)] p-4 sm:p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[#1F2833] p-6 rounded-2xl border border-[#FF6B00]/20 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent opacity-50"></div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1 drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)] flex items-center gap-3">
-              <ShoppingBasket className="w-8 h-8 text-[#FF6B00]" />
-              BOODSCHAPPEN <span className="text-[#FF6B00]">ZEUS-X</span>
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)] flex items-center gap-3">
+              <ShoppingBasket className="w-8 h-8 text-[var(--zeus-primary)]" />
+              BOODSCHAPPEN <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
             </h1>
-            <p className="text-[#C5C6C7] font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#66FCF1] animate-pulse"></span>
+            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
               Bevoorrading missie
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={clearEntireList}
-              className="flex items-center gap-2 px-4 py-2 text-red-500 bg-[#0B0C10] border border-red-500/30 hover:bg-red-500/10 rounded-lg transition-all text-sm font-bold hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+              className="text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
               title="Alles wissen (Reset)"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Alles Wissen</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
               onClick={clearCheckedOnly}
-              className="flex items-center gap-2 px-4 py-2 text-[#C5C6C7] bg-[#0B0C10] border border-[#2d3436] hover:text-white hover:border-[#FF6B00]/50 rounded-lg transition-all text-sm"
+              className="zeus-button-secondary"
               title="Afgevinkte items verwijderen"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Opschonen</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-[#FF6B00] text-white rounded-lg hover:bg-[#FF6B00]/80 transition-all print:hidden text-sm font-bold shadow-[0_0_15px_rgba(255,107,0,0.3)]"
+              className="btn-zeus-primary print:hidden"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Print</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -283,35 +286,35 @@ export default function BoodschappenPage() {
         )}
 
         {/* Week Navigation */}
-        <div className="flex items-center justify-between bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-4 shadow-lg print:hidden">
+        <div className="flex items-center justify-between bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg print:hidden">
           <button
             onClick={handlePrevWeek}
-            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+            className="p-2 hover:bg-[var(--zeus-primary)]/10 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] rounded-lg transition-colors border border-transparent hover:border-[var(--zeus-primary)]/30"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
 
           <div className="text-center">
-            <p className="font-bold text-lg sm:text-xl text-white tracking-wide">
+            <p className="font-bold text-lg sm:text-xl text-[var(--zeus-text)] tracking-wide">
               {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
             </p>
           </div>
 
           <button
             onClick={handleNextWeek}
-            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+            className="p-2 hover:bg-[var(--zeus-primary)]/10 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] rounded-lg transition-colors border border-transparent hover:border-[var(--zeus-primary)]/30"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>
 
         {/* Add Manual Item */}
-        <div className="bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-5 sm:p-7 print:hidden shadow-lg">
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-5 sm:p-7 print:hidden shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-[#FF6B00]/10 rounded-lg border border-[#FF6B00]/30">
-              <Plus className="w-5 h-5 text-[#FF6B00]" />
+            <div className="p-2 bg-[var(--zeus-primary)]/10 rounded-lg border border-[var(--zeus-primary)]/30">
+              <Plus className="w-5 h-5 text-[var(--zeus-primary)]" />
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">
+            <h3 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)]">
               Item Toevoegen
             </h3>
           </div>
@@ -322,14 +325,14 @@ export default function BoodschappenPage() {
               onChange={(e) => setNewItemName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
               placeholder="Wat moet je halen? Bijv. Melk, Brood..."
-              className="flex-1 px-5 py-3.5 bg-[#0B0C10] border border-[#2d3436] rounded-xl focus:outline-none focus:border-[#FF6B00] text-white placeholder-gray-600 transition-all"
+              className="flex-1 px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] placeholder-[var(--zeus-text-secondary)]/50 transition-all"
             />
             <select
               value={newItemCategory}
               onChange={(e) =>
                 setNewItemCategory(e.target.value as IngredientCategory)
               }
-              className="px-5 py-3.5 bg-[#0B0C10] border border-[#2d3436] rounded-xl focus:outline-none focus:border-[#FF6B00] text-white transition-all"
+              className="px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] transition-all"
             >
               <option value="produce">🥬 Groente & Fruit</option>
               <option value="meat">🥩 Vlees & Vis</option>
@@ -339,26 +342,26 @@ export default function BoodschappenPage() {
               <option value="frozen">🧊 Diepvries</option>
               <option value="other">📦 Overig</option>
             </select>
-            <button
+            <Button
               onClick={() => addManualItem()}
               disabled={!newItemName.trim()}
-              className="flex items-center justify-center gap-2 px-7 py-3.5 bg-[#FF6B00] text-white rounded-xl hover:bg-[#FF6B00]/80 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(255,107,0,0.3)]"
+              className="btn-zeus-primary py-6"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-5 h-5 mr-2" />
               <span>Toevoegen</span>
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Shopping List - Tile Layout */}
         {categories.length === 0 &&
           manualItems.filter((m) => !m.checked).length === 0 ? (
-          <div className="bg-[#1F2833] rounded-xl border-2 border-dashed border-[#2d3436] p-12 sm:p-16 text-center">
+          <div className="bg-[var(--zeus-card)] rounded-xl border-2 border-dashed border-[var(--zeus-border)] p-12 sm:p-16 text-center">
             <div className="text-7xl mb-6 opacity-20 grayscale">🛒</div>
-            <h3 className="text-2xl font-bold text-white mb-3">
+            <h3 className="text-2xl font-bold text-[var(--zeus-text)] mb-3">
               Je lijst is leeg
             </h3>
-            <p className="text-[#C5C6C7] mb-5 max-w-md mx-auto">
+            <p className="text-[var(--zeus-text-secondary)] mb-5 max-w-md mx-auto">
               Voeg items toe of plan maaltijden in de weekplanner.
             </p>
           </div>
@@ -371,23 +374,23 @@ export default function BoodschappenPage() {
           });
           return uncheckedItems.length > 0;
         }).length === 0 ? (
-          <div className="bg-[#1F2833] rounded-xl border border-[#66FCF1]/30 p-12 sm:p-16 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-[#66FCF1]/5 animate-pulse"></div>
-            <div className="inline-block p-4 bg-[#66FCF1]/10 rounded-full mb-6 relative z-10">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-accent)]/30 p-12 sm:p-16 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[var(--zeus-accent)]/5 animate-pulse"></div>
+            <div className="inline-block p-4 bg-[var(--zeus-accent)]/10 rounded-full mb-6 relative z-10">
               <div className="text-6xl">🎉</div>
             </div>
-            <h3 className="text-3xl font-black text-white mb-3 relative z-10">
+            <h3 className="text-3xl font-black text-[var(--zeus-text)] mb-3 relative z-10">
               Missie Voltooid!
             </h3>
-            <p className="text-[#66FCF1] mb-6 text-lg max-w-md mx-auto relative z-10">
+            <p className="text-[var(--zeus-accent)] mb-6 text-lg max-w-md mx-auto relative z-10">
               Alle boodschappen zijn binnen.
             </p>
-            <button
+            <Button
               onClick={clearCheckedOnly}
-              className="px-8 py-3.5 bg-[#66FCF1] text-[#0B0C10] rounded-xl hover:bg-[#66FCF1]/80 transition-all font-bold shadow-[0_0_20px_rgba(102,252,241,0.4)] relative z-10"
+              className="bg-[var(--zeus-accent)] text-[var(--zeus-bg)] hover:bg-[var(--zeus-accent)]/80 font-bold shadow-[0_0_20px_var(--zeus-accent-glow)] relative z-10"
             >
               Lijst Opschonen
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="space-y-8">
@@ -405,8 +408,8 @@ export default function BoodschappenPage() {
               return (
                 <div key={category}>
                   {/* Category Header */}
-                  <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2 uppercase tracking-wider">
-                    <span className="w-1.5 h-6 bg-[#FF6B00] rounded-full shadow-[0_0_10px_#FF6B00]"></span>
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)] mb-3 sm:mb-4 flex items-center gap-2 uppercase tracking-wider">
+                    <span className="w-1.5 h-6 bg-[var(--zeus-primary)] rounded-full shadow-[0_0_10px_var(--zeus-primary-glow)]"></span>
                     {getCategoryLabel(category as any)}
                   </h2>
 
@@ -434,7 +437,7 @@ export default function BoodschappenPage() {
                               toggleItem(itemKey);
                             }
                           }}
-                          className="relative group cursor-pointer rounded-xl p-4 transition-all bg-[#1F2833] border border-[#2d3436] hover:border-[#FF6B00] hover:shadow-[0_0_15px_rgba(255,107,0,0.2)] hover:-translate-y-0.5 active:scale-95"
+                          className="relative group cursor-pointer rounded-xl p-4 transition-all bg-[var(--zeus-card)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:shadow-[0_0_15px_var(--zeus-primary-glow)] hover:-translate-y-0.5 active:scale-95"
                         >
                           {/* Delete button for manual items */}
                           {isManual && (
@@ -457,12 +460,12 @@ export default function BoodschappenPage() {
                           )}
 
                           {/* Item name */}
-                          <div className="text-center text-white">
+                          <div className="text-center text-[var(--zeus-text)]">
                             <p className="font-bold text-sm mb-1">
                               {item.name}
                             </p>
                             {item.quantity > 0 && (
-                              <p className="text-xs text-[#FF6B00] font-mono">
+                              <p className="text-xs text-[var(--zeus-primary)] font-mono">
                                 {item.quantity} {item.unit}
                               </p>
                             )}
@@ -476,30 +479,30 @@ export default function BoodschappenPage() {
             })}
 
             {/* Summary */}
-            <div className="bg-[#1F2833] border border-[#66FCF1]/20 rounded-2xl p-5 sm:p-6 print:hidden shadow-[0_0_20px_rgba(102,252,241,0.05)]">
+            <div className="bg-[var(--zeus-card)] border border-[var(--zeus-accent)]/20 rounded-2xl p-5 sm:p-6 print:hidden shadow-[0_0_20px_var(--zeus-accent-glow)]">
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-[#66FCF1]/10 rounded-xl flex-shrink-0">
+                <div className="p-2.5 bg-[var(--zeus-accent)]/10 rounded-xl flex-shrink-0">
                   <div className="text-2xl">💡</div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-base sm:text-lg text-[#66FCF1] font-bold mb-3">
+                  <p className="text-base sm:text-lg text-[var(--zeus-accent)] font-bold mb-3">
                     Pro Tips:
                   </p>
-                  <ul className="text-sm text-[#C5C6C7] space-y-2 font-mono">
+                  <ul className="text-sm text-[var(--zeus-text-secondary)] space-y-2 font-mono">
                     <li className="flex items-start gap-2">
-                      <span className="text-[#FF6B00] flex-shrink-0">▸</span>
+                      <span className="text-[var(--zeus-primary)] flex-shrink-0">▸</span>
                       <span>
                         Klik op tegels om items af te vinken
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-[#FF6B00] flex-shrink-0">▸</span>
+                      <span className="text-[var(--zeus-primary)] flex-shrink-0">▸</span>
                       <span>
                         Gebruik "Opschonen" om afgevinkte items te verwijderen
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-[#FF6B00] flex-shrink-0">▸</span>
+                      <span className="text-[var(--zeus-primary)] flex-shrink-0">▸</span>
                       <span>
                         Gebruik "Alles Wissen" om opnieuw te beginnen
                       </span>
@@ -513,16 +516,16 @@ export default function BoodschappenPage() {
 
         {/* Frequently Used Items */}
         {topFrequentItems.length > 0 && (
-          <div className="bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-5 sm:p-7 print:hidden shadow-lg">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-5 sm:p-7 print:hidden shadow-lg">
             <div className="flex items-center gap-3 mb-5">
-              <div className="p-2.5 bg-[#FF6B00]/10 rounded-xl border border-[#FF6B00]/30">
+              <div className="p-2.5 bg-[var(--zeus-primary)]/10 rounded-xl border border-[var(--zeus-primary)]/30">
                 <span className="text-2xl">⭐</span>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg sm:text-xl font-bold text-white">
+                <h3 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)]">
                   Vaak gebruikt
                 </h3>
-                <p className="text-xs sm:text-sm text-[#C5C6C7]">
+                <p className="text-xs sm:text-sm text-[var(--zeus-text-secondary)]">
                   Klik om snel toe te voegen
                 </p>
               </div>
@@ -532,9 +535,9 @@ export default function BoodschappenPage() {
                 <button
                   key={itemName}
                   onClick={() => addManualItem(itemName, 'other')}
-                  className="px-4 py-3 bg-[#0B0C10] border border-[#2d3436] rounded-xl hover:border-[#FF6B00] transition-all text-sm font-bold text-[#C5C6C7] hover:text-white capitalize shadow-sm hover:shadow-[0_0_10px_rgba(255,107,0,0.2)]"
+                  className="px-4 py-3 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl hover:border-[var(--zeus-primary)] transition-all text-sm font-bold text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] capitalize shadow-sm hover:shadow-[0_0_10px_var(--zeus-primary-glow)]"
                 >
-                  <span className="text-[#FF6B00] mr-1">+</span> {itemName}
+                  <span className="text-[var(--zeus-primary)] mr-1">+</span> {itemName}
                 </button>
               ))}
             </div>

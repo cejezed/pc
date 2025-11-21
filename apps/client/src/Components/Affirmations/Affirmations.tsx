@@ -1,4 +1,4 @@
-// src/components/Affirmations.tsx - DEEL 1
+// src/components/Affirmations.tsx
 import React from "react";
 import {
   Plus,
@@ -13,6 +13,7 @@ import {
   Mic,
   Pause,
   Volume2,
+  Sparkles
 } from "lucide-react";
 import {
   useAffirmations,
@@ -23,6 +24,7 @@ import {
   useDeleteAffirmation,
 } from "./hooks";
 import { CATEGORY_ICONS, CATEGORY_COLORS, TEMPLATES } from "./types";
+import { Button } from "@/Components/ui/button";
 
 // ✅ Missing type definition
 type AffirmationFormData = {
@@ -154,63 +156,72 @@ export default function Affirmations() {
   // Main UI Rendering
   return (
     <>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-6 space-y-8 bg-[var(--zeus-bg)] min-h-screen text-[var(--zeus-text)]">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-brikx-dark">📿 Affirmations</h1>
-          <button
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)] flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-[var(--zeus-primary)]" />
+              AFFIRMATIONS <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
+            </h1>
+            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
+              Programmeer je mindset voor succes
+            </p>
+          </div>
+          <Button
             onClick={() => setShowCreateModal(true)}
-            className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-brikx transition-all flex items-center gap-2"
+            className="btn-zeus-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-2" />
             Nieuwe Affirmatie
-          </button>
+          </Button>
         </div>
 
         {/* Stats Overview */}
         {!affirmationsLoading && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm font-medium">Streak</span>
-                <Award className="w-5 h-5 text-brikx-teal" />
+                <span className="text-[var(--zeus-text-secondary)] text-sm font-medium">Streak</span>
+                <Award className="w-5 h-5 text-[var(--zeus-primary)]" />
               </div>
-              <div className="text-3xl font-bold text-brikx-dark">
+              <div className="text-3xl font-bold text-[var(--zeus-text)] group-hover:text-[var(--zeus-primary)] transition-colors">
                 {stats?.current_streak || 0} dagen
               </div>
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-[var(--zeus-text-secondary)]/60 mt-1">
                 🏆 Max: {stats?.longest_streak || 0}
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm font-medium">Vandaag</span>
-                <Target className="w-5 h-5 text-blue-500" />
+                <span className="text-[var(--zeus-text-secondary)] text-sm font-medium">Vandaag</span>
+                <Target className="w-5 h-5 text-blue-400" />
               </div>
-              <div className="text-3xl font-bold text-brikx-dark">
+              <div className="text-3xl font-bold text-[var(--zeus-text)] group-hover:text-blue-400 transition-colors">
                 {completedToday.size}/{affirmations.length}
               </div>
-              <div className="text-sm text-gray-500 mt-1">voltooid</div>
+              <div className="text-sm text-[var(--zeus-text-secondary)]/60 mt-1">voltooid</div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm font-medium">Gem. Intensiteit</span>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <span className="text-[var(--zeus-text-secondary)] text-sm font-medium">Gem. Intensiteit</span>
+                <TrendingUp className="w-5 h-5 text-green-400" />
               </div>
-              <div className="text-3xl font-bold text-brikx-dark">
+              <div className="text-3xl font-bold text-[var(--zeus-text)] group-hover:text-green-400 transition-colors">
                 {stats?.avg_intensity?.toFixed(1) || "0.0"}/5
               </div>
               <div className="flex gap-1 mt-1">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
-                      i <= Math.round(stats?.avg_intensity || 0)
+                    className={`w-4 h-4 ${i <= Math.round(stats?.avg_intensity || 0)
                         ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
+                        : "text-[var(--zeus-border)]"
+                      }`}
                   />
                 ))}
               </div>
@@ -220,53 +231,53 @@ export default function Affirmations() {
 
         {/* Morning Ritual CTA */}
         {pendingAffirmations.length > 0 && (
-          <div className="bg-gradient-to-r from-brikx-teal to-brikx-teal-dark rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-[var(--zeus-primary)]/20 to-[var(--zeus-accent)]/20 rounded-xl p-6 text-[var(--zeus-text)] shadow-[0_0_30px_var(--zeus-primary-glow)] border border-[var(--zeus-primary)] relative overflow-hidden">
+            <div className="absolute inset-0 bg-[var(--zeus-primary)]/10 backdrop-blur-sm -z-10"></div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
                   🌅 Time for your affirmations!
                 </h3>
-                <p className="text-white/90">
-                  Je hebt nog {pendingAffirmations.length} affirmatie(s) te doen vandaag
+                <p className="text-[var(--zeus-text-secondary)]">
+                  Je hebt nog <span className="text-[var(--zeus-primary)] font-bold">{pendingAffirmations.length}</span> affirmatie(s) te doen vandaag
                 </p>
               </div>
-              <button
+              <Button
                 onClick={startRitual}
-                className="bg-white text-brikx-teal hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+                className="btn-zeus-primary text-lg px-8 py-6 shadow-[0_0_20px_var(--zeus-primary-glow)] animate-pulse"
               >
                 Start Nu
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
         {/* Today's Schedule */}
         {affirmations.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-brikx-dark mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-brikx-teal" />
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-[var(--zeus-primary)]" />
               VANDAAG
             </h3>
             <div className="space-y-3">
               {affirmations.map((aff) => (
                 <div
                   key={aff.id}
-                  className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
-                    completedToday.has(aff.id)
-                      ? "bg-green-50 border-green-200"
-                      : "bg-gray-50 border-gray-200 hover:border-brikx-teal"
-                  }`}
+                  className={`flex items-center justify-between p-4 rounded-lg border transition-all ${completedToday.has(aff.id)
+                      ? "bg-green-900/10 border-green-500/30"
+                      : "bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)] hover:border-[var(--zeus-primary)]"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">
                       {completedToday.has(aff.id) ? "✅" : "⏰"}
                     </div>
                     <div>
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-[var(--zeus-text)]">
                         {aff.reminder_times[0]} {CATEGORY_ICONS[aff.category]}{" "}
                         {aff.statement.substring(0, 60)}...
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-[var(--zeus-text-secondary)]">
                         {completedToday.has(aff.id) ? "Voltooid" : "Te doen"}
                       </div>
                     </div>
@@ -277,7 +288,7 @@ export default function Affirmations() {
                         setSelectedAffirmation(aff);
                         startRitual();
                       }}
-                      className="text-brikx-teal hover:text-brikx-teal-dark font-medium text-sm transition-all"
+                      className="text-[var(--zeus-primary)] hover:text-[var(--zeus-accent)] font-medium text-sm transition-all hover:underline"
                     >
                       Nu doen!
                     </button>
@@ -290,38 +301,36 @@ export default function Affirmations() {
 
         {/* My Affirmations */}
         {affirmations.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-brikx-dark mb-4">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-4">
               📝 MIJN AFFIRMATIES
             </h3>
             <div className="space-y-4">
               {affirmations.map((aff) => (
                 <div
                   key={aff.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-brikx-teal hover:shadow-sm transition-all"
+                  className="border border-[var(--zeus-border)] rounded-lg p-4 hover:border-[var(--zeus-primary)] hover:bg-[var(--zeus-bg-secondary)] transition-all group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-2xl">{CATEGORY_ICONS[aff.category]}</span>
                         <span
-                          className={`text-xs font-semibold px-2 py-1 rounded border ${
-                            CATEGORY_COLORS[aff.category]
-                          }`}
+                          className={`text-xs font-semibold px-2 py-1 rounded border border-[var(--zeus-border)] bg-[var(--zeus-bg)] text-[var(--zeus-text-secondary)]`}
                         >
                           {aff.category}
                         </span>
                       </div>
-                      <p className="text-gray-900 font-medium mb-2">"{aff.statement}"</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <p className="text-[var(--zeus-text)] font-medium mb-2 group-hover:text-[var(--zeus-primary)] transition-colors">"{aff.statement}"</p>
+                      <div className="flex items-center gap-4 text-sm text-[var(--zeus-text-secondary)]">
                         <span>{aff.times_per_day}x per dag</span>
                         <span>🔥 {stats?.current_streak || 0} dagen streak</span>
                         {aff.linked_goal_id && <span>🎯 Gekoppeld aan doel</span>}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg transition-all">
-                        <Play className="w-4 h-4 text-gray-600" />
+                      <button className="p-2 hover:bg-[var(--zeus-primary)]/10 rounded-lg transition-all text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-primary)]">
+                        <Play className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => {
@@ -331,9 +340,9 @@ export default function Affirmations() {
                             deleteAffirmation.mutate(aff.id);
                           }
                         }}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-2 hover:bg-red-900/20 rounded-lg transition-all text-[var(--zeus-text-secondary)] hover:text-red-400"
                       >
-                        <Trash2 className="w-4 h-4 text-red-600" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -344,8 +353,8 @@ export default function Affirmations() {
         )}
 
         {/* Templates */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-brikx-dark mb-4">
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-4">
             📚 TEMPLATES (Click to use)
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -360,9 +369,9 @@ export default function Affirmations() {
                   });
                   setShowCreateModal(true);
                 }}
-                className="text-left p-4 border border-gray-200 rounded-lg hover:border-brikx-teal hover:bg-gray-50 transition-all"
+                className="text-left p-4 border border-[var(--zeus-border)] rounded-lg hover:border-[var(--zeus-primary)] hover:bg-[var(--zeus-bg-secondary)] transition-all group"
               >
-                <span className="text-gray-700">• {template.text}</span>
+                <span className="text-[var(--zeus-text-secondary)] group-hover:text-[var(--zeus-text)] transition-colors">• {template.text}</span>
               </button>
             ))}
           </div>
@@ -370,58 +379,58 @@ export default function Affirmations() {
 
         {/* Empty State */}
         {!affirmationsLoading && affirmations.length === 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-12 text-center shadow-lg">
             <div className="text-6xl mb-4">📿</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-[var(--zeus-text)] mb-2">
               Nog geen affirmaties
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-[var(--zeus-text-secondary)] mb-6">
               Begin met het maken van je eerste dagelijkse affirmatie
             </p>
-            <button
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg"
+              className="btn-zeus-primary"
             >
               Maak Je Eerste Affirmatie
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--zeus-card)] rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_50px_var(--zeus-primary-glow)] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-brikx-dark">📿 Nieuwe Affirmatie</h3>
+              <h3 className="text-xl font-bold text-[var(--zeus-text)]">📿 Nieuwe Affirmatie</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-all"
+                className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 text-sm text-blue-300">
                 💡 <strong>TIP:</strong> Gebruik "Ik ben/heb/doe" (tegenwoordige tijd) en wees
                 specifiek over het resultaat
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Jouw Affirmatie *
                 </label>
                 <textarea
                   value={form.statement}
                   onChange={(e) => setForm({ ...form, statement: e.target.value })}
                   placeholder="Ik verdien en ontvang €100.000 in 2024 door uitzonderlijke waarde te leveren..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent min-h-24 transition-all"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-3 text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] min-h-24 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Categorie
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -429,11 +438,10 @@ export default function Affirmations() {
                     <button
                       key={cat}
                       onClick={() => setForm({ ...form, category: cat })}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        form.category === cat
-                          ? "border-brikx-teal bg-brikx-teal/10"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      className={`p-3 rounded-lg border transition-all ${form.category === cat
+                          ? "border-[var(--zeus-primary)] bg-[var(--zeus-primary)]/10 text-[var(--zeus-text)]"
+                          : "border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] hover:border-[var(--zeus-text-secondary)]"
+                        }`}
                     >
                       <div className="text-2xl mb-1">{CATEGORY_ICONS[cat]}</div>
                       <div className="text-sm font-medium capitalize">{cat}</div>
@@ -443,7 +451,7 @@ export default function Affirmations() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Hoe vaak per dag? (Minimum 2x aanbevolen)
                 </label>
                 <input
@@ -454,12 +462,12 @@ export default function Affirmations() {
                   onChange={(e) =>
                     setForm({ ...form, times_per_day: parseInt(e.target.value) || 1 })
                   }
-                  className="w-32 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brikx-teal transition-all"
+                  className="w-32 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2 text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Herinneringstijden
                 </label>
                 <div className="space-y-2">
@@ -468,10 +476,10 @@ export default function Affirmations() {
                       type="checkbox"
                       checked
                       readOnly
-                      className="w-4 h-4 text-brikx-teal rounded"
+                      className="w-4 h-4 accent-[var(--zeus-primary)] rounded"
                     />
                     <span className="text-2xl">🌅</span>
-                    <span className="text-sm font-medium">Ochtend</span>
+                    <span className="text-sm font-medium text-[var(--zeus-text)]">Ochtend</span>
                     <input
                       type="time"
                       value={form.reminder_times[0] || "07:00"}
@@ -480,7 +488,7 @@ export default function Affirmations() {
                         times[0] = e.target.value;
                         setForm({ ...form, reminder_times: times });
                       }}
-                      className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                      className="bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 py-1 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
                     />
                   </div>
                   {form.times_per_day >= 2 && (
@@ -489,10 +497,10 @@ export default function Affirmations() {
                         type="checkbox"
                         checked
                         readOnly
-                        className="w-4 h-4 text-brikx-teal rounded"
+                        className="w-4 h-4 accent-[var(--zeus-primary)] rounded"
                       />
                       <span className="text-2xl">☀️</span>
-                      <span className="text-sm font-medium">Middag</span>
+                      <span className="text-sm font-medium text-[var(--zeus-text)]">Middag</span>
                       <input
                         type="time"
                         value={form.reminder_times[1] || "12:00"}
@@ -501,7 +509,7 @@ export default function Affirmations() {
                           times[1] = e.target.value;
                           setForm({ ...form, reminder_times: times });
                         }}
-                        className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                        className="bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 py-1 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
                       />
                     </div>
                   )}
@@ -511,10 +519,10 @@ export default function Affirmations() {
                         type="checkbox"
                         checked
                         readOnly
-                        className="w-4 h-4 text-brikx-teal rounded"
+                        className="w-4 h-4 accent-[var(--zeus-primary)] rounded"
                       />
                       <span className="text-2xl">🌙</span>
-                      <span className="text-sm font-medium">Avond</span>
+                      <span className="text-sm font-medium text-[var(--zeus-text)]">Avond</span>
                       <input
                         type="time"
                         value={form.reminder_times[2] || "22:00"}
@@ -523,7 +531,7 @@ export default function Affirmations() {
                           times[2] = e.target.value;
                           setForm({ ...form, reminder_times: times });
                         }}
-                        className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                        className="bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 py-1 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
                       />
                     </div>
                   )}
@@ -533,17 +541,17 @@ export default function Affirmations() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold transition-all"
+                  className="flex-1 px-6 py-3 bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] rounded-lg hover:bg-[var(--zeus-bg-secondary)]/80 font-semibold transition-all"
                 >
                   Annuleren
                 </button>
-                <button
+                <Button
                   onClick={handleCreateSubmit}
                   disabled={!form.statement.trim() || createAffirmation.isPending}
-                  className="flex-1 px-6 py-3 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg hover:shadow-brikx"
+                  className="flex-1 btn-zeus-primary"
                 >
                   {createAffirmation.isPending ? "Opslaan..." : "Opslaan & Test Nu"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -552,43 +560,44 @@ export default function Affirmations() {
 
       {/* Ritual Modal - Full Screen Experience */}
       {showRitualModal && selectedAffirmation && (
-        <div className="fixed inset-0 bg-gradient-to-br from-brikx-dark to-brikx-teal z-50 flex items-center justify-center p-6">
-          <div className="w-full max-w-2xl text-center text-white space-y-8">
+        <div className="fixed inset-0 bg-[var(--zeus-bg)] z-50 flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--zeus-primary)]/20 to-purple-900/20 backdrop-blur-xl"></div>
+          <div className="w-full max-w-2xl text-center text-[var(--zeus-text)] space-y-8 relative z-10">
             {/* Step 0: Welcome */}
             {ritualStep === 0 && (
               <div className="space-y-6 animate-fade-in">
-                <h1 className="text-5xl font-bold">🌅 GOEDEMORGEN!</h1>
-                <p className="text-xl text-white/90">Je dagelijkse affirmatie wacht</p>
-                <button
+                <h1 className="text-5xl font-bold drop-shadow-[0_0_15px_var(--zeus-primary-glow)]">🌅 GOEDEMORGEN!</h1>
+                <p className="text-xl text-[var(--zeus-text-secondary)]">Je dagelijkse affirmatie wacht</p>
+                <Button
                   onClick={nextRitualStep}
-                  className="bg-white text-brikx-teal hover:bg-gray-100 px-12 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 shadow-2xl"
+                  className="btn-zeus-primary text-lg px-12 py-6 shadow-[0_0_30px_var(--zeus-primary-glow)]"
                 >
                   Begin Ritueel →
-                </button>
-                <p className="text-white/80">🔥 Streak: {stats?.current_streak || 0} dagen</p>
+                </Button>
+                <p className="text-[var(--zeus-text-secondary)]">🔥 Streak: {stats?.current_streak || 0} dagen</p>
               </div>
             )}
 
             {/* Step 1: Affirmation Display */}
             {ritualStep === 1 && (
               <div className="space-y-8 animate-fade-in">
-                <p className="text-3xl font-bold leading-relaxed px-8">
+                <p className="text-3xl font-bold leading-relaxed px-8 text-[var(--zeus-text)] drop-shadow-lg">
                   "{selectedAffirmation.statement}"
                 </p>
                 <div className="flex flex-col gap-4">
                   <button
                     onClick={() => setIsRecording(!isRecording)}
-                    className="bg-white/20 hover:bg-white/30 text-white px-8 py-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-3"
+                    className="bg-[var(--zeus-card)] hover:bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] text-[var(--zeus-text)] px-8 py-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-3"
                   >
-                    {isRecording ? <Pause className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                    {isRecording ? <Pause className="w-6 h-6 text-red-500" /> : <Mic className="w-6 h-6 text-[var(--zeus-primary)]" />}
                     {isRecording ? "Stop Opname" : "🎤 Spreek Hardop In"}
                   </button>
-                  <button
+                  <Button
                     onClick={nextRitualStep}
-                    className="bg-white text-brikx-teal hover:bg-gray-100 px-8 py-4 rounded-lg font-bold transition-all"
+                    className="btn-zeus-primary py-6 text-lg"
                   >
                     Volgende →
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -596,7 +605,7 @@ export default function Affirmations() {
             {/* Step 2: Emotional Intensity */}
             {ritualStep === 2 && (
               <div className="space-y-8 animate-fade-in">
-                <h2 className="text-3xl font-bold">Hoe overtuigd voel je je?</h2>
+                <h2 className="text-3xl font-bold text-[var(--zeus-text)]">Hoe overtuigd voel je je?</h2>
                 <div className="flex justify-center gap-4">
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <button
@@ -605,49 +614,48 @@ export default function Affirmations() {
                       className="transition-all hover:scale-110"
                     >
                       <Star
-                        className={`w-16 h-16 ${
-                          rating <= emotionalIntensity
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-white/30"
-                        }`}
+                        className={`w-16 h-16 ${rating <= emotionalIntensity
+                            ? "fill-yellow-400 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+                            : "text-[var(--zeus-border)]"
+                          }`}
                       />
                     </button>
                   ))}
                 </div>
-                <p className="text-white/80">
+                <p className="text-[var(--zeus-text-secondary)]">
                   1 = Twijfel · 5 = Absolute zekerheid
                 </p>
-                <button
+                <Button
                   onClick={nextRitualStep}
-                  className="bg-white text-brikx-teal hover:bg-gray-100 px-12 py-4 rounded-lg font-bold transition-all"
+                  className="btn-zeus-primary py-6 text-lg px-12"
                 >
                   Rate & Volgende →
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Step 3: Visualization */}
             {ritualStep === 3 && (
               <div className="space-y-8 animate-fade-in">
-                <h2 className="text-3xl font-bold">🧘 VISUALISEER HET RESULTAAT</h2>
-                <p className="text-xl text-white/90">
+                <h2 className="text-3xl font-bold text-[var(--zeus-text)]">🧘 VISUALISEER HET RESULTAAT</h2>
+                <p className="text-xl text-[var(--zeus-text-secondary)]">
                   Sluit je ogen en zie jezelf dit doel bereiken...
                 </p>
-                <div className="text-6xl font-bold">{visualizationTime}s</div>
+                <div className="text-6xl font-bold text-[var(--zeus-primary)] drop-shadow-[0_0_20px_var(--zeus-primary-glow)]">{visualizationTime}s</div>
                 <div className="flex gap-4 justify-center">
                   <button
                     onClick={nextRitualStep}
-                    className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                    className="bg-[var(--zeus-card)] hover:bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] px-6 py-3 rounded-lg font-semibold transition-all"
                   >
                     Skip
                   </button>
                   {visualizationTime === 0 && (
-                    <button
+                    <Button
                       onClick={nextRitualStep}
-                      className="bg-white text-brikx-teal hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-all"
+                      className="btn-zeus-primary"
                     >
                       Done →
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -656,26 +664,26 @@ export default function Affirmations() {
             {/* Step 4: Commitment Note */}
             {ritualStep === 4 && (
               <div className="space-y-8 animate-fade-in">
-                <h2 className="text-3xl font-bold">Waarom GA je dit bereiken?</h2>
+                <h2 className="text-3xl font-bold text-[var(--zeus-text)]">Waarom GA je dit bereiken?</h2>
                 <textarea
                   value={commitmentNote}
                   onChange={(e) => setCommitmentNote(e.target.value)}
                   placeholder="Voor financiële vrijheid, om mijn familie te kunnen ondersteunen..."
-                  className="w-full bg-white/10 border-2 border-white/30 rounded-lg px-6 py-4 text-white placeholder-white/50 focus:outline-none focus:border-white min-h-32"
+                  className="w-full bg-[var(--zeus-card)] border border-[var(--zeus-border)] rounded-lg px-6 py-4 text-[var(--zeus-text)] placeholder-[var(--zeus-text-secondary)] focus:outline-none focus:border-[var(--zeus-primary)] min-h-32"
                 />
                 <div className="flex gap-4 justify-center">
                   <button
                     onClick={nextRitualStep}
-                    className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                    className="bg-[var(--zeus-card)] hover:bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] px-6 py-3 rounded-lg font-semibold transition-all"
                   >
                     Skip
                   </button>
-                  <button
+                  <Button
                     onClick={nextRitualStep}
-                    className="bg-white text-brikx-teal hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-all"
+                    className="btn-zeus-primary"
                   >
                     Opslaan & Afsluiten →
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -683,24 +691,24 @@ export default function Affirmations() {
             {/* Step 5: Celebration */}
             {ritualStep === 5 && (
               <div className="space-y-8 animate-fade-in">
-                <h2 className="text-5xl font-bold">✨ GEWELDIG! ✨</h2>
-                <p className="text-2xl">
+                <h2 className="text-5xl font-bold text-[var(--zeus-text)] drop-shadow-[0_0_20px_var(--zeus-primary-glow)]">✨ GEWELDIG! ✨</h2>
+                <p className="text-2xl text-[var(--zeus-text)]">
                   Affirmatie {completedToday.size + 1}/{affirmations.length} voltooid vandaag
                 </p>
-                <p className="text-xl text-white/90">
+                <p className="text-xl text-[var(--zeus-text-secondary)]">
                   🔥 Streak: {(stats?.current_streak || 0) + 1} dagen!
                 </p>
                 {pendingAffirmations.length > 1 && (
-                  <p className="text-white/80">
+                  <p className="text-[var(--zeus-text-secondary)]">
                     Volgende herinnering: {pendingAffirmations[1]?.reminder_times[0]}
                   </p>
                 )}
-                <button
+                <Button
                   onClick={completeRitual}
-                  className="bg-white text-brikx-teal hover:bg-gray-100 px-12 py-4 rounded-lg font-bold text-lg transition-all hover:scale-105 shadow-2xl"
+                  className="btn-zeus-primary text-lg px-12 py-6 shadow-[0_0_30px_var(--zeus-primary-glow)]"
                 >
                   {pendingAffirmations.length > 1 ? "Volgende Affirmatie" : "Ga naar Dashboard"}
-                </button>
+                </Button>
               </div>
             )}
           </div>

@@ -31,6 +31,8 @@ import type {
 
 import RecipeDetailDialog from '../components/RecipeDetailDialog';
 import type { RecipeWithIngredients } from '../types';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
 
 export default function ReceptenPage() {
   const [filters, setFilters] = useState<RecipeFilters>({
@@ -250,43 +252,46 @@ export default function ReceptenPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--zeus-text)]">
             Recepten
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-[var(--zeus-text-secondary)]">
             Jouw persoonlijke receptenbibliotheek
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
+          <Button
+            variant="outline"
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="zeus-button-secondary"
           >
-            <LinkIcon className="w-4 h-4" />
+            <LinkIcon className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Importeer URL</span>
             <span className="sm:hidden">URL</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
             onClick={() => setShowScanDialog(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="zeus-button-secondary"
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Scan Kaart</span>
             <span className="sm:hidden">Scan</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
             onClick={() => setShowScanInputModal(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="zeus-button-secondary"
           >
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Plak JSON</span>
             <span className="sm:hidden">JSON</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={async () => {
               const title = window.prompt('Naam van het nieuwe recept:');
               if (title) {
@@ -307,29 +312,29 @@ export default function ReceptenPage() {
                 }
               }
             }}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors text-sm"
+            className="btn-zeus-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Nieuw recept</span>
             <span className="sm:hidden">Nieuw</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-4">
+      <div className="zeus-card p-3 sm:p-4 space-y-4">
         {/* Search & Main Toggles */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--zeus-text-secondary)]" />
+            <Input
               type="text"
               placeholder="Zoek recepten..."
               value={filters.search}
               onChange={(e) =>
                 setFilters({ ...filters, search: e.target.value })
               }
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal focus:border-transparent text-sm sm:text-base"
+              className="pl-10 zeus-input"
             />
           </div>
 
@@ -342,8 +347,8 @@ export default function ReceptenPage() {
                 })
               }
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${filters.favouritesOnly
-                ? 'bg-red-50 border-red-200 text-red-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-red-900/20 border-red-800/50 text-red-400'
+                : 'bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] hover:bg-[var(--zeus-card-hover)]'
                 }`}
             >
               <Heart
@@ -361,8 +366,8 @@ export default function ReceptenPage() {
                 })
               }
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm whitespace-nowrap ${filters.maxPrepTime === 30
-                ? 'bg-orange-50 border-orange-200 text-orange-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-orange-900/20 border-orange-800/50 text-orange-400'
+                : 'bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] hover:bg-[var(--zeus-card-hover)]'
                 }`}
             >
               <Clock className="w-4 h-4" />
@@ -373,7 +378,7 @@ export default function ReceptenPage() {
 
         {/* Category Filters */}
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <p className="text-xs font-semibold text-[var(--zeus-text-secondary)] uppercase tracking-wider mb-2">
             Categorieën
           </p>
           <div className="flex flex-wrap gap-2">
@@ -387,8 +392,8 @@ export default function ReceptenPage() {
                   key={cat}
                   onClick={() => handleToggleTag(tag)}
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${isActive
-                    ? 'bg-brikx-teal text-white border-brikx-teal shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal hover:text-brikx-teal'
+                    ? 'bg-[var(--zeus-primary)] text-white border-[var(--zeus-primary)] shadow-[0_0_10px_var(--zeus-primary-glow)]'
+                    : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:text-[var(--zeus-text)]'
                     }`}
                 >
                   {label}
@@ -400,7 +405,7 @@ export default function ReceptenPage() {
 
         {/* Ingredient Filters */}
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <p className="text-xs font-semibold text-[var(--zeus-text-secondary)] uppercase tracking-wider mb-2">
             Ingrediënten & Type
           </p>
           <div className="flex flex-wrap gap-2">
@@ -411,8 +416,8 @@ export default function ReceptenPage() {
                   key={tag}
                   onClick={() => handleToggleTag(tag)}
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${isActive
-                    ? 'bg-brikx-teal text-white border-brikx-teal shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-brikx-teal hover:text-brikx-teal'
+                    ? 'bg-[var(--zeus-primary)] text-white border-[var(--zeus-primary)] shadow-[0_0_10px_var(--zeus-primary-glow)]'
+                    : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:text-[var(--zeus-text)]'
                     }`}
                 >
                   {tag}
@@ -426,28 +431,28 @@ export default function ReceptenPage() {
       {/* Recipe Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-brikx-teal" />
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--zeus-primary)]" />
         </div>
       ) : recipes.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="zeus-card p-12 text-center">
+          <BookOpen className="w-16 h-16 text-[var(--zeus-text-secondary)] mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-2">
             Nog geen recepten
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-[var(--zeus-text-secondary)] mb-4">
             Begin met het toevoegen van je favoriete recepten!
           </p>
-          <button
+          <Button
             onClick={() => setShowImportModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark"
+            className="btn-zeus-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-2" />
             Voeg je eerste recept toe
-          </button>
+          </Button>
         </div>
       ) : (
         <>
-          <div className="text-sm text-gray-600 mb-2">
+          <div className="text-sm text-[var(--zeus-text-secondary)] mb-2">
             {recipes.length} {recipes.length === 1 ? 'recept' : 'recepten'}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -465,51 +470,52 @@ export default function ReceptenPage() {
 
       {/* Import Modal (URL) */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold mb-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="zeus-modal max-w-md w-full p-6">
+            <h2 className="text-xl font-semibold mb-4 text-[var(--zeus-text)]">
               Importeer recept van URL
             </h2>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-[var(--zeus-text-secondary)] mb-4">
               Plak de URL van een recept. We proberen automatisch de
               ingrediënten en bereidingswijze te extraheren.
             </p>
 
-            <input
+            <Input
               type="url"
               value={importUrl}
               onChange={(e) => setImportUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              className="zeus-input mb-4"
               autoFocus
             />
 
             <div className="flex gap-2 justify-end">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => {
                   setShowImportModal(false);
                   setImportUrl('');
                 }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-bg-secondary)]"
                 disabled={importRecipe.isPending}
               >
                 Annuleren
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleImport}
                 disabled={!importUrl.trim() || importRecipe.isPending}
-                className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+                className="btn-zeus-primary"
               >
                 {importRecipe.isPending ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Importeren...
                   </>
                 ) : (
                   'Importeer'
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -517,56 +523,56 @@ export default function ReceptenPage() {
 
       {/* Scaninput Modal (JSON + afbeelding-upload) */}
       {showScanInputModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="zeus-modal max-w-2xl w-full p-6 space-y-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold">Importeer scaninput</h2>
+              <h2 className="text-xl font-semibold text-[var(--zeus-text)]">Importeer scaninput</h2>
               <button
                 onClick={handleResetScanInputModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--zeus-text-secondary)]">
               Plak hier geldige{' '}
-              <span className="font-mono text-xs bg-gray-100 px-1 py-0.5 rounded">
+              <span className="font-mono text-xs bg-[var(--zeus-bg-secondary)] px-1 py-0.5 rounded text-[var(--zeus-text)]">
                 JSON
               </span>{' '}
               van een{' '}
-              <code className="font-mono text-xs">CreateRecipeFromScanInput</code>{' '}
+              <code className="font-mono text-xs text-[var(--zeus-primary)]">CreateRecipeFromScanInput</code>{' '}
               of{' '}
-              <code className="font-mono text-xs">ScannedRecipeDraft</code>.
+              <code className="font-mono text-xs text-[var(--zeus-primary)]">ScannedRecipeDraft</code>.
               Gebruik <strong>geen</strong> TypeScript-snippet met{' '}
-              <code className="font-mono text-xs">const ... =</code>. Tekst
+              <code className="font-mono text-xs text-[var(--zeus-primary)]">const ... =</code>. Tekst
               vóór/na het JSON-blok wordt automatisch weggefilterd.
             </p>
 
             <textarea
               value={scanInput}
               onChange={(e) => setScanInput(e.target.value)}
-              className="w-full h-56 font-mono text-xs sm:text-sm border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+              className="w-full h-56 font-mono text-xs sm:text-sm zeus-input p-3"
               placeholder='{"recipe": { ... }, "ingredients": [ ... ]}'
             />
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-[var(--zeus-text)]">
                 Omslagafbeelding (optioneel)
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageFileChange}
-                className="block w-full text-sm text-gray-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brikx-teal file:text-white hover:file:bg-brikx-teal-dark"
+                className="block w-full text-sm text-[var(--zeus-text-secondary)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[var(--zeus-primary)] file:text-white hover:file:bg-[var(--zeus-primary-hover)]"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[var(--zeus-text-secondary)]">
                 Als je hier een afbeelding kiest, wordt deze als data-URL
                 opgeslagen in het recept en gebruikt als omslag.
               </p>
 
               {scanImagePreview && (
-                <div className="mt-2 rounded-lg overflow-hidden border border-gray-200">
+                <div className="mt-2 rounded-lg overflow-hidden border border-[var(--zeus-border)]">
                   <img
                     src={scanImagePreview}
                     alt="Preview"
@@ -577,36 +583,37 @@ export default function ReceptenPage() {
             </div>
 
             {scanInputError && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <div className="text-sm text-red-400 bg-red-900/20 border border-red-800/50 rounded-lg px-3 py-2">
                 {scanInputError}
               </div>
             )}
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
+              <Button
+                variant="ghost"
                 onClick={handleResetScanInputModal}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-bg-secondary)]"
                 disabled={createRecipe.isPending}
               >
                 Annuleren
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleImportScanInput}
                 disabled={!scanInput.trim() || createRecipe.isPending}
-                className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+                className="btn-zeus-primary"
               >
                 {createRecipe.isPending ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Opslaan...
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 mr-2" />
                     Maak recept
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

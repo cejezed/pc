@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Volume2, Loader2, Phone, PhoneOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -16,6 +16,18 @@ export function VoiceChat() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
 
+    // Silence detection refs
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const speechDetectedRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        return () => {
+            endConversation();
+        };
+    }, []);
+
     async function startConversation() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -23,12 +35,76 @@ export function VoiceChat() {
             setIsConversationActive(true);
             setConversationHistory([]);
 
+            // Initialize AudioContext for silence detection
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            audioContextRef.current = audioContext;
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            analyserRef.current = analyser;
+
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+
+            // Start monitoring silence
+            monitorSilence();
+
             // Start first recording automatically
             startRecording(stream);
         } catch (error) {
             console.error('Error starting conversation:', error);
             alert('Kon microfoon niet starten. Geef toestemming voor microfoon toegang.');
         }
+    }
+
+    function monitorSilence() {
+        if (!analyserRef.current || !isConversationActive) return;
+
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const checkAudioLevel = () => {
+            if (!analyserRef.current || !isConversationActive) return;
+
+            analyserRef.current.getByteFrequencyData(dataArray);
+
+            // Calculate average volume
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+
+            // Thresholds
+            const SILENCE_THRESHOLD = 10; // Adjust based on testing
+            const SILENCE_DURATION = 2000; // 2 seconds of silence to trigger stop
+
+            if (average > SILENCE_THRESHOLD) {
+                // Speech detected
+                speechDetectedRef.current = true;
+                if (silenceTimerRef.current) {
+                    clearTimeout(silenceTimerRef.current);
+                    silenceTimerRef.current = null;
+                }
+            } else {
+                // Silence detected
+                if (speechDetectedRef.current && !silenceTimerRef.current && isRecording) {
+                    // Only trigger silence timer if we previously detected speech
+                    silenceTimerRef.current = setTimeout(() => {
+                        if (isRecording && speechDetectedRef.current) {
+                            console.log('Silence detected, stopping recording...');
+                            stopRecording();
+                            speechDetectedRef.current = false; // Reset for next turn
+                        }
+                    }, SILENCE_DURATION);
+                }
+            }
+
+            if (isConversationActive) {
+                requestAnimationFrame(checkAudioLevel);
+            }
+        };
+
+        checkAudioLevel();
     }
 
     function endConversation() {
@@ -42,14 +118,31 @@ export function VoiceChat() {
         if (audioRef.current) {
             audioRef.current.pause();
         }
+        if (audioContextRef.current) {
+            audioContextRef.current.close();
+            audioContextRef.current = null;
+        }
+        if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+        }
+
         setIsConversationActive(false);
         setIsRecording(false);
         setIsSpeaking(false);
+        speechDetectedRef.current = false;
     }
 
     function startRecording(stream?: MediaStream) {
         const activeStream = stream || streamRef.current;
         if (!activeStream) return;
+
+        // Reset speech detection for new turn
+        speechDetectedRef.current = false;
+        if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+        }
 
         const mediaRecorder = new MediaRecorder(activeStream);
         mediaRecorderRef.current = mediaRecorder;
@@ -129,11 +222,16 @@ export function VoiceChat() {
                 // Play TTS audio if available
                 if (data.voiceUrl && isConversationActive) {
                     playAudio(data.voiceUrl);
+                } else {
+                    // If no audio response, start listening again immediately
+                    if (isConversationActive) {
+                        startRecording();
+                    }
                 }
             };
         } catch (error) {
             console.error('Error processing audio:', error);
-            alert('Fout bij verwerken audio. Probeer opnieuw.');
+            // alert('Fout bij verwerken audio. Probeer opnieuw.'); // Optional: disable alert to avoid interruption
             setIsProcessing(false);
 
             // Continue conversation if still active
@@ -246,8 +344,8 @@ export function VoiceChat() {
                         <div
                             key={idx}
                             className={`p-4 rounded-xl border ${msg.role === 'user'
-                                    ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30 ml-8 text-right'
-                                    : 'bg-[#1F2833] border-[#2d3436] mr-8'
+                                ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30 ml-8 text-right'
+                                : 'bg-[#1F2833] border-[#2d3436] mr-8'
                                 }`}
                         >
                             <p className="text-[10px] font-mono text-[#66FCF1] mb-2 uppercase tracking-wider opacity-70">

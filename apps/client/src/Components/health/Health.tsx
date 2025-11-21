@@ -1,7 +1,7 @@
 // src/Components/health/Health.tsx - IMPORT FIX
 import React, { useState } from 'react';
 import { EnergieTab } from './energie-componenten';
-import { WorkoutTab } from './workout-componenten'; // ✅ Was: WorkoutsTab
+import { WorkoutTab } from './workout-componenten';
 import { SlaapTab } from './slaap-componenten';
 import { PijnTab } from './pijn-componenten';
 import StressTab from './stress-componenten';
@@ -24,8 +24,8 @@ export default function Health() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-brikx-dark mb-2">Health Tracker</h1>
-        <p className="text-gray-600">Volg je energie, slaap, workouts en welzijn</p>
+        <h1 className="text-4xl font-bold text-[var(--zeus-text)] mb-2">Health Tracker</h1>
+        <p className="text-[var(--zeus-text-secondary)]">Volg je energie, slaap, workouts en welzijn</p>
       </div>
 
       {/* Tabs */}
@@ -34,11 +34,10 @@ export default function Health() {
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-brikx font-semibold transition-all whitespace-nowrap ${
-              activeTab === id
-                ? 'bg-brikx-teal text-white shadow-lg'
-                : 'bg-white border border-gray-300 hover:border-brikx-teal text-gray-700'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === id
+                ? 'bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]'
+                : 'bg-[var(--zeus-card)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]'
+              }`}
           >
             <Icon className={`w-4 h-4 ${activeTab === id ? 'text-white' : color}`} />
             {label}

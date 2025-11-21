@@ -2,20 +2,25 @@ import React from "react";
 import { X } from "lucide-react";
 
 /* Priority Badge */
-export function PriorityBadge({ priority }: { priority: string }) {
+export function PriorityBadge({ priority }: { priority: string | number }) {
+  // Handle both string and number inputs
+  const p = typeof priority === 'number' ?
+    (priority === 1 ? 'low' : priority === 2 ? 'medium' : priority === 3 ? 'high' : 'medium')
+    : priority;
+
   const colors = {
-    low: "bg-gray-100 text-gray-700",
-    medium: "bg-blue-100 text-blue-700",
-    high: "bg-orange-100 text-orange-700",
-    urgent: "bg-red-100 text-red-700",
-  }[priority] || "bg-gray-100 text-gray-700";
+    low: "bg-gray-800 text-gray-300",
+    medium: "bg-blue-900/50 text-blue-300",
+    high: "bg-orange-900/50 text-orange-300",
+    urgent: "bg-red-900/50 text-red-300",
+  }[p] || "bg-gray-800 text-gray-300";
 
   const labels = {
     low: "Laag",
     medium: "Gemiddeld",
     high: "Hoog",
     urgent: "Urgent",
-  }[priority] || priority;
+  }[p] || p;
 
   return (
     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors}`}>
@@ -27,10 +32,10 @@ export function PriorityBadge({ priority }: { priority: string }) {
 /* Status Badge */
 export function StatusBadge({ status }: { status: string }) {
   const colors = {
-    todo: "bg-gray-100 text-gray-700",
-    in_progress: "bg-blue-100 text-blue-700",
-    done: "bg-green-100 text-green-700",
-  }[status] || "bg-gray-100 text-gray-700";
+    todo: "bg-gray-800 text-gray-300",
+    in_progress: "bg-blue-900/50 text-blue-300",
+    done: "bg-green-900/50 text-green-300",
+  }[status] || "bg-gray-800 text-gray-300";
 
   const labels = {
     todo: "Te doen",
@@ -50,7 +55,7 @@ export function ProjectBadge({ project }: { project?: string }) {
   if (!project) return null;
 
   return (
-    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-900/50 text-purple-300">
       {project}
     </span>
   );
@@ -59,10 +64,10 @@ export function ProjectBadge({ project }: { project?: string }) {
 /* Tag Badge */
 export function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-300">
       #{tag}
       {onRemove && (
-        <button onClick={onRemove} className="hover:text-gray-900">
+        <button onClick={onRemove} className="hover:text-white">
           <X className="w-3 h-3" />
         </button>
       )}
@@ -71,27 +76,27 @@ export function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void
 }
 
 /* Modal Wrapper */
-export function Modal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  title: string; 
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
   children: React.ReactNode;
 }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="zeus-card rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-zeus-border shadow-2xl">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

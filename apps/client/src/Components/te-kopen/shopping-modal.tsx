@@ -88,23 +88,23 @@ export function ShoppingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="zeus-card w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 p-6 border-b border-[var(--zeus-border)]">
+          <h3 className="text-lg font-semibold text-[var(--zeus-text)]">
             {editItem ? "Item bewerken" : "Nieuw item toevoegen"}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
               Naam *
             </label>
             <input
@@ -112,13 +112,13 @@ export function ShoppingModal({
               placeholder="Wat wil je kopen?"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="input-zeus"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
               Omschrijving
             </label>
             <textarea
@@ -127,14 +127,14 @@ export function ShoppingModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, description: e.target.value }))
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="input-zeus"
               rows={2}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Categorie
               </label>
               <select
@@ -142,7 +142,7 @@ export function ShoppingModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, category: e.target.value }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               >
                 <option value="">Selecteer...</option>
                 {CATEGORIES.map((cat) => (
@@ -154,7 +154,7 @@ export function ShoppingModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Prioriteit
               </label>
               <select
@@ -162,7 +162,7 @@ export function ShoppingModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, priority: e.target.value }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               >
                 {PRIORITIES.map((pri) => (
                   <option key={pri.value} value={pri.value}>
@@ -175,7 +175,7 @@ export function ShoppingModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Geschatte prijs (€)
               </label>
               <input
@@ -186,12 +186,12 @@ export function ShoppingModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, estimated_cost_euros: e.target.value }))
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Winkel
               </label>
               <input
@@ -199,13 +199,13 @@ export function ShoppingModal({
                 placeholder="Bijv. Bol.com"
                 value={form.store}
                 onChange={(e) => setForm((f) => ({ ...f, store: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                className="input-zeus"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
               Product link
             </label>
             <input
@@ -215,35 +215,35 @@ export function ShoppingModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, product_url: e.target.value }))
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="input-zeus"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
               Notities
             </label>
             <textarea
               placeholder="Extra opmerkingen..."
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="input-zeus"
               rows={2}
             />
           </div>
         </div>
 
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2 p-6 border-t border-[var(--zeus-border)] bg-[var(--zeus-bg-secondary)]">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            className="flex-1 px-4 py-2 border border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] hover:text-[var(--zeus-text)]"
           >
             Annuleren
           </button>
           <button
             onClick={handleSubmit}
             disabled={!form.name.trim() || isPending}
-            className="flex-1 px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark disabled:bg-gray-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-brikx transition-all"
+            className="flex-1 btn-zeus-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             {isPending ? "Opslaan..." : editItem ? "Bijwerken" : "Toevoegen"}

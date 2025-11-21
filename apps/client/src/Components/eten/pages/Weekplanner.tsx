@@ -4,6 +4,7 @@ import { useMealPlans, useCreateMealPlan, useDeleteMealPlan, useRecipes } from '
 import { getWeekDates, formatDate, formatDateNL, getMealTypeLabel, getMealTypeEmoji } from '../utils';
 import { MealType, MEAL_TYPES, MealPlanWithRecipe } from '../types';
 import { isToday } from 'date-fns';
+import { Button } from '@/Components/ui/button';
 
 export default function WeekplannerPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekDates()[0]);
@@ -156,83 +157,83 @@ export default function WeekplannerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] text-[#C5C6C7] p-4 sm:p-6 font-sans selection:bg-[#FF6B00]/30">
+    <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text-secondary)] p-4 sm:p-6 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[#1F2833] p-6 rounded-2xl border border-[#FF6B00]/20 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent opacity-50"></div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1 drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)]">
-              WEEKPLANNER <span className="text-[#FF6B00]">ZEUS-X</span>
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)]">
+              WEEKPLANNER <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
             </h1>
-            <p className="text-[#C5C6C7] font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#66FCF1] animate-pulse"></span>
+            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
               Plan je culinaire missies
             </p>
           </div>
 
-          <button
+          <Button
             onClick={handleGenerateMealPlan}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#FF6B00] text-white rounded-lg hover:bg-[#FF6B00]/80 transition-all font-bold shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)] transform hover:-translate-y-0.5"
+            className="btn-zeus-primary"
           >
-            <Wand2 className="w-5 h-5" />
+            <Wand2 className="w-5 h-5 mr-2" />
             <span className="hidden sm:inline">Weekmenu Genereren</span>
             <span className="sm:hidden">Genereren</span>
-          </button>
+          </Button>
         </div>
 
         {/* Week Navigation */}
-        <div className="flex items-center justify-between bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 p-4 shadow-lg">
+        <div className="flex items-center justify-between bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg">
           <button
             onClick={handlePrevWeek}
-            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+            className="p-2 hover:bg-[var(--zeus-primary)]/10 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] rounded-lg transition-colors border border-transparent hover:border-[var(--zeus-primary)]/30"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
 
           <div className="text-center">
-            <p className="font-bold text-lg sm:text-xl text-white tracking-wide">
+            <p className="font-bold text-lg sm:text-xl text-[var(--zeus-text)] tracking-wide">
               {formatDateNL(weekDates[0])} - {formatDateNL(weekDates[6])}
             </p>
-            <p className="text-xs sm:text-sm text-[#FF6B00] font-mono mt-1">WEEK {getWeekNumber(weekDates[0])}</p>
+            <p className="text-xs sm:text-sm text-[var(--zeus-primary)] font-mono mt-1">WEEK {getWeekNumber(weekDates[0])}</p>
           </div>
 
           <button
             onClick={handleNextWeek}
-            className="p-2 hover:bg-[#FF6B00]/10 text-[#C5C6C7] hover:text-white rounded-lg transition-colors border border-transparent hover:border-[#FF6B00]/30"
+            className="p-2 hover:bg-[var(--zeus-primary)]/10 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] rounded-lg transition-colors border border-transparent hover:border-[var(--zeus-primary)]/30"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>
 
         {/* Week Grid - Desktop (Table) */}
-        <div className="hidden lg:block bg-[#1F2833] rounded-xl border border-[#FF6B00]/20 overflow-hidden shadow-2xl">
+        <div className="hidden lg:block bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] overflow-hidden shadow-2xl">
           <table className="w-full table-fixed">
-            <thead className="bg-[#0B0C10] border-b border-[#FF6B00]/20">
+            <thead className="bg-[var(--zeus-bg-secondary)] border-b border-[var(--zeus-border)]">
               <tr>
-                <th className="w-32 px-4 py-4 text-left text-sm font-bold text-[#FF6B00] uppercase tracking-wider">
+                <th className="w-32 px-4 py-4 text-left text-sm font-bold text-[var(--zeus-primary)] uppercase tracking-wider">
                   Maaltijd
                 </th>
                 {weekDates.map((date) => (
                   <th
                     key={formatDate(date)}
-                    className={`px-4 py-4 text-center border-l border-[#2d3436] ${isToday(date)
-                      ? 'bg-[#FF6B00]/10 text-white'
-                      : 'text-[#C5C6C7]'
+                    className={`px-4 py-4 text-center border-l border-[var(--zeus-border)] ${isToday(date)
+                      ? 'bg-[var(--zeus-primary)]/10 text-[var(--zeus-text)]'
+                      : 'text-[var(--zeus-text-secondary)]'
                       }`}
                   >
                     <div className="font-bold uppercase tracking-wide text-sm">{date.toLocaleDateString('nl-NL', { weekday: 'short' })}</div>
-                    <div className={`text-xs font-mono mt-1 ${isToday(date) ? 'text-[#FF6B00]' : 'text-[#C5C6C7]/50'}`}>
+                    <div className={`text-xs font-mono mt-1 ${isToday(date) ? 'text-[var(--zeus-primary)]' : 'text-[var(--zeus-text-secondary)]/50'}`}>
                       {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'short' })}
                     </div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2d3436]">
+            <tbody className="divide-y divide-[var(--zeus-border)]">
               {MEAL_TYPES.map((mealType) => (
-                <tr key={mealType} className="hover:bg-[#0B0C10]/50 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-[#C5C6C7] bg-[#0B0C10]/30 border-r border-[#2d3436]">
+                <tr key={mealType} className="hover:bg-[var(--zeus-bg-secondary)]/50 transition-colors">
+                  <td className="px-4 py-3 text-sm font-medium text-[var(--zeus-text-secondary)] bg-[var(--zeus-bg-secondary)]/30 border-r border-[var(--zeus-border)]">
                     <div className="flex items-center gap-3">
                       <span className="text-xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">{getMealTypeEmoji(mealType)}</span>
                       <span className="font-bold">{getMealTypeLabel(mealType)}</span>
@@ -245,7 +246,7 @@ export default function WeekplannerPage() {
                     return (
                       <td
                         key={`${dateStr}-${mealType}`}
-                        className={`p-2 border-l border-[#2d3436] align-top h-40 transition-colors ${isToday(date) ? 'bg-[#FF6B00]/5' : ''
+                        className={`p-2 border-l border-[var(--zeus-border)] align-top h-40 transition-colors ${isToday(date) ? 'bg-[var(--zeus-primary)]/5' : ''
                           }`}
                       >
                         <MealSlot
@@ -265,26 +266,26 @@ export default function WeekplannerPage() {
         {/* Week List - Mobile/Tablet */}
         <div className="lg:hidden space-y-6">
           {weekDates.map((date) => (
-            <div key={formatDate(date)} className={`bg-[#1F2833] rounded-xl border shadow-lg overflow-hidden ${isToday(date) ? 'border-[#FF6B00] ring-1 ring-[#FF6B00]/50' : 'border-[#FF6B00]/20'}`}>
+            <div key={formatDate(date)} className={`bg-[var(--zeus-card)] rounded-xl border shadow-lg overflow-hidden ${isToday(date) ? 'border-[var(--zeus-primary)] ring-1 ring-[var(--zeus-primary)]/50' : 'border-[var(--zeus-border)]'}`}>
               {/* Day Header */}
-              <div className={`px-4 py-3 flex items-center justify-between ${isToday(date) ? 'bg-[#FF6B00] text-white' : 'bg-[#0B0C10] border-b border-[#FF6B00]/10'}`}>
+              <div className={`px-4 py-3 flex items-center justify-between ${isToday(date) ? 'bg-[var(--zeus-primary)] text-white' : 'bg-[var(--zeus-bg-secondary)] border-b border-[var(--zeus-border)]'}`}>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-lg capitalize tracking-wide">
                     {date.toLocaleDateString('nl-NL', { weekday: 'long' })}
                   </span>
-                  <span className={`text-sm font-mono ${isToday(date) ? 'text-white/90' : 'text-[#C5C6C7]'}`}>
+                  <span className={`text-sm font-mono ${isToday(date) ? 'text-white/90' : 'text-[var(--zeus-text-secondary)]'}`}>
                     {date.getDate()} {date.toLocaleDateString('nl-NL', { month: 'long' })}
                   </span>
                 </div>
                 {isToday(date) && (
-                  <span className="text-xs font-bold bg-white text-[#FF6B00] px-2 py-1 rounded-full shadow-sm">
+                  <span className="text-xs font-bold bg-white text-[var(--zeus-primary)] px-2 py-1 rounded-full shadow-sm">
                     VANDAAG
                   </span>
                 )}
               </div>
 
               {/* Meals List */}
-              <div className="divide-y divide-[#2d3436]">
+              <div className="divide-y divide-[var(--zeus-border)]">
                 {MEAL_TYPES.map((mealType) => {
                   const dateStr = formatDate(date);
                   const mealPlan = mealPlansByDate[dateStr]?.[mealType];
@@ -292,7 +293,7 @@ export default function WeekplannerPage() {
                   return (
                     <div key={mealType} className="p-3 flex gap-3">
                       {/* Meal Type Icon/Label */}
-                      <div className="w-24 flex-shrink-0 flex flex-col justify-center text-[#C5C6C7]">
+                      <div className="w-24 flex-shrink-0 flex flex-col justify-center text-[var(--zeus-text-secondary)]">
                         <div className="flex items-center gap-2 font-medium text-sm">
                           <span className="text-lg">{getMealTypeEmoji(mealType)}</span>
                           <span>{getMealTypeLabel(mealType)}</span>
@@ -319,13 +320,13 @@ export default function WeekplannerPage() {
         {/* Add Meal Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="bg-[#1F2833] border border-[#FF6B00]/30 rounded-2xl max-w-4xl w-full max-h-[80vh] flex flex-col shadow-[0_0_50px_rgba(255,107,0,0.2)]">
-              <div className="p-4 sm:p-6 border-b border-[#FF6B00]/20 flex justify-between items-center bg-[#0B0C10]/50 rounded-t-2xl">
-                <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                  <Utensils className="w-5 h-5 text-[#FF6B00]" />
-                  Kies een recept voor <span className="text-[#FF6B00]">{getMealTypeLabel(showAddModal.mealType)}</span>
+            <div className="bg-[var(--zeus-card)] border border-[var(--zeus-border)] rounded-2xl max-w-4xl w-full max-h-[80vh] flex flex-col shadow-[0_0_50px_var(--zeus-primary-glow)]">
+              <div className="p-4 sm:p-6 border-b border-[var(--zeus-border)] flex justify-between items-center bg-[var(--zeus-bg-secondary)] rounded-t-2xl">
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)] flex items-center gap-2">
+                  <Utensils className="w-5 h-5 text-[var(--zeus-primary)]" />
+                  Kies een recept voor <span className="text-[var(--zeus-primary)]">{getMealTypeLabel(showAddModal.mealType)}</span>
                 </h2>
-                <button onClick={() => setShowAddModal(null)} className="text-[#C5C6C7] hover:text-white transition-colors">
+                <button onClick={() => setShowAddModal(null)} className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] transition-colors">
                   <ChevronLeft className="w-6 h-6 rotate-180" />
                 </button>
               </div>
@@ -345,7 +346,7 @@ export default function WeekplannerPage() {
                       <button
                         key={recipe.id}
                         onClick={() => handleAddMeal(recipe.id)}
-                        className="group relative aspect-square bg-[#0B0C10] rounded-xl overflow-hidden text-left border border-[#2d3436] hover:border-[#FF6B00] transition-all hover:shadow-[0_0_20px_rgba(255,107,0,0.3)]"
+                        className="group relative aspect-square bg-[var(--zeus-bg-secondary)] rounded-xl overflow-hidden text-left border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] transition-all hover:shadow-[0_0_20px_var(--zeus-primary-glow)]"
                       >
                         {recipe.image_url ? (
                           <img
@@ -354,13 +355,13 @@ export default function WeekplannerPage() {
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[#2d3436] group-hover:text-[#FF6B00]/50 transition-colors">
+                          <div className="w-full h-full flex items-center justify-center text-[var(--zeus-text-secondary)] group-hover:text-[var(--zeus-primary)]/50 transition-colors">
                             <ShoppingCart className="w-12 h-12" />
                           </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3 flex flex-col justify-end">
-                          <p className="text-white font-bold text-sm line-clamp-2 group-hover:text-[#FF6B00] transition-colors">{recipe.title}</p>
-                          <div className="flex items-center gap-2 text-xs text-[#C5C6C7] mt-1 font-mono">
+                          <p className="text-white font-bold text-sm line-clamp-2 group-hover:text-[var(--zeus-primary)] transition-colors">{recipe.title}</p>
+                          <div className="flex items-center gap-2 text-xs text-[var(--zeus-text-secondary)] mt-1 font-mono">
                             <span>{recipe.default_servings} pers.</span>
                             {recipe.prep_time_min && <span>• {recipe.prep_time_min} min</span>}
                           </div>
@@ -370,16 +371,16 @@ export default function WeekplannerPage() {
                 </div>
 
                 {recipes.length === 0 && (
-                  <div className="text-center py-12 text-[#C5C6C7]/50 italic">
+                  <div className="text-center py-12 text-[var(--zeus-text-secondary)]/50 italic">
                     Geen recepten gevonden. Maak eerst een recept aan!
                   </div>
                 )}
               </div>
 
-              <div className="p-4 border-t border-[#FF6B00]/20 flex justify-end bg-[#0B0C10]/50 rounded-b-2xl">
+              <div className="p-4 border-t border-[var(--zeus-border)] flex justify-end bg-[var(--zeus-bg-secondary)] rounded-b-2xl">
                 <button
                   onClick={() => setShowAddModal(null)}
-                  className="px-6 py-2 text-[#C5C6C7] hover:text-white hover:bg-[#FF6B00]/10 rounded-lg transition-colors font-medium"
+                  className="px-6 py-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-primary)]/10 rounded-lg transition-colors font-medium"
                 >
                   Annuleren
                 </button>
@@ -412,7 +413,7 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
     return (
       <button
         onClick={onClickAdd}
-        className={`w-full flex items-center justify-center text-[#2d3436] hover:text-[#FF6B00] hover:bg-[#FF6B00]/5 border-2 border-dashed border-[#2d3436] hover:border-[#FF6B00]/50 rounded-xl transition-all group ${compact ? 'h-16' : 'h-full min-h-[100px]'}`}
+        className={`w-full flex items-center justify-center text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-primary)] hover:bg-[var(--zeus-primary)]/5 border-2 border-dashed border-[var(--zeus-border)] hover:border-[var(--zeus-primary)]/50 rounded-xl transition-all group ${compact ? 'h-16' : 'h-full min-h-[100px]'}`}
       >
         <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
       </button>
@@ -424,9 +425,9 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
   return (
     <div
       className={`
-        relative group overflow-hidden rounded-xl transition-all hover:shadow-[0_0_20px_rgba(255,107,0,0.3)] cursor-pointer border
+        relative group overflow-hidden rounded-xl transition-all hover:shadow-[0_0_20px_var(--zeus-primary-glow)] cursor-pointer border
         ${compact ? 'h-24' : 'h-full min-h-[120px]'}
-        ${hasImage ? 'bg-black border-transparent' : 'bg-[#0B0C10] border-[#FF6B00]/20'}
+        ${hasImage ? 'bg-black border-transparent' : 'bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)]'}
       `}
     >
       {/* Background Image */}
@@ -443,21 +444,21 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
 
       {/* Content */}
       <div className={`relative h-full flex flex-col justify-end p-3 z-10`}>
-        <p className={`font-bold text-sm line-clamp-2 leading-tight text-white group-hover:text-[#FF6B00] transition-colors ${hasImage ? 'drop-shadow-md' : ''}`}>
+        <p className={`font-bold text-sm line-clamp-2 leading-tight text-white group-hover:text-[var(--zeus-primary)] transition-colors ${hasImage ? 'drop-shadow-md' : ''}`}>
           {mealPlan.title_override || mealPlan.recipe?.title || 'Onbekend recept'}
         </p>
 
-        <div className={`flex items-center gap-2 text-xs mt-1 font-mono ${hasImage ? 'text-gray-300' : 'text-[#C5C6C7]'}`}>
+        <div className={`flex items-center gap-2 text-xs mt-1 font-mono ${hasImage ? 'text-gray-300' : 'text-[var(--zeus-text-secondary)]'}`}>
           <span>{mealPlan.servings} pers.</span>
           {mealPlan.is_leftover && (
-            <span className="bg-[#FF6B00] text-white px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+            <span className="bg-[var(--zeus-primary)] text-white px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
               Kliekjes
             </span>
           )}
         </div>
 
         {mealPlan.notes && (
-          <p className={`text-[10px] mt-1 line-clamp-1 italic ${hasImage ? 'text-gray-400' : 'text-[#C5C6C7]/50'}`}>
+          <p className={`text-[10px] mt-1 line-clamp-1 italic ${hasImage ? 'text-gray-400' : 'text-[var(--zeus-text-secondary)]/50'}`}>
             {mealPlan.notes}
           </p>
         )}
@@ -469,7 +470,7 @@ function MealSlot({ mealPlan, onClickAdd, onDelete, compact }: MealSlotProps) {
           e.stopPropagation();
           onDelete(mealPlan.id);
         }}
-        className="absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 bg-black/50 text-[#FF6B00] hover:bg-red-500 hover:text-white backdrop-blur-sm z-20"
+        className="absolute top-2 right-2 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 bg-black/50 text-[var(--zeus-primary)] hover:bg-red-500 hover:text-white backdrop-blur-sm z-20"
         title="Verwijderen"
       >
         <Trash2 className="w-3.5 h-3.5" />

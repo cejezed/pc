@@ -1,10 +1,10 @@
-import { Search, SlidersHorizontal, Grid, List } from "lucide-react";
+import { Search, SlidersHorizontal, Grid, List, RotateCcw } from "lucide-react";
 
-export function SearchBar({ 
-  value, 
-  onChange 
-}: { 
-  value: string; 
+export function SearchBar({
+  value,
+  onChange
+}: {
+  value: string;
   onChange: (value: string) => void;
 }) {
   return (
@@ -15,7 +15,7 @@ export function SearchBar({
         placeholder="Zoek taken..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+        className="w-full pl-10 pr-4 py-2 bg-[#1F2833] border border-zeus-border rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-zeus-accent"
       />
     </div>
   );
@@ -43,15 +43,16 @@ export function FilterBar({
   const hasFilters = statusFilter !== "all" || priorityFilter !== "all" || projectFilter !== "all";
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4">
+    <div className="zeus-card border border-zeus-border rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <SlidersHorizontal className="w-4 h-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-700">Filters</span>
+        <SlidersHorizontal className="w-4 h-4 text-zeus-accent" />
+        <span className="text-sm font-medium text-gray-300">Filters</span>
         {hasFilters && (
           <button
             onClick={onReset}
-            className="ml-auto text-xs text-blue-600 hover:text-blue-700"
+            className="ml-auto text-xs text-zeus-accent hover:text-zeus-accent-hover flex items-center gap-1"
           >
+            <RotateCcw className="w-3 h-3" />
             Reset filters
           </button>
         )}
@@ -59,13 +60,13 @@ export function FilterBar({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-gray-400 mb-1">
             Status
           </label>
           <select
             value={statusFilter}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+            className="w-full bg-[#1F2833] border border-zeus-border rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
           >
             <option value="all">Alle statussen</option>
             <option value="todo">Te doen</option>
@@ -75,13 +76,13 @@ export function FilterBar({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-gray-400 mb-1">
             Prioriteit
           </label>
           <select
             value={priorityFilter}
             onChange={(e) => onPriorityChange(e.target.value)}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+            className="w-full bg-[#1F2833] border border-zeus-border rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
           >
             <option value="all">Alle prioriteiten</option>
             <option value="urgent">Urgent</option>
@@ -92,13 +93,13 @@ export function FilterBar({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
+          <label className="block text-xs font-medium text-gray-400 mb-1">
             Project
           </label>
           <select
             value={projectFilter}
             onChange={(e) => onProjectChange(e.target.value)}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"
+            className="w-full bg-[#1F2833] border border-zeus-border rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
           >
             <option value="all">Alle projecten</option>
             {projects.map((proj) => (
@@ -121,25 +122,23 @@ export function ViewToggle({
   onChange: (view: "grid" | "list") => void;
 }) {
   return (
-    <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+    <div className="flex gap-1 bg-[#1F2833] border border-zeus-border rounded-lg p-1">
       <button
         onClick={() => onChange("grid")}
-        className={`p-2 rounded ${
-          view === "grid"
-            ? "bg-white text-gray-900 shadow-sm"
-            : "text-gray-600 hover:text-gray-900"
-        }`}
+        className={`p-2 rounded transition-colors ${view === "grid"
+            ? "bg-zeus-accent text-white shadow-sm"
+            : "text-gray-400 hover:text-white"
+          }`}
         title="Grid weergave"
       >
         <Grid className="w-4 h-4" />
       </button>
       <button
         onClick={() => onChange("list")}
-        className={`p-2 rounded ${
-          view === "list"
-            ? "bg-white text-gray-900 shadow-sm"
-            : "text-gray-600 hover:text-gray-900"
-        }`}
+        className={`p-2 rounded transition-colors ${view === "list"
+            ? "bg-zeus-accent text-white shadow-sm"
+            : "text-gray-400 hover:text-white"
+          }`}
         title="Lijst weergave"
       >
         <List className="w-4 h-4" />
@@ -159,7 +158,7 @@ export function SortSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+      className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
     >
       <option value="duedate">Deadline</option>
       <option value="priority">Prioriteit</option>
@@ -179,25 +178,25 @@ export function QuickFilters({
     <div className="flex flex-wrap gap-2">
       <button
         onClick={() => onFilterClick("today")}
-        className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100"
+        className="px-3 py-1.5 text-sm bg-blue-900/20 text-blue-300 border border-blue-900/50 rounded-lg hover:bg-blue-900/40 transition-colors"
       >
         Vandaag
       </button>
       <button
         onClick={() => onFilterClick("week")}
-        className="px-3 py-1.5 text-sm bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100"
+        className="px-3 py-1.5 text-sm bg-purple-900/20 text-purple-300 border border-purple-900/50 rounded-lg hover:bg-purple-900/40 transition-colors"
       >
         Deze week
       </button>
       <button
         onClick={() => onFilterClick("overdue")}
-        className="px-3 py-1.5 text-sm bg-red-50 text-red-700 rounded-lg hover:bg-red-100"
+        className="px-3 py-1.5 text-sm bg-red-900/20 text-red-300 border border-red-900/50 rounded-lg hover:bg-red-900/40 transition-colors"
       >
         Verlopen
       </button>
       <button
         onClick={() => onFilterClick("completed")}
-        className="px-3 py-1.5 text-sm bg-green-50 text-green-700 rounded-lg hover:bg-green-100"
+        className="px-3 py-1.5 text-sm bg-green-900/20 text-green-300 border border-green-900/50 rounded-lg hover:bg-green-900/40 transition-colors"
       >
         Afgerond
       </button>

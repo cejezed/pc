@@ -130,9 +130,8 @@ const Settings = () => {
   };
 
   const handleExport = () => {
-    const filename = `${exportDataType}-export-${
-      new Date().toISOString().split('T')[0]
-    }.${exportFormat}`;
+    const filename = `${exportDataType}-export-${new Date().toISOString().split('T')[0]
+      }.${exportFormat}`;
     alert(`Export gestart: ${filename}`);
   };
 
@@ -170,23 +169,22 @@ const Settings = () => {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <SettingsIcon className="w-8 h-8 text-[#0A2540]" />
-        <h1 className="text-3xl font-bold text-[#0A2540]">Instellingen</h1>
+        <SettingsIcon className="w-8 h-8 text-[var(--zeus-text)]" />
+        <h1 className="text-3xl font-bold text-[var(--zeus-text)]">Instellingen</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-[var(--zeus-border)]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${
-                activeTab === tab.id
-                  ? 'border-b-2 border-[#2D9CDB] text-[#2D9CDB]'
-                  : 'text-gray-600 hover:text-[#2D9CDB]'
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${activeTab === tab.id
+                  ? 'border-b-2 border-[var(--zeus-primary)] text-[var(--zeus-primary)]'
+                  : 'text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]'
+                }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
@@ -199,21 +197,21 @@ const Settings = () => {
       {activeTab === 'import-export' && (
         <div className="space-y-6">
           {/* Import Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Upload className="w-5 h-5 text-[#2D9CDB]" />
-              <h2 className="text-xl font-bold text-[#0A2540]">CSV Importeren</h2>
+              <Upload className="w-5 h-5 text-[var(--zeus-primary)]" />
+              <h2 className="text-xl font-bold text-[var(--zeus-text)]">CSV Importeren</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Selecteer data type:
                 </label>
                 <select
                   value={importDataType}
                   onChange={(e) => setImportDataType(e.target.value as DataType)}
-                  className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
+                  className="w-full max-w-md bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 >
                   {Object.entries(dataTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -224,10 +222,10 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Upload CSV:
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#2D9CDB] transition-colors">
+                <div className="border-2 border-dashed border-[var(--zeus-border)] rounded-lg p-8 text-center hover:border-[var(--zeus-primary)] transition-colors group">
                   <input
                     type="file"
                     accept=".csv"
@@ -236,21 +234,21 @@ const Settings = () => {
                     id="csv-upload"
                   />
                   <label htmlFor="csv-upload" className="cursor-pointer">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-700">
+                    <FileText className="w-12 h-12 text-[var(--zeus-text-secondary)] group-hover:text-[var(--zeus-primary)] mx-auto mb-3 transition-colors" />
+                    <p className="text-sm font-medium text-[var(--zeus-text)]">
                       {uploadedFile ? uploadedFile.name : 'Sleep bestand of klik om te uploaden'}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">CSV formaat</p>
+                    <p className="text-xs text-[var(--zeus-text-secondary)] mt-1">CSV formaat</p>
                   </label>
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4">
                 <div className="flex gap-2">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  <div className="text-sm text-amber-800">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <div className="text-sm text-amber-200">
                     <p className="font-semibold mb-1">LET OP:</p>
-                    <ul className="list-disc list-inside space-y-1">
+                    <ul className="list-disc list-inside space-y-1 opacity-80">
                       <li>CSV moet headers bevatten</li>
                       <li>Met id = update bestaande rij, zonder id = nieuwe rij</li>
                       <li>Download eerst een export als template</li>
@@ -260,9 +258,9 @@ const Settings = () => {
               </div>
 
               {importSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
+                <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-400" />
+                  <span className="text-sm font-medium text-green-200">
                     Import succesvol voltooid!
                   </span>
                 </div>
@@ -271,7 +269,7 @@ const Settings = () => {
               <button
                 onClick={handleImport}
                 disabled={!uploadedFile || importing}
-                className="bg-[#2D9CDB] hover:bg-[#1D7AAC] disabled:bg-gray-300 text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
+                className="btn-zeus-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {importing ? (
                   <>
@@ -289,21 +287,21 @@ const Settings = () => {
           </div>
 
           {/* Export Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Download className="w-5 h-5 text-[#2D9CDB]" />
-              <h2 className="text-xl font-bold text-[#0A2540]">Export</h2>
+              <Download className="w-5 h-5 text-[var(--zeus-primary)]" />
+              <h2 className="text-xl font-bold text-[var(--zeus-text)]">Export</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Selecteer data type:
                 </label>
                 <select
                   value={exportDataType}
                   onChange={(e) => setExportDataType(e.target.value as DataType)}
-                  className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
+                  className="w-full max-w-md bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 >
                   {Object.entries(dataTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -315,31 +313,31 @@ const Settings = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                     Van:
                   </label>
                   <input
                     type="date"
                     value={exportDateFrom}
                     onChange={(e) => setExportDateFrom(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
+                    className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                     Tot:
                   </label>
                   <input
                     type="date"
                     value={exportDateTo}
                     onChange={(e) => setExportDateTo(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent"
+                    className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Formaat:
                 </label>
                 <div className="flex gap-4">
@@ -350,9 +348,9 @@ const Settings = () => {
                         value={format}
                         checked={exportFormat === format}
                         onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-                        className="w-4 h-4 text-[#2D9CDB] focus:ring-[#2D9CDB]"
+                        className="w-4 h-4 text-[var(--zeus-primary)] focus:ring-[var(--zeus-primary)] bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)]"
                       />
-                      <span className="text-sm font-medium text-gray-700 uppercase">
+                      <span className="text-sm font-medium text-[var(--zeus-text)] uppercase">
                         {format}
                       </span>
                     </label>
@@ -362,7 +360,7 @@ const Settings = () => {
 
               <button
                 onClick={handleExport}
-                className="bg-green-500 hover:bg-green-600 text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg shadow-green-900/20"
               >
                 <Download className="w-4 h-4" />
                 Download Export
@@ -371,37 +369,37 @@ const Settings = () => {
           </div>
 
           {/* Backup & Restore */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <RefreshCw className="w-5 h-5 text-[#2D9CDB]" />
-              <h2 className="text-xl font-bold text-[#0A2540]">Backup & Restore</h2>
+              <RefreshCw className="w-5 h-5 text-[var(--zeus-primary)]" />
+              <h2 className="text-xl font-bold text-[var(--zeus-text)]">Backup & Restore</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-3">Volledige backup:</p>
+                <p className="text-sm font-medium text-[var(--zeus-text-secondary)] mb-3">Volledige backup:</p>
                 <button
                   onClick={handleBackupDownload}
-                  className="bg-[#0A2540] hover:bg-[#0A3552] text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
+                  className="bg-[var(--zeus-bg-secondary)] hover:bg-[var(--zeus-bg-secondary)]/80 border border-[var(--zeus-border)] text-[var(--zeus-text)] px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   Download Alle Data (ZIP)
                 </button>
-                <p className="text-xs text-gray-500 mt-2">Laatste backup: 25 Sep 2024 14:32</p>
+                <p className="text-xs text-[var(--zeus-text-secondary)] mt-2">Laatste backup: 25 Sep 2024 14:32</p>
               </div>
 
-              <div className="border-t border-gray-200 pt-4">
-                <p className="text-sm font-medium text-gray-700 mb-3">
+              <div className="border-t border-[var(--zeus-border)] pt-4">
+                <p className="text-sm font-medium text-[var(--zeus-text-secondary)] mb-3">
                   Restore from backup:
                 </p>
                 <input
                   type="file"
                   accept=".zip"
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#2D9CDB] file:text-white hover:file:bg-[#1D7AAC]"
+                  className="block w-full text-sm text-[var(--zeus-text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--zeus-primary)] file:text-white hover:file:bg-[var(--zeus-primary)]/80"
                 />
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3 flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-800">
+                <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 mt-3 flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-200">
                     Dit overschrijft alle huidige data! Maak eerst een backup.
                   </p>
                 </div>
@@ -413,96 +411,96 @@ const Settings = () => {
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6">
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">
+            <h2 className="text-xl font-bold text-[var(--zeus-text)] mb-4">
               Bedrijfsgegevens (voor facturen)
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bedrijfsnaam</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Bedrijfsnaam</label>
                 <input
                   type="text"
                   value={profile.company_name}
                   onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">KVK nummer</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">KVK nummer</label>
                 <input
                   type="text"
                   value={profile.kvk_number}
                   onChange={(e) => setProfile({ ...profile, kvk_number: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">BTW nummer</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">BTW nummer</label>
                 <input
                   type="text"
                   value={profile.btw_number}
                   onChange={(e) => setProfile({ ...profile, btw_number: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">IBAN</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">IBAN</label>
                 <input
                   type="text"
                   value={profile.iban}
                   onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Adres</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Adres</label>
                 <input
                   type="text"
                   value={profile.address}
                   onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Logo</label>
                 <input
                   type="file"
                   accept="image/*"
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#2D9CDB] file:text-white hover:file:bg-[#1D7AAC]"
+                  className="block w-full text-sm text-[var(--zeus-text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--zeus-primary)] file:text-white hover:file:bg-[var(--zeus-primary)]/80"
                 />
               </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">Persoonlijk</h2>
+          <div className="border-t border-[var(--zeus-border)] pt-6">
+            <h2 className="text-xl font-bold text-[var(--zeus-text)] mb-4">Persoonlijk</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Naam</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Naam</label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Email</label>
                 <input
                   type="email"
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Telefoon</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Telefoon</label>
                 <input
                   type="tel"
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                 />
               </div>
             </div>
@@ -510,7 +508,7 @@ const Settings = () => {
 
           <button
             onClick={handleProfileSave}
-            className="bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
+            className="btn-zeus-primary flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
             Opslaan
@@ -520,9 +518,9 @@ const Settings = () => {
 
       {/* Notifications Tab */}
       {activeTab === 'notifications' && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6">
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">Email notificaties</h2>
+            <h2 className="text-xl font-bold text-[var(--zeus-text)] mb-4">Email notificaties</h2>
             <div className="space-y-3">
               {Object.entries(notifications.email).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-3 cursor-pointer group">
@@ -535,9 +533,9 @@ const Settings = () => {
                         email: { ...notifications.email, [key]: e.target.checked },
                       })
                     }
-                    className="w-5 h-5 text-[#2D9CDB] rounded focus:ring-[#2D9CDB]"
+                    className="w-5 h-5 text-[var(--zeus-primary)] rounded focus:ring-[var(--zeus-primary)] bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)]"
                   />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-[#2D9CDB]">
+                  <span className="text-sm font-medium text-[var(--zeus-text-secondary)] group-hover:text-[var(--zeus-primary)] transition-colors">
                     {key === 'budget_alerts' && 'Budget waarschuwingen'}
                     {key === 'invoice_due' && 'Factuur vervaldatum'}
                     {key === 'subscription_cancel' && 'Abonnement opzegtermijn'}
@@ -548,8 +546,8 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">Push notificaties</h2>
+          <div className="border-t border-[var(--zeus-border)] pt-6">
+            <h2 className="text-xl font-bold text-[var(--zeus-text)] mb-4">Push notificaties</h2>
             <div className="space-y-3">
               {Object.entries(notifications.push).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-3 cursor-pointer group">
@@ -562,9 +560,9 @@ const Settings = () => {
                         push: { ...notifications.push, [key]: e.target.checked },
                       })
                     }
-                    className="w-5 h-5 text-[#2D9CDB] rounded focus:ring-[#2D9CDB]"
+                    className="w-5 h-5 text-[var(--zeus-primary)] rounded focus:ring-[var(--zeus-primary)] bg-[var(--zeus-bg-secondary)] border-[var(--zeus-border)]"
                   />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-[#2D9CDB]">
+                  <span className="text-sm font-medium text-[var(--zeus-text-secondary)] group-hover:text-[var(--zeus-primary)] transition-colors">
                     {key === 'affirmation_reminders' && 'Affirmation reminders'}
                     {key === 'habit_checkins' && 'Habit check-ins'}
                     {key === 'task_deadlines' && 'Taak deadlines'}
@@ -575,8 +573,8 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-xl font-bold text-[#0A2540] mb-4">Quiet hours</h2>
+          <div className="border-t border-[var(--zeus-border)] pt-6">
+            <h2 className="text-xl font-bold text-[var(--zeus-text)] mb-4">Quiet hours</h2>
             <div className="flex items-center gap-4">
               <input
                 type="time"
@@ -587,9 +585,9 @@ const Settings = () => {
                     quiet_hours: { ...notifications.quiet_hours, start: e.target.value },
                   })
                 }
-                className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                className="bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
               />
-              <span className="text-gray-500">tot</span>
+              <span className="text-[var(--zeus-text-secondary)]">tot</span>
               <input
                 type="time"
                 value={notifications.quiet_hours.end}
@@ -599,14 +597,14 @@ const Settings = () => {
                     quiet_hours: { ...notifications.quiet_hours, end: e.target.value },
                   })
                 }
-                className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                className="bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
               />
             </div>
           </div>
 
           <button
             onClick={handleNotificationsSave}
-            className="bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white px-6 py-2.5 rounded-lg font-semibold transition-all flex items-center gap-2"
+            className="btn-zeus-primary flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
             Opslaan
@@ -617,19 +615,18 @@ const Settings = () => {
       {/* Integrations Tab */}
       {activeTab === 'integrations' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Calendar className="w-6 h-6 text-[#2D9CDB]" />
+                <Calendar className="w-6 h-6 text-[var(--zeus-primary)]" />
                 <div>
-                  <h2 className="text-xl font-bold text-[#0A2540]">Google Calendar</h2>
-                  <p className="text-sm text-gray-500">Sync je agenda met Brikx</p>
+                  <h2 className="text-xl font-bold text-[var(--zeus-text)]">Google Calendar</h2>
+                  <p className="text-sm text-[var(--zeus-text-secondary)]">Sync je agenda met Brikx</p>
                 </div>
               </div>
               <span
-                className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                  calendarConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                }`}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold ${calendarConnected ? 'bg-green-900/20 text-green-400 border border-green-500/30' : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]'
+                  }`}
               >
                 {calendarConnected ? '✓ Geactiveerd' : 'Niet verbonden'}
               </span>
@@ -638,21 +635,21 @@ const Settings = () => {
             {calendarConnected && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">ICS URL:</label>
+                  <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">ICS URL:</label>
                   <input
                     type="text"
                     value={calendarUrl}
                     onChange={(e) => setCalendarUrl(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D9CDB]"
+                    className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button className="bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                  <button className="btn-zeus-primary text-sm">
                     Test Verbinding
                   </button>
                   <button
                     onClick={() => setCalendarConnected(false)}
-                    className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                    className="bg-[var(--zeus-bg-secondary)] hover:bg-[var(--zeus-bg-secondary)]/80 border border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] px-4 py-2 rounded-lg text-sm font-semibold transition-all"
                   >
                     Ontkoppelen
                   </button>
@@ -664,11 +661,11 @@ const Settings = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setCalendarConnected(true)}
-                  className="bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                  className="btn-zeus-primary text-sm"
                 >
                   Opnieuw verbinden
                 </button>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-[var(--zeus-text-secondary)]">
                   Verbind je Google Calendar via ICS.
                 </span>
               </div>

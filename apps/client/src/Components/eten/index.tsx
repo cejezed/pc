@@ -21,29 +21,30 @@ export default function MijnKeuken() {
   const [activeTab, setActiveTab] = useState<TabType>('week');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--zeus-bg)]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[var(--zeus-card)] border-b border-[var(--zeus-border)] sticky top-0 z-10 backdrop-blur-md bg-opacity-80">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3 mb-4">
-            <ChefHat className="w-8 h-8 text-brikx-teal" />
+            <div className="p-2 bg-[var(--zeus-primary)]/10 rounded-xl">
+              <ChefHat className="w-8 h-8 text-[var(--zeus-primary)]" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Mijn Keuken</h1>
-              <p className="text-sm text-gray-600">Plan je maaltijden en boodschappen</p>
+              <h1 className="text-2xl font-bold text-[var(--zeus-text)]">Mijn Keuken</h1>
+              <p className="text-sm text-[var(--zeus-text-secondary)]">Plan je maaltijden en boodschappen</p>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  activeTab === id
-                    ? 'bg-brikx-teal text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === id
+                    ? 'bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]'
+                    : 'bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]'
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}

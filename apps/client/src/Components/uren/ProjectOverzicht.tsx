@@ -29,27 +29,27 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
       const invoicedPhases = new Set<string>(((project as any)?.invoiced_phases ?? []) as string[]);
 
       const totalHours = projectEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
-      
+
       // Split billed/unbilled
       const billedEntries = projectEntries.filter(e => e.invoiced_at != null);
       const unbilledEntries = projectEntries.filter(e => e.invoiced_at == null);
-      
+
       const billedHours = billedEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
       const unbilledHours = unbilledEntries.reduce((sum, e) => sum + (e.minutes ? e.minutes / 60 : e.hours || 0), 0);
-      
+
       // Bereken bedragen per entry (met fase-specifieke tarieven)
       const billedAmount = billedEntries.reduce((sum, e) => {
         const phaseRate = (phaseRatesCents[e.phase_code] ?? project.default_rate_cents ?? 0) / 100;
         const hours = e.minutes ? e.minutes / 60 : e.hours || 0;
         return sum + (hours * phaseRate);
       }, 0);
-      
+
       const unbilledAmount = unbilledEntries.reduce((sum, e) => {
         const phaseRate = (phaseRatesCents[e.phase_code] ?? project.default_rate_cents ?? 0) / 100;
         const hours = e.minutes ? e.minutes / 60 : e.hours || 0;
         return sum + (hours * phaseRate);
       }, 0);
-      
+
       const totalAmount = billedAmount + unbilledAmount;
 
       const phaseBreakdown = phases.reduce((acc, phase) => {
@@ -140,51 +140,51 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
         />
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-brikx-dark">Projecten</h2>
+          <h2 className="text-2xl font-bold text-[var(--zeus-text)]">Projecten</h2>
           <button
             onClick={openCreate}
-            className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium shadow-lg"
+            className="btn-zeus-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Project toevoegen
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sortedActiveProjects.map(({ project, totalHours, totalAmount, billedAmount, unbilledAmount, billedHours, unbilledHours, phaseBreakdown, hasEntries }) => {
             const isExpanded = expandedProjects.has(project.id);
             return (
-              <div key={project.id} className="bg-white rounded-brikx shadow-sm border border-gray-200">
+              <div key={project.id} className="zeus-card overflow-hidden">
                 <div className="p-4 flex items-center justify-between">
                   <button
                     onClick={() => toggleProject(project.id)}
-                    className="flex items-center gap-3 flex-1 text-left hover:bg-gray-50 -m-4 p-4 rounded-lg transition-colors"
+                    className="flex items-center gap-3 flex-1 text-left hover:bg-[var(--zeus-card-hover)] -m-4 p-4 rounded-lg transition-colors"
                   >
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-[var(--zeus-text-secondary)] flex-shrink-0" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-[var(--zeus-text-secondary)] flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg text-brikx-dark">{project.name}</h3>
-                      {project.city && <p className="text-sm text-gray-600">{project.city}</p>}
+                      <h3 className="font-semibold text-lg text-[var(--zeus-text)]">{project.name}</h3>
+                      {project.city && <p className="text-sm text-[var(--zeus-text-secondary)]">{project.city}</p>}
                     </div>
-                    
+
                     <div className="text-right">
-                      <div className="font-semibold text-lg text-brikx-dark flex items-center gap-2 justify-end">
-                        <Euro className="w-5 h-5 text-brikx-teal" />
+                      <div className="font-semibold text-lg text-[var(--zeus-text)] flex items-center gap-2 justify-end">
+                        <Euro className="w-5 h-5 text-[var(--zeus-primary)]" />
                         <span>{EUR(totalAmount)}</span>
                       </div>
-                      <div className="text-sm text-gray-600">{totalHours.toFixed(1)} uur totaal</div>
+                      <div className="text-sm text-[var(--zeus-text-secondary)]">{totalHours.toFixed(1)} uur totaal</div>
                       {unbilledAmount > 0 && (
-                        <div className="text-xs text-orange-600 font-medium mt-1">
+                        <div className="text-xs text-orange-500 font-medium mt-1">
                           {EUR(unbilledAmount)} te factureren
                         </div>
                       )}
                       {billedAmount > 0 && (
-                        <div className="text-xs text-green-600 mt-0.5">
+                        <div className="text-xs text-green-500 mt-0.5">
                           {EUR(billedAmount)} gefactureerd
                         </div>
                       )}
@@ -194,21 +194,21 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => openEdit(project)}
-                      className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="p-2 text-[var(--zeus-text-secondary)] hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors"
                       title="Project bewerken"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleArchive(project.id, true)}
-                      className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                      className="p-2 text-[var(--zeus-text-secondary)] hover:text-orange-400 hover:bg-orange-500/10 rounded transition-colors"
                       title="Archiveer project"
                     >
                       <Archive className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(project.id, project.name)}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      className="p-2 text-[var(--zeus-text-secondary)] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                       title="Verwijder project"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -217,39 +217,39 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                 </div>
 
                 {isExpanded && (
-                  <div className="border-t p-4 bg-gray-50">
+                  <div className="border-t border-[var(--zeus-border)] p-4 bg-[var(--zeus-bg-secondary)]">
                     <div className="mb-4 grid grid-cols-3 gap-4">
-                      <div className="bg-white rounded-lg p-3 border border-gray-200">
-                        <div className="text-xs text-gray-600 mb-1">Totaal</div>
-                        <div className="text-lg font-semibold text-brikx-dark">{EUR(totalAmount)}</div>
-                        <div className="text-xs text-gray-500">{totalHours.toFixed(1)} uur</div>
+                      <div className="bg-[var(--zeus-card)] rounded-lg p-3 border border-[var(--zeus-border)]">
+                        <div className="text-xs text-[var(--zeus-text-secondary)] mb-1">Totaal</div>
+                        <div className="text-lg font-semibold text-[var(--zeus-text)]">{EUR(totalAmount)}</div>
+                        <div className="text-xs text-[var(--zeus-text-secondary)]">{totalHours.toFixed(1)} uur</div>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                        <div className="text-xs text-green-700 mb-1">Gefactureerd</div>
-                        <div className="text-lg font-semibold text-green-700">{EUR(billedAmount)}</div>
-                        <div className="text-xs text-green-600">{billedHours.toFixed(1)} uur</div>
+                      <div className="bg-green-900/20 rounded-lg p-3 border border-green-800/50">
+                        <div className="text-xs text-green-400 mb-1">Gefactureerd</div>
+                        <div className="text-lg font-semibold text-green-400">{EUR(billedAmount)}</div>
+                        <div className="text-xs text-green-400/80">{billedHours.toFixed(1)} uur</div>
                       </div>
-                      <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                        <div className="text-xs text-orange-700 mb-1">Ongefactureerd</div>
-                        <div className="text-lg font-semibold text-orange-700">{EUR(unbilledAmount)}</div>
-                        <div className="text-xs text-orange-600">{unbilledHours.toFixed(1)} uur</div>
+                      <div className="bg-orange-900/20 rounded-lg p-3 border border-orange-800/50">
+                        <div className="text-xs text-orange-400 mb-1">Ongefactureerd</div>
+                        <div className="text-lg font-semibold text-orange-400">{EUR(unbilledAmount)}</div>
+                        <div className="text-xs text-orange-400/80">{unbilledHours.toFixed(1)} uur</div>
                       </div>
                     </div>
 
                     <table className="w-full text-sm">
-                      <thead className="border-b">
+                      <thead className="border-b border-[var(--zeus-border)]">
                         <tr>
-                          <th className="text-left py-2 font-medium text-gray-700">Fase</th>
-                          <th className="text-right py-2 font-medium text-gray-700">Uren</th>
-                          <th className="text-right py-2 font-medium text-gray-700">Tarief</th>
-                          <th className="text-right py-2 font-medium text-gray-700">Bedrag</th>
+                          <th className="text-left py-2 font-medium text-[var(--zeus-text-secondary)]">Fase</th>
+                          <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Uren</th>
+                          <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Tarief</th>
+                          <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Bedrag</th>
                           {project.billing_type === 'fixed' && (
                             <>
-                              <th className="text-right py-2 font-medium text-gray-700">Budget</th>
-                              <th className="text-right py-2 font-medium text-gray-700">%</th>
+                              <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Budget</th>
+                              <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">%</th>
                             </>
                           )}
-                          <th className="text-right py-2 font-medium text-gray-700">Status</th>
+                          <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -268,36 +268,35 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                             const isOverBudget = percentage > 100;
 
                             return (
-                              <tr key={phase.code} className="border-b last:border-0 hover:bg-gray-100">
-                                <td className="py-2">
-                                  <span className="font-medium text-gray-600 mr-2">
+                              <tr key={phase.code} className="border-b border-[var(--zeus-border)] last:border-0 hover:bg-[var(--zeus-card-hover)]">
+                                <td className="py-2 text-[var(--zeus-text)]">
+                                  <span className="font-medium text-[var(--zeus-text-secondary)] mr-2">
                                     {phaseShortcodes[phase.code]}
                                   </span>
                                   {phase.name}
                                 </td>
-                                <td className="text-right py-2">{(data?.hours ?? 0).toFixed(1)}</td>
-                                <td className="text-right py-2">{EUR(data?.rate ?? 0)}</td>
-                                <td className="text-right py-2 font-medium">{EUR(data?.amount ?? 0)}</td>
+                                <td className="text-right py-2 text-[var(--zeus-text)]">{(data?.hours ?? 0).toFixed(1)}</td>
+                                <td className="text-right py-2 text-[var(--zeus-text)]">{EUR(data?.rate ?? 0)}</td>
+                                <td className="text-right py-2 font-medium text-[var(--zeus-text)]">{EUR(data?.amount ?? 0)}</td>
                                 {project.billing_type === 'fixed' && (
                                   <>
-                                    <td className="text-right py-2 text-gray-600">
+                                    <td className="text-right py-2 text-[var(--zeus-text-secondary)]">
                                       {hasBudget ? EUR((data!.budget! / 100)) : '-'}
                                     </td>
-                                    <td className={`text-right py-2 font-medium ${
-                                      isOverBudget ? 'text-red-600' : 'text-green-600'
-                                    }`}>
+                                    <td className={`text-right py-2 font-medium ${isOverBudget ? 'text-red-400' : 'text-green-400'
+                                      }`}>
                                       {hasBudget ? `${percentage.toFixed(0)}%` : '-'}
                                     </td>
                                   </>
                                 )}
                                 <td className="text-right py-2">
                                   {data?.invoiced ? (
-                                    <span className="inline-flex items-center gap-1 text-green-700 bg-green-100 px-2 py-0.5 rounded-full text-xs">
+                                    <span className="inline-flex items-center gap-1 text-green-400 bg-green-900/30 px-2 py-0.5 rounded-full text-xs border border-green-800/50">
                                       <CheckCircle2 className="w-3 h-3" />
                                       Gefactureerd
                                     </span>
                                   ) : (
-                                    <span className="text-gray-500">—</span>
+                                    <span className="text-[var(--zeus-text-secondary)]/50">—</span>
                                   )}
                                 </td>
                               </tr>
@@ -307,7 +306,7 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                     </table>
 
                     {!hasEntries && (
-                      <div className="text-center py-4 text-gray-500 text-sm">
+                      <div className="text-center py-4 text-[var(--zeus-text-secondary)] text-sm">
                         Nog geen uren geregistreerd voor dit project
                       </div>
                     )}
@@ -322,7 +321,7 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
           <div className="mt-8">
             <button
               onClick={() => setShowArchivedProjects(!showArchivedProjects)}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium mb-3"
+              className="flex items-center gap-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] font-medium mb-3"
             >
               {showArchivedProjects ? (
                 <ChevronDown className="w-5 h-5" />
@@ -335,22 +334,22 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
             {showArchivedProjects && (
               <div className="space-y-3 opacity-60">
                 {archivedProjects.map(({ project, totalHours, totalAmount }) => (
-                  <div key={project.id} className="bg-white rounded-brikx shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+                  <div key={project.id} className="zeus-card p-4 flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-brikx-dark">{project.name}</h3>
-                      <p className="text-sm text-gray-600">{totalHours.toFixed(1)} uur · {EUR(totalAmount)}</p>
+                      <h3 className="font-semibold text-[var(--zeus-text)]">{project.name}</h3>
+                      <p className="text-sm text-[var(--zeus-text-secondary)]">{totalHours.toFixed(1)} uur · {EUR(totalAmount)}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleArchive(project.id, false)}
-                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+                        className="p-2 text-[var(--zeus-text-secondary)] hover:text-green-400 hover:bg-green-500/10 rounded transition-colors"
                         title="Activeer project"
                       >
                         <ArchiveRestore className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(project.id, project.name)}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-2 text-[var(--zeus-text-secondary)] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                         title="Verwijder project"
                       >
                         <Trash2 className="w-4 h-4" />

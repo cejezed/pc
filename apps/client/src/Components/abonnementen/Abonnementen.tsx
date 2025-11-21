@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../supabase";
-import { 
-  Plus, AlertCircle, TrendingUp, Calendar, Euro, Edit2, Trash2, X, 
+import {
+  Plus, AlertCircle, TrendingUp, Calendar, Euro, Edit2, Trash2, X,
   Download, Search, Filter, Grid, List, Bell, Clock, CreditCard,
   ChevronDown, BarChart3, ArrowUpDown
 } from "lucide-react";
+import { Button } from "@/Components/ui/button";
 
 // ============================================
 // TYPES - Consistent Schema
@@ -80,7 +81,7 @@ const todayISO = () => new Date().toISOString().split("T")[0];
 // ============================================
 export default function Abonnementen() {
   const queryClient = useQueryClient();
-  
+
   // State
   const [showModal, setShowModal] = useState(false);
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
@@ -217,11 +218,11 @@ export default function Abonnementen() {
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case "amount":
-          return calculateMonthlyCost(b.amount_cents, b.billing_cycle) - 
-                 calculateMonthlyCost(a.amount_cents, a.billing_cycle);
+          return calculateMonthlyCost(b.amount_cents, b.billing_cycle) -
+            calculateMonthlyCost(a.amount_cents, a.billing_cycle);
         case "date":
-          return new Date(b.next_billing_date || b.start_date).getTime() - 
-                 new Date(a.next_billing_date || a.start_date).getTime();
+          return new Date(b.next_billing_date || b.start_date).getTime() -
+            new Date(a.next_billing_date || a.start_date).getTime();
         default:
           return a.name.localeCompare(b.name);
       }
@@ -236,7 +237,7 @@ export default function Abonnementen() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     const data: Partial<Subscription> = {
       name: formData.get("name") as string,
       description: formData.get("description") as string || undefined,
@@ -273,7 +274,7 @@ export default function Abonnementen() {
       s.next_billing_date || "",
       s.category || "",
     ]);
-    
+
     const csv = [headers, ...rows]
       .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
       .join("\n");
@@ -291,8 +292,8 @@ export default function Abonnementen() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-brikx-bg flex items-center justify-center">
-        <div className="text-gray-600">Laden...</div>
+      <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[var(--zeus-primary)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -301,88 +302,93 @@ export default function Abonnementen() {
   // RENDER
   // ============================================
   return (
-    <div className="min-h-screen bg-brikx-bg">
+    <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text)]">
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
-        
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-brikx-dark">Abonnementen</h1>
-            <p className="text-sm md:text-base text-gray-600 mt-1">
+            <h1 className="text-2xl md:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)] flex items-center gap-3">
+              <CreditCard className="w-8 h-8 text-[var(--zeus-primary)]" />
+              ABONNEMENTEN <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
+            </h1>
+            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
               Beheer je abonnementen en opzegtermijnen
             </p>
           </div>
-          <div className="flex gap-2">
-            <button
+          <div className="flex gap-3">
+            <Button
               onClick={exportToCSV}
-              className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-3 md:px-4 py-2 rounded-brikx font-semibold transition-all inline-flex items-center gap-2 text-sm"
+              className="zeus-button-secondary"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Export</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 setEditingSub(null);
                 setShowModal(true);
               }}
-              className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-3 md:px-4 py-2 rounded-brikx font-semibold shadow-lg hover:shadow-brikx transition-all inline-flex items-center gap-2 text-sm"
+              className="btn-zeus-primary"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Nieuw</span>
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <div className="bg-white rounded-brikx border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
             <div className="flex items-start justify-between mb-2">
-              <div className="p-2 rounded-lg bg-brikx-teal/10 text-brikx-teal">
+              <div className="p-2 rounded-lg bg-[var(--zeus-primary)]/10 text-[var(--zeus-primary)] border border-[var(--zeus-primary)]/20 group-hover:border-[var(--zeus-primary)]/50 transition-colors">
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-brikx-dark">{stats.activeCount}</div>
-            <div className="text-xs md:text-sm text-gray-600">Actieve abonnementen</div>
+            <div className="text-2xl md:text-3xl font-bold text-[var(--zeus-text)]">{stats.activeCount}</div>
+            <div className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">Actieve abonnementen</div>
           </div>
 
-          <div className="bg-white rounded-brikx border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
             <div className="flex items-start justify-between mb-2">
-              <div className="p-2 rounded-lg bg-green-500/10 text-green-600">
+              <div className="p-2 rounded-lg bg-green-900/20 text-green-400 border border-green-500/20 group-hover:border-green-500/50 transition-colors">
                 <Euro className="w-4 h-4 md:w-5 md:h-5" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-brikx-dark">{EUR(stats.totalMonthly)}</div>
-            <div className="text-xs md:text-sm text-gray-600">Per maand</div>
+            <div className="text-2xl md:text-3xl font-bold text-[var(--zeus-text)]">{EUR(stats.totalMonthly)}</div>
+            <div className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">Per maand</div>
           </div>
 
-          <div className="bg-white rounded-brikx border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
             <div className="flex items-start justify-between mb-2">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600">
+              <div className="p-2 rounded-lg bg-indigo-900/20 text-indigo-400 border border-indigo-500/20 group-hover:border-indigo-500/50 transition-colors">
                 <Calendar className="w-4 h-4 md:w-5 md:h-5" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-brikx-dark">{EUR(stats.totalYearly)}</div>
-            <div className="text-xs md:text-sm text-gray-600">Per jaar</div>
+            <div className="text-2xl md:text-3xl font-bold text-[var(--zeus-text)]">{EUR(stats.totalYearly)}</div>
+            <div className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">Per jaar</div>
           </div>
 
-          <div className="bg-white rounded-brikx border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 shadow-lg hover:border-[var(--zeus-primary)]/30 transition-all group">
             <div className="flex items-start justify-between mb-2">
-              <div className="p-2 rounded-lg bg-red-500/10 text-red-600">
+              <div className="p-2 rounded-lg bg-red-900/20 text-red-400 border border-red-500/20 group-hover:border-red-500/50 transition-colors">
                 <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-brikx-dark">{stats.deadlines.length}</div>
-            <div className="text-xs md:text-sm text-gray-600">Opzegtermijnen</div>
+            <div className="text-2xl md:text-3xl font-bold text-[var(--zeus-text)]">{stats.deadlines.length}</div>
+            <div className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">Opzegtermijnen</div>
           </div>
         </div>
 
         {/* Deadlines Warning */}
         {stats.deadlines.length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-brikx p-3 md:p-4">
+          <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-3 md:p-4">
             <div className="flex items-start gap-2 md:gap-3">
-              <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-yellow-900 mb-2 text-sm md:text-base">
+                <h3 className="font-semibold text-yellow-400 mb-2 text-sm md:text-base">
                   Aankomende opzegtermijnen
                 </h3>
                 <div className="space-y-2">
@@ -391,16 +397,16 @@ export default function Abonnementen() {
                       key={deadline.subscription.id}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs md:text-sm"
                     >
-                      <span className="text-yellow-800">
-                        <strong>{deadline.subscription.name}</strong> moet binnen{" "}
-                        <strong>{deadline.daysUntil} dagen</strong> opgezegd worden
+                      <span className="text-yellow-200/80">
+                        <strong className="text-yellow-200">{deadline.subscription.name}</strong> moet binnen{" "}
+                        <strong className="text-yellow-200">{deadline.daysUntil} dagen</strong> opgezegd worden
                       </span>
                       <button
                         onClick={() => {
                           setEditingSub(deadline.subscription);
                           setShowModal(true);
                         }}
-                        className="text-yellow-700 hover:underline text-left sm:text-right whitespace-nowrap"
+                        className="text-yellow-400 hover:text-yellow-300 hover:underline text-left sm:text-right whitespace-nowrap transition-colors"
                       >
                         Details →
                       </button>
@@ -413,18 +419,18 @@ export default function Abonnementen() {
         )}
 
         {/* Filters & Search */}
-        <div className="bg-white rounded-brikx border border-gray-200 p-4">
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4">
           <div className="flex flex-col md:flex-row gap-3 md:gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--zeus-text-secondary)]" />
                 <input
                   type="text"
                   placeholder="Zoek abonnementen..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-brikx text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+                  className="w-full pl-10 pr-4 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-[var(--zeus-text-secondary)]"
                 />
               </div>
             </div>
@@ -433,7 +439,7 @@ export default function Abonnementen() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-brikx text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
             >
               <option value="all">Alle categorieën</option>
               {stats.categories.map((cat) => (
@@ -447,7 +453,7 @@ export default function Abonnementen() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-brikx text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+              className="px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
             >
               <option value="name">Sorteer: Naam</option>
               <option value="amount">Sorteer: Bedrag</option>
@@ -455,16 +461,16 @@ export default function Abonnementen() {
             </select>
 
             {/* View Mode */}
-            <div className="flex gap-1 border border-gray-300 rounded-brikx p-1">
+            <div className="flex gap-1 border border-[var(--zeus-border)] rounded-lg p-1 bg-[var(--zeus-bg-secondary)]">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded ${viewMode === "grid" ? "bg-brikx-teal text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                className={`p-2 rounded ${viewMode === "grid" ? "bg-[var(--zeus-primary)] text-white shadow-md" : "text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]"}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded ${viewMode === "list" ? "bg-brikx-teal text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                className={`p-2 rounded ${viewMode === "list" ? "bg-[var(--zeus-primary)] text-white shadow-md" : "text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]"}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -473,7 +479,7 @@ export default function Abonnementen() {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex gap-2 border-b border-gray-200 overflow-x-auto pb-px -mb-px scrollbar-hide">
+        <div className="flex gap-2 border-b border-[var(--zeus-border)] overflow-x-auto pb-px -mb-px scrollbar-hide">
           {[
             { key: "all", label: "Alle" },
             { key: "active", label: "Actief" },
@@ -484,11 +490,10 @@ export default function Abonnementen() {
             <button
               key={tab.key}
               onClick={() => setFilterStatus(tab.key)}
-              className={`px-3 md:px-4 py-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
-                filterStatus === tab.key
-                  ? "border-brikx-teal font-semibold text-brikx-teal"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
+              className={`px-3 md:px-4 py-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${filterStatus === tab.key
+                  ? "border-[var(--zeus-primary)] font-semibold text-[var(--zeus-primary)]"
+                  : "border-transparent text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]"
+                }`}
             >
               {tab.label}
             </button>
@@ -497,74 +502,72 @@ export default function Abonnementen() {
 
         {/* Subscriptions List/Grid */}
         {filteredAndSorted.length === 0 ? (
-          <div className="bg-white rounded-brikx border border-gray-200 p-6 shadow-sm text-center py-12">
-            <Calendar className="w-12 h-12 md:w-16 md:h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg text-center py-12">
+            <Calendar className="w-12 h-12 md:w-16 md:h-16 text-[var(--zeus-text-secondary)] mx-auto mb-4 opacity-50" />
+            <h3 className="text-base md:text-lg font-semibold text-[var(--zeus-text)] mb-2">
               Geen abonnementen gevonden
             </h3>
-            <p className="text-sm md:text-base text-gray-600 mb-4">
-              {searchQuery || selectedCategory !== "all" 
+            <p className="text-sm md:text-base text-[var(--zeus-text-secondary)] mb-4">
+              {searchQuery || selectedCategory !== "all"
                 ? "Pas je filters aan om resultaten te zien"
                 : "Begin met het toevoegen van je eerste abonnement"}
             </p>
             {!searchQuery && selectedCategory === "all" && (
-              <button
+              <Button
                 onClick={() => setShowModal(true)}
-                className="bg-brikx-teal hover:bg-brikx-teal-dark text-white px-4 md:px-6 py-2 md:py-2.5 rounded-brikx font-semibold shadow-lg hover:shadow-brikx transition-all inline-flex items-center gap-2 text-sm md:text-base"
+                className="btn-zeus-primary"
               >
-                <Plus className="w-4 h-4 md:w-5 md:h-5" />
+                <Plus className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                 Nieuw abonnement
-              </button>
+              </Button>
             )}
           </div>
         ) : (
-          <div className={viewMode === "grid" 
+          <div className={viewMode === "grid"
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
             : "space-y-3"
           }>
             {filteredAndSorted.map((sub) => {
               const monthlyCost = calculateMonthlyCost(sub.amount_cents, sub.billing_cycle);
-              const daysUntil = sub.next_billing_date 
+              const daysUntil = sub.next_billing_date
                 ? calculateDaysUntilDeadline(sub.next_billing_date, sub.cancellation_deadline_days)
                 : null;
               const isUrgent = daysUntil !== null && daysUntil >= 0 && daysUntil <= 3;
 
               return (
-                <div 
-                  key={sub.id} 
-                  className={`bg-white rounded-brikx border p-4 shadow-sm hover:shadow-md transition-all ${
-                    isUrgent ? "border-red-300 bg-red-50/30" : "border-gray-200"
-                  }`}
+                <div
+                  key={sub.id}
+                  className={`bg-[var(--zeus-card)] rounded-xl border p-4 shadow-lg hover:shadow-[0_0_20px_var(--zeus-primary-glow)] transition-all group ${isUrgent ? "border-red-500/50 bg-red-900/10" : "border-[var(--zeus-border)] hover:border-[var(--zeus-primary)]"
+                    }`}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xl">{getCategoryIcon(sub.category)}</span>
-                        <h3 className="font-semibold text-base md:text-lg text-gray-900 truncate">
+                        <h3 className="font-semibold text-base md:text-lg text-[var(--zeus-text)] truncate group-hover:text-[var(--zeus-primary)] transition-colors">
                           {sub.name}
                         </h3>
                       </div>
                       {sub.company_name && (
-                        <p className="text-xs md:text-sm text-gray-600 truncate">{sub.company_name}</p>
+                        <p className="text-xs md:text-sm text-[var(--zeus-text-secondary)] truncate">{sub.company_name}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 ml-2">
                       <span
-                        className={`px-2 py-0.5 rounded-lg text-xs font-semibold ${
-                          sub.status === "active" ? "bg-green-100 text-green-700" :
-                          sub.status === "trial" ? "bg-purple-100 text-purple-700" :
-                          "bg-gray-100 text-gray-700"
-                        }`}
+                        className={`px-2 py-0.5 rounded-lg text-xs font-semibold border ${sub.status === "active" ? "bg-green-900/20 text-green-400 border-green-500/30" :
+                            sub.status === "trial" ? "bg-purple-900/20 text-purple-400 border-purple-500/30" :
+                              "bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)]"
+                          }`}
                       >
-                        {sub.status === "active" ? "Actief" : 
-                         sub.status === "trial" ? "Trial" :
-                         sub.status === "cancelled" ? "Opgezegd" : "Gepauzeerd"}
+                        {sub.status === "active" ? "Actief" :
+                          sub.status === "trial" ? "Trial" :
+                            sub.status === "cancelled" ? "Opgezegd" : "Gepauzeerd"}
                       </span>
                     </div>
                   </div>
 
                   {isUrgent && daysUntil !== null && (
-                    <div className="bg-red-100 border border-red-200 rounded-lg p-2 mb-3 flex items-center gap-2 text-xs text-red-700">
+                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-2 mb-3 flex items-center gap-2 text-xs text-red-400">
                       <AlertCircle className="w-3 h-3 flex-shrink-0" />
                       <span>Opzegtermijn: nog {daysUntil} dag{daysUntil !== 1 ? "en" : ""}</span>
                     </div>
@@ -572,40 +575,40 @@ export default function Abonnementen() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Kosten:</span>
-                      <span className="font-semibold">{EUR(sub.amount_cents)}</span>
+                      <span className="text-[var(--zeus-text-secondary)]">Kosten:</span>
+                      <span className="font-semibold text-[var(--zeus-text)]">{EUR(sub.amount_cents)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Per maand:</span>
-                      <span className="font-semibold">{EUR(monthlyCost)}</span>
+                      <span className="text-[var(--zeus-text-secondary)]">Per maand:</span>
+                      <span className="font-semibold text-[var(--zeus-text)]">{EUR(monthlyCost)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Cyclus:</span>
-                      <span className="text-sm capitalize">{sub.billing_cycle}</span>
+                      <span className="text-[var(--zeus-text-secondary)]">Cyclus:</span>
+                      <span className="text-sm capitalize text-[var(--zeus-text)]">{sub.billing_cycle}</span>
                     </div>
                     {sub.next_billing_date && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Volgende:</span>
-                        <span className="text-sm">
+                        <span className="text-[var(--zeus-text-secondary)]">Volgende:</span>
+                        <span className="text-sm text-[var(--zeus-text)]">
                           {new Date(sub.next_billing_date).toLocaleDateString("nl-NL")}
                         </span>
                       </div>
                     )}
                     {sub.payment_method && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Betaling:</span>
-                        <span className="text-sm">{sub.payment_method}</span>
+                        <span className="text-[var(--zeus-text-secondary)]">Betaling:</span>
+                        <span className="text-sm text-[var(--zeus-text)]">{sub.payment_method}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex gap-2 pt-3 border-t border-gray-200">
+                  <div className="flex gap-2 pt-3 border-t border-[var(--zeus-border)]">
                     <button
                       onClick={() => {
                         setEditingSub(sub);
                         setShowModal(true);
                       }}
-                      className="flex-1 bg-white hover:bg-gray-50 border border-gray-300 hover:border-brikx-teal text-gray-700 px-3 py-1.5 rounded-brikx font-semibold transition-all inline-flex items-center justify-center gap-2 text-sm"
+                      className="flex-1 bg-[var(--zeus-bg-secondary)] hover:bg-[var(--zeus-bg-secondary)]/80 border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] px-3 py-1.5 rounded-lg font-semibold transition-all inline-flex items-center justify-center gap-2 text-sm"
                     >
                       <Edit2 className="w-3 h-3 md:w-4 md:h-4" />
                       <span className="hidden sm:inline">Bewerken</span>
@@ -616,7 +619,7 @@ export default function Abonnementen() {
                           deleteMutation.mutate(sub.id);
                         }
                       }}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-brikx font-semibold transition-all inline-flex items-center justify-center text-sm"
+                      className="bg-red-900/20 hover:bg-red-900/40 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg font-semibold transition-all inline-flex items-center justify-center text-sm"
                     >
                       <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                     </button>
@@ -629,10 +632,10 @@ export default function Abonnementen() {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-brikx w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <h2 className="text-lg md:text-2xl font-bold text-brikx-dark">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[var(--zeus-card)] rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_50px_var(--zeus-primary-glow)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-[var(--zeus-border)] sticky top-0 bg-[var(--zeus-card)] z-10">
+                <h2 className="text-lg md:text-2xl font-bold text-[var(--zeus-text)]">
                   {editingSub ? "Abonnement bewerken" : "Nieuw abonnement"}
                 </h2>
                 <button
@@ -640,7 +643,7 @@ export default function Abonnementen() {
                     setShowModal(false);
                     setEditingSub(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] p-2 hover:bg-[var(--zeus-bg-secondary)] rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
@@ -649,7 +652,7 @@ export default function Abonnementen() {
               <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-3 md:space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Naam *
                     </label>
                     <input
@@ -657,31 +660,31 @@ export default function Abonnementen() {
                       name="name"
                       required
                       defaultValue={editingSub?.name}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-[var(--zeus-text-secondary)]"
                       placeholder="Netflix, Spotify, etc."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Bedrijf
                     </label>
                     <input
                       type="text"
                       name="company"
                       defaultValue={editingSub?.company_name}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Categorie
                     </label>
                     <select
                       name="category"
                       defaultValue={editingSub?.category || ""}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     >
                       <option value="">Selecteer...</option>
                       <option value="streaming">Streaming</option>
@@ -695,7 +698,7 @@ export default function Abonnementen() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Bedrag (€) *
                     </label>
                     <input
@@ -704,19 +707,19 @@ export default function Abonnementen() {
                       name="amount"
                       required
                       defaultValue={editingSub ? editingSub.amount_cents / 100 : ""}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Cyclus *
                     </label>
                     <select
                       name="billing_cycle"
                       required
                       defaultValue={editingSub?.billing_cycle || "monthly"}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     >
                       <option value="weekly">Wekelijks</option>
                       <option value="monthly">Maandelijks</option>
@@ -726,13 +729,13 @@ export default function Abonnementen() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Betaalmethode
                     </label>
                     <select
                       name="payment_method"
                       defaultValue={editingSub?.payment_method || ""}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     >
                       <option value="">Selecteer...</option>
                       <option value="creditcard">Creditcard</option>
@@ -744,7 +747,7 @@ export default function Abonnementen() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Startdatum *
                     </label>
                     <input
@@ -752,140 +755,81 @@ export default function Abonnementen() {
                       name="start_date"
                       required
                       defaultValue={editingSub?.start_date || todayISO()}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Volgende factuur
                     </label>
                     <input
                       type="date"
                       name="next_billing_date"
                       defaultValue={editingSub?.next_billing_date}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Opzegtermijn (dagen)
                     </label>
                     <input
                       type="number"
                       name="cancel_days"
                       defaultValue={editingSub?.cancellation_deadline_days || 30}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Herinnering (dagen)
                     </label>
                     <input
                       type="number"
                       name="reminder_days"
                       defaultValue={editingSub?.reminder_days || 7}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                       Status
                     </label>
                     <select
                       name="status"
                       defaultValue={editingSub?.status || "active"}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
+                      className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg px-3 md:px-4 py-2 md:py-2.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
                     >
                       <option value="active">Actief</option>
                       <option value="trial">Trial</option>
-                      <option value="cancelled">Opgezegd</option>
                       <option value="paused">Gepauzeerd</option>
+                      <option value="cancelled">Opgezegd</option>
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Prioriteit
-                    </label>
-                    <select
-                      name="priority"
-                      defaultValue={editingSub?.priority || 3}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all"
-                    >
-                      <option value="1">1 - Hoog</option>
-                      <option value="2">2</option>
-                      <option value="3">3 - Gemiddeld</option>
-                      <option value="4">4</option>
-                      <option value="5">5 - Laag</option>
-                    </select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="auto_renew"
-                        defaultChecked={editingSub?.auto_renew !== false}
-                        className="w-4 h-4 rounded border-gray-300 text-brikx-teal focus:ring-brikx-teal"
-                      />
-                      <span className="text-sm text-gray-700">Automatisch verlengen</span>
-                    </label>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Beschrijving
-                    </label>
-                    <textarea
-                      name="description"
-                      rows={2}
-                      defaultValue={editingSub?.description}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all resize-none"
-                      placeholder="Premium plan, Family account..."
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Notities
-                    </label>
-                    <textarea
-                      name="notes"
-                      rows={3}
-                      defaultValue={editingSub?.notes}
-                      className="w-full border border-gray-300 rounded-brikx px-3 md:px-4 py-2 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal focus:border-transparent transition-all resize-none"
-                      placeholder="Extra informatie..."
-                    />
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-4">
+                <div className="flex gap-3 pt-4 border-t border-[var(--zeus-border)]">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false);
                       setEditingSub(null);
                     }}
-                    className="flex-1 bg-white hover:bg-gray-50 border border-gray-300 hover:border-brikx-teal text-gray-700 px-4 md:px-6 py-2 md:py-2.5 rounded-brikx font-semibold transition-all text-sm md:text-base"
+                    className="flex-1 px-4 py-2 bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] rounded-lg hover:bg-[var(--zeus-bg-secondary)]/80 font-semibold transition-all"
                   >
                     Annuleren
                   </button>
-                  <button
+                  <Button
                     type="submit"
                     disabled={createMutation.isPending || updateMutation.isPending}
-                    className="flex-1 bg-brikx-teal hover:bg-brikx-teal-dark text-white px-4 md:px-6 py-2 md:py-2.5 rounded-brikx font-semibold shadow-lg hover:shadow-brikx transition-all disabled:bg-gray-300 text-sm md:text-base"
+                    className="flex-1 btn-zeus-primary"
                   >
-                    {createMutation.isPending || updateMutation.isPending
-                      ? "Bezig..."
-                      : editingSub
-                      ? "Opslaan"
-                      : "Toevoegen"}
-                  </button>
+                    {createMutation.isPending || updateMutation.isPending ? "Bezig..." : "Opslaan"}
+                  </Button>
                 </div>
               </form>
             </div>

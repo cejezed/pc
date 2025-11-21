@@ -14,7 +14,7 @@ export function EnergieTab() {
     queryKey: ['daily-metrics-history'],
     queryFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
@@ -59,7 +59,7 @@ export function EnergieTab() {
       : 0;
 
     // Workout days
-    const workoutDays = last7Days.filter(m => 
+    const workoutDays = last7Days.filter(m =>
       m.workout_done || m.ochtend_workout || m.golf_oefenen || m.golfen || m.mtb
     ).length;
 
@@ -85,10 +85,10 @@ export function EnergieTab() {
   const correlations = useMemo(() => {
     if (!metrics.length) return null;
 
-    const workoutDays = metrics.filter(m => 
+    const workoutDays = metrics.filter(m =>
       m.workout_done || m.ochtend_workout || m.golf_oefenen || m.golfen || m.mtb
     );
-    const noWorkoutDays = metrics.filter(m => 
+    const noWorkoutDays = metrics.filter(m =>
       !m.workout_done && !m.ochtend_workout && !m.golf_oefenen && !m.golfen && !m.mtb
     );
 
@@ -101,7 +101,7 @@ export function EnergieTab() {
       : 0;
 
     const diff = avgEnergieWorkout - avgEnergieNoWorkout;
-    const percentDiff = avgEnergieNoWorkout > 0 
+    const percentDiff = avgEnergieNoWorkout > 0
       ? Math.round((diff / avgEnergieNoWorkout) * 100)
       : 0;
 
@@ -161,19 +161,19 @@ export function EnergieTab() {
 
       {/* Correlatie Insight */}
       {correlations && correlations.avgEnergieWorkout > 0 && (
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-900/20 border-blue-800/50">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2 text-blue-400">
               💡 Inzicht: Activiteit & Energie
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-300">
               Op dagen met workout/activiteit heb je gemiddeld{" "}
               <strong>{correlations.avgEnergieWorkout.toFixed(1)}/10</strong> energie,
               tegenover <strong>{correlations.avgEnergieNoWorkout.toFixed(1)}/10</strong> op
               rustdagen. Dat is{" "}
-              <strong className="text-blue-600">
+              <strong className="text-blue-400">
                 {correlations.percentDiff > 0 ? "+" : ""}
                 {correlations.percentDiff}%
               </strong>{" "}
@@ -186,62 +186,62 @@ export function EnergieTab() {
       {/* Beste & Slechtste Dag */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.bestDay && (
-          <Card className="bg-green-50 border-green-200">
+          <Card className="bg-green-900/20 border-green-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-green-400">
                 🏆 Beste Dag
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.bestDay.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <div className="mt-2 space-y-1 text-xs text-green-800">
+              <div className="mt-2 space-y-1 text-xs text-green-300">
                 <p>⚡ Energie: {stats.bestDay.energie_score}/10</p>
                 <p>😴 Slaap: {stats.bestDay.slaap_score}/10</p>
                 {stats.bestDay.stress_niveau > 0 && (
                   <p>🧠 Stress: {stats.bestDay.stress_niveau}/10</p>
                 )}
-                {(stats.bestDay.ochtend_workout || stats.bestDay.golf_oefenen || 
+                {(stats.bestDay.ochtend_workout || stats.bestDay.golf_oefenen ||
                   stats.bestDay.golfen || stats.bestDay.mtb || stats.bestDay.workout_done) && (
-                  <p className="font-medium mt-2">
-                    Activiteiten:{" "}
-                    {[
-                      stats.bestDay.ochtend_workout && "Ochtend workout",
-                      stats.bestDay.golf_oefenen && "Golf oefenen",
-                      stats.bestDay.golfen && "Golfen",
-                      stats.bestDay.mtb && "MTB",
-                      stats.bestDay.workout_done && "Workout",
-                    ]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </p>
-                )}
+                    <p className="font-medium mt-2">
+                      Activiteiten:{" "}
+                      {[
+                        stats.bestDay.ochtend_workout && "Ochtend workout",
+                        stats.bestDay.golf_oefenen && "Golf oefenen",
+                        stats.bestDay.golfen && "Golfen",
+                        stats.bestDay.mtb && "MTB",
+                        stats.bestDay.workout_done && "Workout",
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  )}
               </div>
             </CardContent>
           </Card>
         )}
 
         {stats?.worstDay && (
-          <Card className="bg-orange-50 border-orange-200">
+          <Card className="bg-orange-900/20 border-orange-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-orange-400">
                 📉 Laagste Energie Dag
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.worstDay.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <div className="mt-2 space-y-1 text-xs text-orange-800">
+              <div className="mt-2 space-y-1 text-xs text-orange-300">
                 <p>⚡ Energie: {stats.worstDay.energie_score}/10</p>
                 <p>😴 Slaap: {stats.worstDay.slaap_score}/10</p>
                 {stats.worstDay.stress_niveau > 0 && (
@@ -254,9 +254,9 @@ export function EnergieTab() {
       </div>
 
       {/* Recent Days List */}
-      <Card>
+      <Card className="zeus-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-[var(--zeus-text)]">
             <Calendar className="h-5 w-5" />
             Laatste 14 Dagen
           </CardTitle>
@@ -298,16 +298,16 @@ function DayCard({ metric }: { metric: DailyMetric }) {
   ].filter(Boolean);
 
   return (
-    <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+    <div className="flex items-start justify-between p-3 bg-[var(--zeus-bg-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] transition-colors border border-[var(--zeus-border)]">
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-2">
-          <p className="text-sm font-medium">{dateLabel}</p>
-          <Badge variant="secondary" className="text-xs">
+          <p className="text-sm font-medium text-[var(--zeus-text)]">{dateLabel}</p>
+          <Badge variant="secondary" className="text-xs bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]">
             {getEnergyEmoji(metric.energie_score)} {metric.energie_score}/10
           </Badge>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+        <div className="flex flex-wrap gap-2 text-xs text-[var(--zeus-text-secondary)]">
           <span>😴 Slaap: {metric.slaap_score}/10</span>
           {metric.stress_niveau > 0 && (
             <span>🧠 Stress: {metric.stress_niveau}/10</span>
@@ -322,7 +322,7 @@ function DayCard({ metric }: { metric: DailyMetric }) {
             {activities.map((activity, i) => (
               <span
                 key={i}
-                className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded"
+                className="text-xs bg-green-900/20 text-green-400 border border-green-800/50 px-2 py-0.5 rounded"
               >
                 {activity}
               </span>
@@ -333,12 +333,12 @@ function DayCard({ metric }: { metric: DailyMetric }) {
         {(metric.lang_wakker || metric.kort_wakker) && (
           <div className="mt-2 flex flex-wrap gap-1">
             {metric.lang_wakker && (
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+              <span className="text-xs bg-purple-900/20 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded">
                 🌙 Lang wakker
               </span>
             )}
             {metric.kort_wakker && (
-              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
+              <span className="text-xs bg-indigo-900/20 text-indigo-400 border border-indigo-800/50 px-2 py-0.5 rounded">
                 💤 Kort wakker
               </span>
             )}

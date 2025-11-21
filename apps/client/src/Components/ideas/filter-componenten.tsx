@@ -1,12 +1,12 @@
 // src/components/ideas/filter-componenten.tsx
 import { Search, Grid3X3, List, RotateCcw } from "lucide-react";
 
-export function SearchBar({ 
-  value, 
-  onChange 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
+export function SearchBar({
+  value,
+  onChange
+}: {
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <div className="relative">
@@ -16,7 +16,7 @@ export function SearchBar({
         placeholder="Zoek ideeën..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+        className="w-full pl-10 pr-4 py-2 bg-[#1F2833] border border-zeus-border rounded-lg focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white placeholder-gray-500"
       />
     </div>
   );
@@ -43,7 +43,7 @@ export function FilterBar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+        className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
       >
         <option value="all">Alle statussen</option>
         <option value="new">Nieuw</option>
@@ -60,7 +60,7 @@ export function FilterBar({
       <select
         value={priorityFilter}
         onChange={(e) => onPriorityChange(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+        className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
       >
         <option value="all">Alle prioriteiten</option>
         <option value="1">Laag</option>
@@ -74,7 +74,7 @@ export function FilterBar({
       {hasActiveFilters && (
         <button
           onClick={onReset}
-          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm transition-colors"
           title="Filters resetten"
         >
           <RotateCcw className="w-4 h-4" />
@@ -85,22 +85,21 @@ export function FilterBar({
   );
 }
 
-export function ViewToggle({ 
-  view, 
-  onChange 
-}: { 
-  view: "grid" | "list"; 
-  onChange: (view: "grid" | "list") => void; 
+export function ViewToggle({
+  view,
+  onChange
+}: {
+  view: "grid" | "list";
+  onChange: (view: "grid" | "list") => void;
 }) {
   return (
-    <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+    <div className="flex border border-zeus-border rounded-lg overflow-hidden">
       <button
         onClick={() => onChange("grid")}
-        className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
-          view === "grid"
-            ? "bg-brikx-teal text-white"
-            : "bg-white text-gray-700 hover:bg-gray-50"
-        }`}
+        className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors ${view === "grid"
+            ? "bg-zeus-accent text-white"
+            : "bg-[#1F2833] text-gray-400 hover:bg-[#2d3436] hover:text-white"
+          }`}
         title="Grid weergave"
       >
         <Grid3X3 className="w-4 h-4" />
@@ -108,11 +107,10 @@ export function ViewToggle({
       </button>
       <button
         onClick={() => onChange("list")}
-        className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors border-l ${
-          view === "list"
-            ? "bg-brikx-teal text-white border-brikx-teal"
-            : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
-        }`}
+        className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors border-l ${view === "list"
+            ? "bg-zeus-accent text-white border-zeus-accent"
+            : "bg-[#1F2833] text-gray-400 hover:bg-[#2d3436] hover:text-white border-zeus-border"
+          }`}
         title="Lijst weergave"
       >
         <List className="w-4 h-4" />
@@ -122,18 +120,18 @@ export function ViewToggle({
   );
 }
 
-export function SortSelect({ 
-  value, 
-  onChange 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
+export function SortSelect({
+  value,
+  onChange
+}: {
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brikx-teal"
+      className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
     >
       <option value="newest">Nieuwste eerst</option>
       <option value="oldest">Oudste eerst</option>

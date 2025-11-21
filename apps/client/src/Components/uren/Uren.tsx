@@ -15,24 +15,24 @@ export default function Uren() {
 
   const exportToCSV = () => {
     const headers = [
-      "Project", 
-      "Fase", 
-      "Datum", 
-      "Uren", 
-      "Omschrijving", 
-      "Uurtarief", 
-      "Bedrag", 
-      "Gefactureerd", 
+      "Project",
+      "Fase",
+      "Datum",
+      "Uren",
+      "Omschrijving",
+      "Uurtarief",
+      "Bedrag",
+      "Gefactureerd",
       "Factuurnummer"
     ];
-    
+
     const rows = timeEntries.map((e) => {
       const project = e.projects || e.project;
       const phase = e.phases || e.phase;
       const hours = e.minutes ? e.minutes / 60 : e.hours || 0;
       const phaseRates = (project as any)?.phase_rates_cents || {};
       const rate = (phaseRates[e.phase_code] ?? project?.default_rate_cents ?? 0) / 100;
-      
+
       return [
         project?.name || "Onbekend",
         phase?.name || e.phase_code,
@@ -63,57 +63,54 @@ export default function Uren() {
 
   if (projectsLoading || phasesLoading || entriesLoading) {
     return (
-      <div className="min-h-screen bg-brikx-bg flex items-center justify-center">
-        <div className="text-gray-600">Laden...</div>
+      <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center">
+        <div className="text-[var(--zeus-text-secondary)] animate-pulse">Laden...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-brikx-bg">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text)]">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-brikx-dark">Uren</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-white tracking-tight">Uren</h1>
+            <p className="text-[var(--zeus-text-secondary)] mt-1">
               Registreer je gewerkte uren per project en fase
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setView("entries")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                view === "entries" 
-                  ? "bg-brikx-teal text-white shadow-lg" 
-                  : "bg-white text-gray-700 border border-gray-300 hover:border-brikx-teal"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${view === "entries"
+                ? "bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]"
+                : "bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:text-white"
+                }`}
             >
               Uren invoer
             </button>
             <button
               onClick={() => setView("summary")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                view === "summary" 
-                  ? "bg-brikx-teal text-white shadow-lg" 
-                  : "bg-white text-gray-700 border border-gray-300 hover:border-brikx-teal"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${view === "summary"
+                ? "bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]"
+                : "bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:text-white"
+                }`}
             >
               Project overzicht
             </button>
             <button
               onClick={() => setView("all")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                view === "all" 
-                  ? "bg-brikx-teal text-white shadow-lg" 
-                  : "bg-white text-gray-700 border border-gray-300 hover:border-brikx-teal"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${view === "all"
+                ? "bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]"
+                : "bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)] hover:border-[var(--zeus-primary)] hover:text-white"
+                }`}
             >
               Alle uren
             </button>
             <button
               onClick={exportToCSV}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all inline-flex items-center gap-2"
+              className="btn-zeus-secondary inline-flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Export
@@ -122,23 +119,25 @@ export default function Uren() {
         </div>
 
         {/* Content */}
-        {view === "entries" && (
-          <UrenInvoer
-            projects={projects}
-            phases={phases}
-            timeEntries={timeEntries}
-          />
-        )}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {view === "entries" && (
+            <UrenInvoer
+              projects={projects}
+              phases={phases}
+              timeEntries={timeEntries}
+            />
+          )}
 
-        {view === "summary" && (
-          <ProjectOverzicht
-            projects={projects}
-            phases={phases}
-            timeEntries={timeEntries}
-          />
-        )}
+          {view === "summary" && (
+            <ProjectOverzicht
+              projects={projects}
+              phases={phases}
+              timeEntries={timeEntries}
+            />
+          )}
 
-        {view === "all" && <AlleUren timeEntries={timeEntries} />}
+          {view === "all" && <AlleUren timeEntries={timeEntries} />}
+        </div>
       </div>
     </div>
   );

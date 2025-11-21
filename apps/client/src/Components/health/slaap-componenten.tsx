@@ -13,7 +13,7 @@ export function SlaapTab() {
     queryKey: ['daily-metrics-history'],
     queryFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
@@ -110,49 +110,49 @@ export function SlaapTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.bestNight && (
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-blue-900/20 border-blue-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-blue-400">
                 🌙 Beste Nacht
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.bestNight.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-xs text-blue-800 mt-2">Slaap: {stats.bestNight.slaap_score}/10</p>
+              <p className="text-xs text-blue-300 mt-2">Slaap: {stats.bestNight.slaap_score}/10</p>
             </CardContent>
           </Card>
         )}
 
         {stats?.worstNight && (
-          <Card className="bg-orange-50 border-orange-200">
+          <Card className="bg-orange-900/20 border-orange-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-orange-400">
                 😴 Slechtste Nacht
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.worstNight.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-xs text-orange-800 mt-2">Slaap: {stats.worstNight.slaap_score}/10</p>
+              <p className="text-xs text-orange-300 mt-2">Slaap: {stats.worstNight.slaap_score}/10</p>
             </CardContent>
           </Card>
         )}
       </div>
 
-      <Card>
+      <Card className="zeus-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-[var(--zeus-text)]">
             <Calendar className="h-5 w-5" />
             Laatste 14 Nachten
           </CardTitle>
@@ -186,26 +186,26 @@ function SlaapDayCard({ metric }: { metric: DailyMetric }) {
   if (isYesterday) dateLabel = "Gisteren";
 
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+    <div className="flex items-center justify-between p-3 bg-[var(--zeus-bg-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] transition-colors border border-[var(--zeus-border)]">
       <div className="flex items-center gap-3">
-        <p className="text-sm font-medium">{dateLabel}</p>
-        <Badge variant="secondary" className="text-xs">
+        <p className="text-sm font-medium text-[var(--zeus-text)]">{dateLabel}</p>
+        <Badge variant="secondary" className="text-xs bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]">
           {getSlaapEmoji(metric.slaap_score)} {metric.slaap_score}/10
         </Badge>
       </div>
       <div className="flex gap-2">
         {metric.lang_wakker && (
-          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+          <span className="text-xs bg-purple-900/20 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded">
             🌙 Lang wakker
           </span>
         )}
         {metric.kort_wakker && (
-          <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
+          <span className="text-xs bg-indigo-900/20 text-indigo-400 border border-indigo-800/50 px-2 py-0.5 rounded">
             💤 Kort wakker
           </span>
         )}
         {metric.nap && (
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+          <span className="text-xs bg-blue-900/20 text-blue-400 border border-blue-800/50 px-2 py-0.5 rounded">
             😴 Powernap
           </span>
         )}

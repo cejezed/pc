@@ -13,7 +13,7 @@ export function PijnTab() {
     queryKey: ['daily-metrics-history'],
     queryFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
@@ -50,7 +50,7 @@ export function PijnTab() {
     const sortedByPain = [...metrics]
       .filter(m => m.schouder_pijn && m.schouder_pijn > 0)
       .sort((a, b) => (a.schouder_pijn || 0) - (b.schouder_pijn || 0));
-    
+
     const worstDay = sortedByPain[0] || null;
     const bestDay = sortedByPain[sortedByPain.length - 1] || null;
 
@@ -103,14 +103,14 @@ export function PijnTab() {
       </div>
 
       {stats && stats.avgPijn < 5 && (
-        <Card className="bg-red-50 border-red-200">
+        <Card className="bg-red-900/20 border-red-800/50">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2 text-red-400">
               ⚠️ Let Op: Hoge Pijn
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-red-800">
+            <p className="text-sm text-red-300">
               Je gemiddelde schouderpijn is {stats.avgPijn.toFixed(1)}/10 (waarbij 10 = geen pijn).
               Overweeg rust, fysiotherapie of medisch advies.
             </p>
@@ -119,14 +119,14 @@ export function PijnTab() {
       )}
 
       {stats && stats.avgPijn >= 8 && (
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-green-900/20 border-green-800/50">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2 text-green-400">
               ✅ Goed Bezig!
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-green-800">
+            <p className="text-sm text-green-300">
               Je gemiddelde schouderpijn is laag ({stats.avgPijn.toFixed(1)}/10). Blijf je huidige aanpak volhouden!
             </p>
           </CardContent>
@@ -135,21 +135,21 @@ export function PijnTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats?.bestDay && (
-          <Card className="bg-green-50 border-green-200">
+          <Card className="bg-green-900/20 border-green-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-green-400">
                 ✅ Minste Pijn
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.bestDay.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-xs text-green-800 mt-2">
+              <p className="text-xs text-green-300 mt-2">
                 Pijn: {stats.bestDay.schouder_pijn}/10 ({getPainLabel(stats.bestDay.schouder_pijn || 0)})
               </p>
             </CardContent>
@@ -157,21 +157,21 @@ export function PijnTab() {
         )}
 
         {stats?.worstDay && (
-          <Card className="bg-red-50 border-red-200">
+          <Card className="bg-red-900/20 border-red-800/50">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-red-400">
                 ⚠️ Meeste Pijn
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-[var(--zeus-text)]">
                 {new Date(stats.worstDay.date).toLocaleDateString('nl-NL', {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
                 })}
               </p>
-              <p className="text-xs text-red-800 mt-2">
+              <p className="text-xs text-red-300 mt-2">
                 Pijn: {stats.worstDay.schouder_pijn}/10 ({getPainLabel(stats.worstDay.schouder_pijn || 0)})
               </p>
             </CardContent>
@@ -179,9 +179,9 @@ export function PijnTab() {
         )}
       </div>
 
-      <Card>
+      <Card className="zeus-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-[var(--zeus-text)]">
             <Calendar className="h-5 w-5" />
             Laatste 14 Dagen
           </CardTitle>
@@ -217,21 +217,20 @@ function PijnDayCard({ metric }: { metric: DailyMetric }) {
   const pijn = metric.schouder_pijn || 0;
 
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+    <div className="flex items-center justify-between p-3 bg-[var(--zeus-bg-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] transition-colors border border-[var(--zeus-border)]">
       <div className="flex items-center gap-3">
-        <p className="text-sm font-medium">{dateLabel}</p>
-        <Badge 
-          variant="secondary" 
-          className={`text-xs ${
-            pijn >= 8 ? 'bg-green-100 text-green-700' : 
-            pijn >= 5 ? 'bg-yellow-100 text-yellow-700' : 
-            'bg-red-100 text-red-700'
-          }`}
+        <p className="text-sm font-medium text-[var(--zeus-text)]">{dateLabel}</p>
+        <Badge
+          variant="secondary"
+          className={`text-xs border ${pijn >= 8 ? 'bg-green-900/20 text-green-400 border-green-800/50' :
+              pijn >= 5 ? 'bg-yellow-900/20 text-yellow-400 border-yellow-800/50' :
+                'bg-red-900/20 text-red-400 border-red-800/50'
+            }`}
         >
           {getPainEmoji(pijn)} {pijn}/10
         </Badge>
       </div>
-      <span className="text-xs text-gray-600">{getPainLabel(pijn)}</span>
+      <span className="text-xs text-[var(--zeus-text-secondary)]">{getPainLabel(pijn)}</span>
     </div>
   );
 }

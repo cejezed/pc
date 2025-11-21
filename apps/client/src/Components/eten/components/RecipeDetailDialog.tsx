@@ -3,6 +3,7 @@ import { X, Save, Trash2, Plus, Clock, Users, Camera, Edit2 } from 'lucide-react
 import { useUpdateRecipe, useDeleteRecipe } from '../hooks';
 import type { RecipeWithIngredients, RecipeIngredient, IngredientCategory } from '../types';
 import { COMMON_TAGS } from '../utils';
+import { Button } from '@/Components/ui/button';
 
 interface RecipeDetailDialogProps {
     recipe: RecipeWithIngredients;
@@ -127,11 +128,11 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
     const currentCategory = (editedRecipe.tags || []).find(t => t.startsWith('cat:'))?.replace('cat:', '') || '';
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full my-8 flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-[var(--zeus-card)] border border-[var(--zeus-border)] rounded-2xl shadow-[0_0_50px_var(--zeus-primary-glow)] max-w-4xl w-full my-8 flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-                    <h2 className="text-xl font-bold text-gray-900 truncate flex-1 pr-4">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--zeus-border)] shrink-0 bg-[var(--zeus-bg-secondary)] rounded-t-2xl">
+                    <h2 className="text-xl font-bold text-[var(--zeus-text)] truncate flex-1 pr-4">
                         {isEditing ? 'Recept bewerken' : recipe.title}
                     </h2>
                     <div className="flex items-center gap-2">
@@ -139,14 +140,14 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                             <>
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+                                    className="p-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-primary)]/10 rounded-full transition-colors"
                                     title="Bewerken"
                                 >
                                     <Edit2 className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-full transition-colors"
                                     title="Verwijderen"
                                 >
                                     <Trash2 className="w-5 h-5" />
@@ -155,7 +156,7 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                         )}
                         <button
                             onClick={onClose}
-                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                            className="p-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-primary)]/10 rounded-full transition-colors"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -163,12 +164,12 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Left Column */}
                         <div className="space-y-6">
                             {/* Image */}
-                            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative group">
+                            <div className="aspect-video bg-[var(--zeus-bg-secondary)] rounded-lg overflow-hidden relative group border border-[var(--zeus-border)]">
                                 {editedRecipe.image_url ? (
                                     <img
                                         src={editedRecipe.image_url}
@@ -176,13 +177,13 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <div className="w-full h-full flex items-center justify-center text-[var(--zeus-text-secondary)]">
                                         <Camera className="w-12 h-12" />
                                     </div>
                                 )}
                                 {isEditing && (
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <label className="cursor-pointer px-4 py-2 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                        <label className="cursor-pointer px-4 py-2 bg-[var(--zeus-primary)] text-white rounded-lg font-medium hover:bg-[var(--zeus-primary-hover)] transition-colors shadow-[0_0_15px_var(--zeus-primary-glow)]">
                                             Wijzig foto
                                             <input
                                                 type="file"
@@ -199,19 +200,19 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                             <div className="space-y-4">
                                 {isEditing ? (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                                        <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">Titel</label>
                                         <input
                                             type="text"
                                             value={editedRecipe.title}
                                             onChange={(e) => setEditedRecipe({ ...editedRecipe, title: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal"
+                                            className="w-full px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)]"
                                         />
                                     </div>
                                 ) : null}
 
                                 {/* Category Selector */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
+                                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Categorie</label>
                                     <div className="flex flex-wrap gap-2">
                                         {['ontbijt', 'lunch', 'avond', 'toetje'].map((cat) => {
                                             const isSelected = currentCategory === cat;
@@ -220,9 +221,9 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                     key={cat}
                                                     onClick={() => isEditing && handleCategoryChange(cat)}
                                                     disabled={!isEditing}
-                                                    className={`px-3 py-1.5 text-sm rounded-lg border transition-colors capitalize ${isSelected
-                                                        ? 'bg-brikx-teal text-white border-brikx-teal'
-                                                        : 'bg-white text-gray-700 border-gray-300'
+                                                    className={`px-3 py-1.5 text-sm rounded-lg border transition-all capitalize ${isSelected
+                                                        ? 'bg-[var(--zeus-primary)] text-white border-[var(--zeus-primary)] shadow-[0_0_10px_var(--zeus-primary-glow)]'
+                                                        : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)]'
                                                         } ${!isEditing && !isSelected ? 'opacity-50' : ''}`}
                                                 >
                                                     {cat}
@@ -234,7 +235,7 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
 
                                 <div className="flex gap-4">
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                                             <Clock className="w-4 h-4 inline mr-1" /> Bereidingstijd (min)
                                         </label>
                                         {isEditing ? (
@@ -242,14 +243,14 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                 type="number"
                                                 value={editedRecipe.prep_time_min || ''}
                                                 onChange={(e) => setEditedRecipe({ ...editedRecipe, prep_time_min: parseInt(e.target.value) || null })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)]"
                                             />
                                         ) : (
-                                            <p className="text-gray-900">{recipe.prep_time_min || '-'} min</p>
+                                            <p className="text-[var(--zeus-text)]">{recipe.prep_time_min || '-'} min</p>
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                                             <Users className="w-4 h-4 inline mr-1" /> Porties
                                         </label>
                                         {isEditing ? (
@@ -257,14 +258,14 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                 type="number"
                                                 value={editedRecipe.default_servings}
                                                 onChange={(e) => setEditedRecipe({ ...editedRecipe, default_servings: parseInt(e.target.value) || 2 })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)]"
                                             />
                                         ) : (
-                                            <p className="text-gray-900">{recipe.default_servings} personen</p>
+                                            <p className="text-[var(--zeus-text)]">{recipe.default_servings} personen</p>
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                                             🔥 Kcal/portie
                                         </label>
                                         {isEditing ? (
@@ -272,27 +273,27 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                 type="number"
                                                 value={editedRecipe.calories || ''}
                                                 onChange={(e) => setEditedRecipe({ ...editedRecipe, calories: parseInt(e.target.value) || null })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                className="w-full px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)]"
                                                 placeholder="Optioneel"
                                             />
                                         ) : (
-                                            <p className="text-gray-900">{recipe.calories ? `${recipe.calories} kcal` : '-'}</p>
+                                            <p className="text-[var(--zeus-text)]">{recipe.calories ? `${recipe.calories} kcal` : '-'}</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Tags */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                    <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Tags</label>
                                     <div className="flex flex-wrap gap-2">
                                         {isEditing ? (
                                             COMMON_TAGS.map(tag => (
                                                 <button
                                                     key={tag}
                                                     onClick={() => toggleTag(tag)}
-                                                    className={`px-2 py-1 text-xs rounded-full border transition-colors ${editedRecipe.tags.includes(tag)
-                                                        ? 'bg-brikx-teal text-white border-brikx-teal'
-                                                        : 'bg-white text-gray-600 border-gray-300'
+                                                    className={`px-2 py-1 text-xs rounded-full border transition-all ${editedRecipe.tags.includes(tag)
+                                                        ? 'bg-[var(--zeus-primary)] text-white border-[var(--zeus-primary)] shadow-[0_0_10px_var(--zeus-primary-glow)]'
+                                                        : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)]'
                                                         }`}
                                                 >
                                                     {tag}
@@ -300,7 +301,7 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                             ))
                                         ) : (
                                             recipe.tags.filter(t => !t.startsWith('cat:')).map(tag => (
-                                                <span key={tag} className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                                                <span key={tag} className="px-2 py-1 text-xs rounded-full bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]">
                                                     {tag}
                                                 </span>
                                             ))
@@ -315,11 +316,11 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                             {/* Ingredients */}
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <h3 className="font-semibold text-gray-900">Ingrediënten</h3>
+                                    <h3 className="font-semibold text-[var(--zeus-text)]">Ingrediënten</h3>
                                     {isEditing && (
                                         <button
                                             onClick={addIngredient}
-                                            className="text-sm text-brikx-teal hover:text-brikx-teal-dark flex items-center gap-1"
+                                            className="text-sm text-[var(--zeus-primary)] hover:text-[var(--zeus-primary-hover)] flex items-center gap-1"
                                         >
                                             <Plus className="w-4 h-4" /> Toevoegen
                                         </button>
@@ -335,32 +336,32 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                                         placeholder="Hvh"
                                                         value={ing.quantity || ''}
                                                         onChange={(e) => handleIngredientChange(idx, 'quantity', parseFloat(e.target.value) || null)}
-                                                        className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-16 px-2 py-1 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded text-sm text-[var(--zeus-text)] focus:border-[var(--zeus-primary)] focus:outline-none"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Eenheid"
                                                         value={ing.unit || ''}
                                                         onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-                                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-20 px-2 py-1 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded text-sm text-[var(--zeus-text)] focus:border-[var(--zeus-primary)] focus:outline-none"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Ingrediënt"
                                                         value={ing.name}
                                                         onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
-                                                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="flex-1 px-2 py-1 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded text-sm text-[var(--zeus-text)] focus:border-[var(--zeus-primary)] focus:outline-none"
                                                     />
                                                     <button
                                                         onClick={() => removeIngredient(idx)}
-                                                        className="text-red-500 hover:text-red-700"
+                                                        className="text-red-400 hover:text-red-300"
                                                     >
                                                         <X className="w-4 h-4" />
                                                     </button>
                                                 </>
                                             ) : (
-                                                <div className="flex items-baseline gap-2 text-sm text-gray-700 py-1 border-b border-gray-50 w-full">
-                                                    <span className="font-medium w-16 text-right">
+                                                <div className="flex items-baseline gap-2 text-sm text-[var(--zeus-text-secondary)] py-1 border-b border-[var(--zeus-border)] w-full">
+                                                    <span className="font-medium w-16 text-right text-[var(--zeus-primary)]">
                                                         {ing.quantity} {ing.unit}
                                                     </span>
                                                     <span>{ing.name}</span>
@@ -369,23 +370,23 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
                                         </div>
                                     ))}
                                     {editedRecipe.ingredients.length === 0 && (
-                                        <p className="text-sm text-gray-400 italic">Geen ingrediënten</p>
+                                        <p className="text-sm text-[var(--zeus-text-secondary)]/50 italic">Geen ingrediënten</p>
                                     )}
                                 </div>
                             </div>
 
                             {/* Instructions */}
                             <div>
-                                <h3 className="font-semibold text-gray-900 mb-2">Bereiding</h3>
+                                <h3 className="font-semibold text-[var(--zeus-text)] mb-2">Bereiding</h3>
                                 {isEditing ? (
                                     <textarea
                                         value={editedRecipe.instructions || ''}
                                         onChange={(e) => setEditedRecipe({ ...editedRecipe, instructions: e.target.value })}
-                                        className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brikx-teal font-sans"
+                                        className="w-full h-64 px-3 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] font-sans"
                                         placeholder="Stap 1..."
                                     />
                                 ) : (
-                                    <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                    <div className="text-sm text-[var(--zeus-text-secondary)] whitespace-pre-wrap leading-relaxed">
                                         {recipe.instructions || 'Geen instructies'}
                                     </div>
                                 )}
@@ -396,23 +397,23 @@ export default function RecipeDetailDialog({ recipe, isOpen, onClose }: RecipeDe
 
                 {/* Footer */}
                 {isEditing && (
-                    <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
+                    <div className="px-6 py-4 border-t border-[var(--zeus-border)] flex justify-end gap-3 shrink-0 bg-[var(--zeus-bg-secondary)] rounded-b-2xl">
                         <button
                             onClick={() => {
                                 setEditedRecipe(recipe);
                                 setIsEditing(false);
                             }}
-                            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg"
+                            className="px-4 py-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-primary)]/10 rounded-lg transition-colors"
                         >
                             Annuleren
                         </button>
-                        <button
+                        <Button
                             onClick={handleSave}
                             disabled={updateRecipe.isPending}
-                            className="px-4 py-2 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark flex items-center gap-2"
+                            className="btn-zeus-primary"
                         >
-                            {updateRecipe.isPending ? 'Opslaan...' : <><Save className="w-4 h-4" /> Opslaan</>}
-                        </button>
+                            {updateRecipe.isPending ? 'Opslaan...' : <><Save className="w-4 h-4 mr-2" /> Opslaan</>}
+                        </Button>
                     </div>
                 )}
             </div>

@@ -55,7 +55,7 @@ export function WorkoutTab() {
     queryKey: ['workouts'],
     queryFn: async () => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const { data, error } = await supabase
         .from('workouts')
         .select('*')
@@ -109,7 +109,7 @@ export function WorkoutTab() {
   const addWorkout = useMutation({
     mutationFn: async (workout: Omit<Workout, 'id' | 'created_at' | 'user_id'>) => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       // ✅ Haal user_id op
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -146,7 +146,7 @@ export function WorkoutTab() {
   const deleteWorkout = useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error("Supabase not initialized");
-      
+
       const { error } = await supabase
         .from('workouts')
         .delete()
@@ -166,10 +166,10 @@ export function WorkoutTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-brikx-dark">Workouts</h2>
-          <p className="text-sm text-gray-600">Track je trainingen en prestaties</p>
+          <h2 className="text-2xl font-bold text-[var(--zeus-text)]">Workouts</h2>
+          <p className="text-sm text-[var(--zeus-text-secondary)]">Track je trainingen en prestaties</p>
         </div>
-        <Button onClick={() => setShowAddModal(true)} className="bg-brikx-teal hover:bg-brikx-teal-dark">
+        <Button onClick={() => setShowAddModal(true)} className="btn-zeus-primary">
           <Plus className="w-4 h-4 mr-2" />
           Workout Toevoegen
         </Button>
@@ -196,7 +196,7 @@ export function WorkoutTab() {
             value={stats.avgIntensity7d.toFixed(1)}
             unit="/ 5"
             icon={<Dumbbell className="h-4 w-4 text-orange-500" />}
-            subtitle={INTENSITY_LABELS[Math.round(stats.avgIntensity7d) as 1|2|3|4|5]}
+            subtitle={INTENSITY_LABELS[Math.round(stats.avgIntensity7d) as 1 | 2 | 3 | 4 | 5]}
           />
           <StatCard
             title="Meest Gedaan"
@@ -215,9 +215,9 @@ export function WorkoutTab() {
           description="Voeg je eerste workout toe om te beginnen met tracken"
         />
       ) : (
-        <Card>
+        <Card className="zeus-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-[var(--zeus-text)]">
               <Activity className="h-5 w-5" />
               Recente Workouts
             </CardTitle>
@@ -234,11 +234,11 @@ export function WorkoutTab() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-brikx p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="zeus-card p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Nieuwe Workout</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-[var(--zeus-text)]">Nieuwe Workout</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -246,17 +246,16 @@ export function WorkoutTab() {
             <div className="space-y-4">
               {/* Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   {(Object.keys(WORKOUT_TYPE_LABELS) as WorkoutType[]).map((type) => (
                     <button
                       key={type}
                       onClick={() => setNewWorkout({ ...newWorkout, workout_type: type })}
-                      className={`p-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                        newWorkout.workout_type === type
-                          ? 'border-brikx-teal bg-brikx-teal text-white'
-                          : 'border-gray-300 hover:border-brikx-teal'
-                      }`}
+                      className={`p-2 rounded-lg border-2 text-sm font-medium transition-all ${newWorkout.workout_type === type
+                          ? 'border-[var(--zeus-primary)] bg-[var(--zeus-primary)] text-white'
+                          : 'border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] hover:border-[var(--zeus-primary)]'
+                        }`}
                     >
                       {WORKOUT_TYPE_LABELS[type]}
                     </button>
@@ -266,7 +265,7 @@ export function WorkoutTab() {
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Titel *
                 </label>
                 <input
@@ -274,40 +273,39 @@ export function WorkoutTab() {
                   placeholder="Bijv. Strength training"
                   value={newWorkout.title}
                   onChange={(e) => setNewWorkout({ ...newWorkout, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
+                  className="input-zeus"
                   required
                 />
               </div>
 
               {/* Duration */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Duur (minuten)
                 </label>
                 <input
                   type="number"
                   value={newWorkout.duration_minutes}
                   onChange={(e) => setNewWorkout({ ...newWorkout, duration_minutes: parseInt(e.target.value) || 0 })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
+                  className="input-zeus"
                   min="1"
                 />
               </div>
 
               {/* Intensity */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Intensiteit: {INTENSITY_LABELS[newWorkout.intensity_level]}
                 </label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((level) => (
                     <button
                       key={level}
-                      onClick={() => setNewWorkout({ ...newWorkout, intensity_level: level as 1|2|3|4|5 })}
-                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                        newWorkout.intensity_level === level
-                          ? 'bg-brikx-teal text-white'
-                          : 'bg-gray-100 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewWorkout({ ...newWorkout, intensity_level: level as 1 | 2 | 3 | 4 | 5 })}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${newWorkout.intensity_level === level
+                          ? 'bg-[var(--zeus-primary)] text-white'
+                          : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] hover:bg-[var(--zeus-card-hover)]'
+                        }`}
                     >
                       {level}
                     </button>
@@ -317,27 +315,27 @@ export function WorkoutTab() {
 
               {/* Logged at */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Datum & Tijd
                 </label>
                 <input
                   type="datetime-local"
                   value={newWorkout.logged_at}
                   onChange={(e) => setNewWorkout({ ...newWorkout, logged_at: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
+                  className="input-zeus"
                 />
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Notities (optioneel)
                 </label>
                 <textarea
                   value={newWorkout.notes}
                   onChange={(e) => setNewWorkout({ ...newWorkout, notes: e.target.value })}
                   placeholder="Bijv. PR op squats, voelde goed"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brikx-teal"
+                  className="input-zeus"
                   rows={3}
                 />
               </div>
@@ -354,7 +352,7 @@ export function WorkoutTab() {
               <Button
                 onClick={() => addWorkout.mutate(newWorkout)}
                 disabled={!newWorkout.title.trim() || addWorkout.isPending}
-                className="flex-1 bg-brikx-teal hover:bg-brikx-teal-dark"
+                className="flex-1 btn-zeus-primary"
               >
                 {addWorkout.isPending ? 'Toevoegen...' : 'Toevoegen'}
               </Button>
@@ -388,29 +386,29 @@ function WorkoutCard({ workout, onDelete }: { workout: Workout; onDelete: (id: s
   });
 
   return (
-    <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+    <div className="flex items-start justify-between p-3 bg-[var(--zeus-bg-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] transition-colors group border border-[var(--zeus-border)]">
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-lg">{WORKOUT_TYPE_LABELS[workout.workout_type].split(' ')[0]}</span>
-          <p className="text-sm font-medium">{workout.title}</p>
-          <Badge variant="secondary" className="text-xs">
+          <p className="text-sm font-medium text-[var(--zeus-text)]">{workout.title}</p>
+          <Badge variant="secondary" className="text-xs bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]">
             {workout.duration_minutes} min
           </Badge>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+        <div className="flex flex-wrap gap-2 text-xs text-[var(--zeus-text-secondary)]">
           <span>📅 {dateLabel} om {timeLabel}</span>
           <span>💪 Intensiteit: {workout.intensity_level}/5</span>
         </div>
 
         {workout.notes && (
-          <p className="mt-2 text-xs text-gray-600 italic">{workout.notes}</p>
+          <p className="mt-2 text-xs text-[var(--zeus-text-secondary)] italic">{workout.notes}</p>
         )}
       </div>
 
       <button
         onClick={() => onDelete(workout.id)}
-        className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all p-1"
+        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-all p-1"
       >
         <Trash2 className="w-4 h-4" />
       </button>

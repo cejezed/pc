@@ -22,12 +22,12 @@ export function ShoppingItemCard({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-brikx-teal transition-all">
+    <div className="zeus-card p-4 hover:shadow-[0_0_15px_var(--zeus-primary-glow)] hover:border-[var(--zeus-primary)] transition-all">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
+          <h3 className="font-semibold text-[var(--zeus-text)] mb-1">{item.name}</h3>
           {item.description && (
-            <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+            <p className="text-sm text-[var(--zeus-text-secondary)] mb-2">{item.description}</p>
           )}
           <div className="flex flex-wrap gap-2 mb-2">
             {item.category && <CategoryBadge category={item.category} />}
@@ -37,14 +37,14 @@ export function ShoppingItemCard({
         <div className="flex gap-1 ml-2">
           <button
             onClick={() => onEdit(item)}
-            className="p-2 text-gray-400 hover:text-brikx-teal hover:bg-blue-50 rounded transition-colors"
+            className="p-2 text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-primary)] hover:bg-blue-500/10 rounded transition-colors"
             title="Bewerken"
           >
             <Edit2 className="w-4 h-4" />
           </button>
           <button
             onClick={handleDelete}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-2 text-[var(--zeus-text-secondary)] hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
             title="Verwijderen"
           >
             <Trash2 className="w-4 h-4" />
@@ -55,8 +55,8 @@ export function ShoppingItemCard({
       <div className="space-y-2 text-sm">
         {item.estimated_cost_cents !== undefined && (
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">Geschat:</span>
-            <span className="font-medium text-gray-900">
+            <span className="text-[var(--zeus-text-secondary)]">Geschat:</span>
+            <span className="font-medium text-[var(--zeus-text)]">
               {EUR(item.estimated_cost_cents)}
             </span>
           </div>
@@ -64,8 +64,8 @@ export function ShoppingItemCard({
 
         {item.store && (
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">Winkel:</span>
-            <span className="text-gray-900">{item.store}</span>
+            <span className="text-[var(--zeus-text-secondary)]">Winkel:</span>
+            <span className="text-[var(--zeus-text)]">{item.store}</span>
           </div>
         )}
 
@@ -74,7 +74,7 @@ export function ShoppingItemCard({
             href={item.product_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-brikx-teal hover:text-brikx-teal-dark transition-colors"
+            className="flex items-center gap-1 text-[var(--zeus-primary)] hover:text-[var(--zeus-primary-dark)] transition-colors"
           >
             <ExternalLink className="w-3 h-3" />
             Bekijk product
@@ -82,13 +82,13 @@ export function ShoppingItemCard({
         )}
 
         {item.notes && (
-          <p className="text-gray-600 italic pt-2 border-t">{item.notes}</p>
+          <p className="text-[var(--zeus-text-secondary)] italic pt-2 border-t border-[var(--zeus-border)]">{item.notes}</p>
         )}
       </div>
 
       <button
         onClick={() => onMarkPurchased(item)}
-        className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-md hover:shadow-lg"
+        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-md hover:shadow-lg"
       >
         <Check className="w-4 h-4" />
         Markeer als gekocht

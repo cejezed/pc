@@ -29,16 +29,22 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A2540] via-[#0A3552] to-[#1D3A5C] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--zeus-primary)]/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[var(--zeus-accent)]/20 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Brikx</h1>
-          <p className="text-gray-300">Jouw persoonlijke productiviteitsplatform</p>
+          <h1 className="text-4xl font-bold text-[var(--zeus-text)] mb-2 zeus-glow-text">Brikx</h1>
+          <p className="text-[var(--zeus-text-secondary)]">Jouw persoonlijke productiviteitsplatform</p>
         </div>
 
         {/* Auth Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-[var(--zeus-card)] rounded-2xl shadow-2xl p-8 border border-[var(--zeus-border)] backdrop-blur-md">
           {/* Tabs */}
           <div className="flex gap-2 mb-6">
             <button
@@ -46,11 +52,10 @@ export default function Auth() {
                 setMode('login');
                 setError('');
               }}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
-                mode === 'login'
-                  ? 'bg-[#2D9CDB] text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`flex-1 py-3 rounded-xl font-semibold transition-all ${mode === 'login'
+                  ? 'bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]'
+                  : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-card-hover)]'
+                }`}
             >
               <LogIn className="w-4 h-4 inline mr-2" />
               Inloggen
@@ -60,11 +65,10 @@ export default function Auth() {
                 setMode('register');
                 setError('');
               }}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
-                mode === 'register'
-                  ? 'bg-[#2D9CDB] text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`flex-1 py-3 rounded-xl font-semibold transition-all ${mode === 'register'
+                  ? 'bg-[var(--zeus-primary)] text-white shadow-[0_0_15px_var(--zeus-primary-glow)]'
+                  : 'bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)] hover:bg-[var(--zeus-card-hover)]'
+                }`}
             >
               <UserPlus className="w-4 h-4 inline mr-2" />
               Registreren
@@ -75,56 +79,56 @@ export default function Auth() {
           <div className="space-y-4">
             {mode === 'register' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                   Volledige Naam
                 </label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent transition-all"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl px-4 py-3 text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-[var(--zeus-text-secondary)]/50"
                   placeholder="Jan de Vries"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-[var(--zeus-text-secondary)]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent transition-all"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl pl-12 pr-4 py-3 text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-[var(--zeus-text-secondary)]/50"
                   placeholder="jouw@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                 Wachtwoord
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-[var(--zeus-text-secondary)]" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] focus:border-transparent transition-all"
+                  className="w-full bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl pl-12 pr-4 py-3 text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all placeholder-[var(--zeus-text-secondary)]/50"
                   placeholder="••••••••"
                 />
               </div>
               {mode === 'register' && (
-                <p className="text-xs text-gray-500 mt-1">Minimaal 6 karakters</p>
+                <p className="text-xs text-[var(--zeus-text-secondary)] mt-1">Minimaal 6 karakters</p>
               )}
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+              <div className="bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-sm text-red-200">
                 {error}
               </div>
             )}
@@ -132,7 +136,7 @@ export default function Auth() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#2D9CDB] hover:bg-[#1D7AAC] text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full btn-zeus-primary py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -148,7 +152,7 @@ export default function Auth() {
           </div>
 
           {/* Footer */}
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-6 text-center text-sm text-[var(--zeus-text-secondary)]">
             {mode === 'login' ? (
               <>
                 Nog geen account?{' '}
@@ -157,7 +161,7 @@ export default function Auth() {
                     setMode('register');
                     setError('');
                   }}
-                  className="text-[#2D9CDB] font-semibold hover:underline"
+                  className="text-[var(--zeus-primary)] font-semibold hover:underline hover:text-[var(--zeus-primary)]/80"
                 >
                   Registreer hier
                 </button>
@@ -170,7 +174,7 @@ export default function Auth() {
                     setMode('login');
                     setError('');
                   }}
-                  className="text-[#2D9CDB] font-semibold hover:underline"
+                  className="text-[var(--zeus-primary)] font-semibold hover:underline hover:text-[var(--zeus-primary)]/80"
                 >
                   Log in
                 </button>

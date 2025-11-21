@@ -5,35 +5,35 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background " +
-    "disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zeus-primary)] focus-visible:ring-offset-2 ring-offset-[var(--zeus-bg)] " +
+  "disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        // Primary button - Brikx Teal met witte tekst
+        // Primary button - Zeus Primary met glow
         default:
-          "bg-brikx-teal hover:bg-brikx-teal-dark text-white shadow-lg hover:shadow-brikx",
+          "bg-[var(--zeus-primary)] hover:bg-[var(--zeus-primary-dark)] text-white shadow-[0_4px_15px_var(--zeus-primary-glow)] hover:shadow-[0_0_20px_var(--zeus-primary-glow)]",
 
         // Destructive - Rood met witte tekst
         destructive:
-          "bg-red-500 hover:bg-red-600 text-white",
+          "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20",
 
-        // Outline - Wit met border en donkere tekst
+        // Outline - Border en donkere tekst
         outline:
-          "border-2 border-gray-300 bg-white hover:bg-gray-50 hover:border-brikx-teal text-gray-700",
+          "border border-[var(--zeus-border)] bg-[var(--zeus-card)] hover:bg-[var(--zeus-card-hover)] hover:border-[var(--zeus-primary)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]",
 
-        // Secondary - Lichtgrijs met donkere tekst
+        // Secondary - Donkerder achtergrond
         secondary:
-          "bg-gray-100 hover:bg-gray-200 text-gray-900",
+          "bg-[var(--zeus-bg-secondary)] hover:bg-[var(--zeus-card-hover)] text-[var(--zeus-text)] border border-[var(--zeus-border)]",
 
         // Ghost - Transparant met hover effect
         ghost:
-          "bg-transparent hover:bg-gray-100 text-gray-700",
+          "bg-transparent hover:bg-[var(--zeus-card-hover)] text-[var(--zeus-text-secondary)] hover:text-[var(--zeus-text)]",
 
         // Link - Zoals een link
-        link: 
-          "bg-transparent text-brikx-teal underline-offset-4 hover:underline",
+        link:
+          "bg-transparent text-[var(--zeus-primary)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -51,7 +51,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

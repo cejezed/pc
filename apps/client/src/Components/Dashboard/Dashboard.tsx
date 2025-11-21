@@ -290,21 +290,9 @@ export default function Dashboard() {
       });
     }
   }, [todayMetrics]);
-return (
-  <div className="min-h-screen bg-zeus-bg text-zeus-text p-4 md:p-8 font-sans selection:bg-zeus-accent/30">
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zeus-card p-6 rounded-2xl border border-zeus-accent/20 shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zeus-accent to-transparent opacity-50"></div>
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-1 drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)]">
-            DASHBOARD <span className="text-zeus-accent">ZEUS-X</span>
-          </h1>
-          <p className="text-zeus-text font-medium flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-zeus-text-highlight animate-pulse"></span>
-            {format(today, 'EEEE d MMMM yyyy', { locale: nl })}
-          </p>
-        </div>
+  return (
+    <div className="min-h-screen bg-zeus-bg text-zeus-text p-4 md:p-8 font-sans selection:bg-zeus-accent/30">
+      <div className="max-w-7xl mx-auto space-y-8">
 
         <button
           onClick={() => setShowVoice(!showVoice)}
@@ -366,8 +354,6 @@ return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Quick Capture & Tasks */}
         <div className="lg:col-span-2 space-y-6">
-          <QuickMoment />
-
           {/* Tasks */}
           <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
@@ -479,6 +465,9 @@ return (
               </button>
             </div>
           </div>
+
+          <QuickMoment />
+
         </div>
 
         {/* Right Column - Daily Check-in */}
@@ -677,8 +666,8 @@ return (
         </div>
       </div>
     </div>
-  </div>
-);
+
+  );
 }
 
 function ScoreSelector({ label, icon: Icon, iconColor, value, onChange, lowLabel, highLabel }: any) {

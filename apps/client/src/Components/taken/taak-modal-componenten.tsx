@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { Plus, Save } from "lucide-react";
 import { Modal, TagBadge } from "./basis-componenten";
 import type { Task } from "./types";
 import { useAddTask, useUpdateTask } from "./hooks";
@@ -94,14 +94,14 @@ export function TaskFormModal({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
       title={editTask ? "Taak bewerken" : "Nieuwe taak"}
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Titel *
           </label>
           <input
@@ -109,13 +109,13 @@ export function TaskFormModal({
             placeholder="Wat moet er gebeuren?"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             autoFocus
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Omschrijving
           </label>
           <textarea
@@ -123,19 +123,19 @@ export function TaskFormModal({
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={3}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Status
             </label>
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value as Task["status"] })}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             >
               <option value="todo">Te doen</option>
               <option value="in_progress">Bezig</option>
@@ -144,13 +144,13 @@ export function TaskFormModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Prioriteit
             </label>
             <select
               value={form.priority}
               onChange={(e) => setForm({ ...form, priority: e.target.value as Task["priority"] })}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             >
               <option value="low">Laag</option>
               <option value="medium">Gemiddeld</option>
@@ -162,19 +162,19 @@ export function TaskFormModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Deadline
             </label>
             <input
               type="date"
               value={form.due_date}
               onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Project
             </label>
             <input
@@ -182,13 +182,13 @@ export function TaskFormModal({
               placeholder="Bijv. Website, App"
               value={form.project}
               onChange={(e) => setForm({ ...form, project: e.target.value })}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-300 mb-1">
             Tags
           </label>
           <div className="flex gap-2 mb-2">
@@ -203,11 +203,11 @@ export function TaskFormModal({
                   handleAddTag();
                 }
               }}
-              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+              className="flex-1 bg-[#0B0C10] border border-zeus-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zeus-accent"
             />
             <button
               onClick={handleAddTag}
-              className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors"
             >
               Toevoegen
             </button>
@@ -215,10 +215,10 @@ export function TaskFormModal({
           {form.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {form.tags.map((tag) => (
-                <TagBadge 
-                  key={tag} 
-                  tag={tag} 
-                  onRemove={() => handleRemoveTag(tag)} 
+                <TagBadge
+                  key={tag}
+                  tag={tag}
+                  onRemove={() => handleRemoveTag(tag)}
                 />
               ))}
             </div>
@@ -226,19 +226,19 @@ export function TaskFormModal({
         </div>
       </div>
 
-      <div className="flex gap-2 mt-6">
+      <div className="flex gap-2 mt-6 pt-4 border-t border-zeus-border">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+          className="flex-1 px-4 py-2 border border-zeus-border text-gray-400 rounded hover:bg-[#2d3436] hover:text-white transition-colors"
         >
           Annuleren
         </button>
         <button
           onClick={handleSubmit}
           disabled={!form.title.trim() || addTask.isPending || updateTask.isPending}
-          className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2 bg-zeus-accent text-white rounded hover:bg-zeus-accent-hover disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-zeus-accent/20 transition-all"
         >
-          <Plus className="w-4 h-4" />
+          {editTask ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {editTask ? "Bijwerken" : "Toevoegen"}
         </button>
       </div>

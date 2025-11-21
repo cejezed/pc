@@ -1,8 +1,17 @@
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../../supabase";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Download, Filter, TrendingUp, Clock, DollarSign, Target } from "lucide-react";
+import { Calendar, Download, Filter, TrendingUp, Clock, DollarSign, Target, BarChart3 } from "lucide-react";
+import {
+  TimeBarChart,
+  BudgetPieChart,
+  TrendLineChart,
+  ProjectPhaseChart,
+} from "./chart-componenten";
+import { PeriodSelector, ViewToggle } from "./filter-componenten";
+import { KPICard } from "./kpi-componenten";
+import { EUR, toISODate, startOfPeriod, endOfPeriod, CHART_COLORS } from "./basis-componenten";
+import { Button } from "@/Components/ui/button";
 
 // Types
 type TimeEntry = {
@@ -24,7 +33,7 @@ type Project = {
 // Supabase queries
 async function fetchTimeEntries(from?: string, to?: string): Promise<TimeEntry[]> {
   if (!supabase) throw new Error("Supabase not initialized");
-  
+
   let query = supabase
     .from("time_entries")
     .select(`
@@ -44,23 +53,15 @@ async function fetchTimeEntries(from?: string, to?: string): Promise<TimeEntry[]
 
 async function fetchProjects(): Promise<Project[]> {
   if (!supabase) throw new Error("Supabase not initialized");
-  
+
   const { data, error } = await supabase
     .from("projects")
     .select("id, name, default_rate_cents")
     .eq("archived", false);
-  
+
   if (error) throw error;
   return data || [];
 }
-
-// Helper functions
-const EUR = (value: number) =>
-  new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -70,7 +71,7 @@ const formatDate = (dateStr: string) => {
 const getDateRange = (range: 'week' | 'month' | 'quarter') => {
   const now = new Date();
   const from = new Date(now);
-  
+
   switch (range) {
     case 'week':
       from.setDate(now.getDate() - 7);
@@ -82,14 +83,12 @@ const getDateRange = (range: 'week' | 'month' | 'quarter') => {
       from.setMonth(now.getMonth() - 3);
       break;
   }
-  
+
   return {
     from: from.toISOString().split('T')[0],
     to: now.toISOString().split('T')[0]
   };
 };
-
-const COLORS = ['#2D9CDB', '#27AE60', '#F2C94C', '#E74C3C', '#9B59B6', '#1ABC9C'];
 
 export default function Analytics() {
   const [timeRange, setTimeRange] = React.useState<'week' | 'month' | 'quarter' | 'custom'>('month');
@@ -98,8 +97,8 @@ export default function Analytics() {
   const [customRange, setCustomRange] = React.useState({ from: '', to: '' });
 
   // Get date range
-  const dateRange = timeRange === 'custom' 
-    ? customRange 
+  const dateRange = timeRange === 'custom'
+    ? customRange
     : getDateRange(timeRange);
 
   // Fetch data
@@ -137,7 +136,7 @@ export default function Analytics() {
     // Calculate KPIs
     const totalMinutes = filteredEntries.reduce((sum, e) => sum + e.minutes, 0);
     const totalHours = totalMinutes / 60;
-    
+
     // Get unique dates for avg calculation
     const uniqueDates = new Set(filteredEntries.map(e => e.occurred_on));
     const avgHoursPerDay = uniqueDates.size > 0 ? totalHours / uniqueDates.size : 0;
@@ -153,16 +152,16 @@ export default function Analytics() {
 
     // Daily breakdown
     const dailyMap = new Map<string, { hours: number; projects: Map<string, number> }>();
-    
+
     filteredEntries.forEach(entry => {
       const date = entry.occurred_on;
       const hours = entry.minutes / 60;
       const projectName = entry.projects?.name || 'Onbekend';
-      
+
       if (!dailyMap.has(date)) {
         dailyMap.set(date, { hours: 0, projects: new Map() });
       }
-      
+
       const day = dailyMap.get(date)!;
       day.hours += hours;
       day.projects.set(projectName, (day.projects.get(projectName) || 0) + hours);
@@ -175,16 +174,16 @@ export default function Analytics() {
         projects: Array.from(data.projects.entries()).map(([name, hours], idx) => ({
           name,
           hours: Math.round(hours * 10) / 10,
-          color: COLORS[idx % COLORS.length]
+          color: CHART_COLORS[idx % CHART_COLORS.length]
         }))
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Project breakdown
-    const projectMap = new Map<string, { 
-      hours: number; 
-      amount: number; 
-      phases: Map<string, { hours: number; name: string }> 
+    const projectMap = new Map<string, {
+      hours: number;
+      amount: number;
+      phases: Map<string, { hours: number; name: string }>
     }>();
 
     filteredEntries.forEach(entry => {
@@ -197,17 +196,17 @@ export default function Analytics() {
       const phaseName = entry.phases?.name || entry.phase_code;
 
       if (!projectMap.has(projectId)) {
-        projectMap.set(projectId, { 
-          hours: 0, 
+        projectMap.set(projectId, {
+          hours: 0,
           amount: 0,
-          phases: new Map() 
+          phases: new Map()
         });
       }
 
       const proj = projectMap.get(projectId)!;
       proj.hours += hours;
       proj.amount += amount;
-      
+
       if (!proj.phases.has(entry.phase_code)) {
         proj.phases.set(entry.phase_code, { hours: 0, name: phaseName });
       }
@@ -249,54 +248,77 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-brikx-bg flex items-center justify-center">
-        <div className="spinner-brikx"></div>
+      <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[var(--zeus-primary)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   const { kpis, dailyData, projectData } = analytics;
-  const filteredProjects = selectedProject === 'all' 
-    ? projectData 
+  const filteredProjects = selectedProject === 'all'
+    ? projectData
     : projectData.filter(p => p.project_id === selectedProject);
 
+  // Format data for charts
+  const timeBarData = dailyData.map(d => ({
+    name: formatDate(d.date),
+    hours: d.hours
+  }));
+
+  const budgetPieData = projectData.map(p => ({
+    name: p.project_name,
+    value: p.total_amount,
+    type: 'expense' // Just for coloring logic in pie chart
+  }));
+
+  const trendLineData = dailyData.map(d => ({
+    period: formatDate(d.date),
+    value: d.hours
+  }));
+
   return (
-    <div className="min-h-screen bg-brikx-bg">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        
+    <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text)]">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
           <div>
-            <h1 className="text-3xl font-bold text-brikx-dark">Analytics</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)] flex items-center gap-3">
+              <BarChart3 className="w-8 h-8 text-[var(--zeus-primary)]" />
+              ANALYTICS <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
+            </h1>
+            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
               Inzicht in je tijdsregistratie en productiviteit
             </p>
           </div>
           <div className="flex gap-3">
-            <button 
-              className="btn-brikx-secondary inline-flex items-center gap-2"
+            <Button
+              variant="outline"
+              className="zeus-button-secondary"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 mr-2" />
               CSV
-            </button>
-            <button 
-              className="btn-brikx-primary inline-flex items-center gap-2"
+            </Button>
+            <Button
+              className="btn-zeus-primary"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 mr-2" />
               PDF Rapport
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="card-brikx">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <select 
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+          <div className="flex flex-wrap gap-6 items-center">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-[var(--zeus-primary)]" />
+              <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'quarter' | 'custom')}
-                className="select-brikx"
+                className="px-4 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
               >
                 <option value="week">Deze week</option>
                 <option value="month">Deze maand</option>
@@ -305,12 +327,12 @@ export default function Analytics() {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <select 
+            <div className="flex items-center gap-3">
+              <Filter className="w-5 h-5 text-[var(--zeus-primary)]" />
+              <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="select-brikx"
+                className="px-4 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] transition-all"
               >
                 <option value="all">Alle projecten</option>
                 {projects.map(project => (
@@ -322,43 +344,31 @@ export default function Analytics() {
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
-              <button
-                onClick={() => setViewType('chart')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-                  viewType === 'chart' 
-                    ? 'bg-brikx-teal text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Charts
-              </button>
-              <button
-                onClick={() => setViewType('table')}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-                  viewType === 'table' 
-                    ? 'bg-brikx-teal text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Tabel
-              </button>
+              <ViewToggle
+                value={viewType}
+                onChange={(val) => setViewType(val as 'chart' | 'table')}
+                options={[
+                  { value: 'chart', label: 'Charts', icon: <BarChart3 className="w-4 h-4" /> },
+                  { value: 'table', label: 'Tabel', icon: <Filter className="w-4 h-4" /> }
+                ]}
+              />
             </div>
           </div>
 
           {timeRange === 'custom' && (
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-6 pt-4 border-t border-[var(--zeus-border)]">
               <input
                 type="date"
                 value={customRange.from}
                 onChange={(e) => setCustomRange(prev => ({ ...prev, from: e.target.value }))}
-                className="input-brikx"
+                className="px-4 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
               />
-              <span className="text-gray-500 self-center">tot</span>
+              <span className="text-[var(--zeus-text-secondary)] self-center">tot</span>
               <input
                 type="date"
                 value={customRange.to}
                 onChange={(e) => setCustomRange(prev => ({ ...prev, to: e.target.value }))}
-                className="input-brikx"
+                className="px-4 py-2 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
               />
             </div>
           )}
@@ -366,54 +376,35 @@ export default function Analytics() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card-brikx">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 rounded-lg bg-brikx-teal/10 text-brikx-teal">
-                <Clock className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-brikx-dark">{kpis.total_hours}</div>
-            <div className="text-sm text-gray-600">Totaal uren</div>
-          </div>
-
-          <div className="card-brikx">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 rounded-lg bg-green-500/10 text-green-600">
-                <Target className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-brikx-dark">{kpis.avg_hours_per_day}</div>
-            <div className="text-sm text-gray-600">Gem. per dag</div>
-          </div>
-
-          <div className="card-brikx">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 rounded-lg bg-yellow-500/10 text-yellow-600">
-                <DollarSign className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-brikx-dark">{EUR(kpis.total_revenue)}</div>
-            <div className="text-sm text-gray-600">Omzet</div>
-          </div>
-
-          <div className="card-brikx">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-3 rounded-lg bg-purple-500/10 text-purple-600">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-brikx-dark">{EUR(kpis.avg_hourly_rate)}</div>
-            <div className="text-sm text-gray-600">Gem. tarief</div>
-          </div>
+          <KPICard
+            title="Totaal uren"
+            value={kpis.total_hours}
+            icon={<Clock className="w-6 h-6" />}
+          />
+          <KPICard
+            title="Gem. per dag"
+            value={kpis.avg_hours_per_day}
+            icon={<Target className="w-6 h-6" />}
+          />
+          <KPICard
+            title="Omzet"
+            value={EUR(kpis.total_revenue)}
+            icon={<DollarSign className="w-6 h-6" />}
+          />
+          <KPICard
+            title="Gem. tarief"
+            value={EUR(kpis.avg_hourly_rate)}
+            icon={<TrendingUp className="w-6 h-6" />}
+          />
         </div>
 
         {timeEntries.length === 0 ? (
-          <div className="card-brikx text-center py-12">
-            <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-12 text-center">
+            <Clock className="w-16 h-16 text-[var(--zeus-text-secondary)] mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-2">
               Geen data voor deze periode
             </h3>
-            <p className="text-gray-600">
+            <p className="text-[var(--zeus-text-secondary)]">
               Registreer eerst wat uren om analytics te zien
             </p>
           </div>
@@ -421,59 +412,20 @@ export default function Analytics() {
           <>
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
+
               {/* Daily Hours Chart */}
-              <div className="card-brikx">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Uren per Dag</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={dailyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={formatDate}
-                      fontSize={12}
-                      stroke="#6B7280"
-                    />
-                    <YAxis fontSize={12} stroke="#6B7280" />
-                    <Tooltip 
-                      labelFormatter={(label) => formatDate(String(label))}
-                      formatter={(value: number) => [`${value}u`, 'Uren']}
-                    />
-                    <Bar dataKey="hours" fill="#2D9CDB" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+                <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-6 border-b border-[var(--zeus-border)] pb-2">Uren per Dag</h3>
+                <TimeBarChart data={timeBarData} />
               </div>
 
               {/* Project Distribution */}
-              <div className="card-brikx">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Uren per Project</h3>
+              <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+                <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-6 border-b border-[var(--zeus-border)] pb-2">Uren per Project</h3>
                 {projectData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={projectData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={(props: any) => {
-                          const entry = projectData[props.index];
-                          if (!entry) return '';
-                          const projectNameShort = entry.project_name.split(' ')[0];
-                          return entry.percentage > 5 ? `${projectNameShort} (${entry.percentage}%)` : '';
-                        }}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="total_hours"
-                      >
-                        {projectData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => [`${value}u`, 'Uren']} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <BudgetPieChart data={budgetPieData} />
                 ) : (
-                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <div className="h-[300px] flex items-center justify-center text-[var(--zeus-text-secondary)]">
                     Geen project data
                   </div>
                 )}
@@ -481,69 +433,47 @@ export default function Analytics() {
             </div>
 
             {/* Productivity Trend */}
-            <div className="card-brikx">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Productiviteit Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={dailyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis 
-                    dataKey="date" 
-                    tickFormatter={formatDate}
-                    fontSize={12}
-                    stroke="#6B7280"
-                  />
-                  <YAxis fontSize={12} stroke="#6B7280" />
-                  <Tooltip 
-                    labelFormatter={(label) => formatDate(String(label))}
-                    formatter={(value: number) => [`${value}u`, 'Uren']}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="hours" 
-                    stroke="#2D9CDB" 
-                    strokeWidth={3}
-                    dot={{ fill: '#2D9CDB', strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+              <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-6 border-b border-[var(--zeus-border)] pb-2">Productiviteit Trend</h3>
+              <TrendLineChart data={trendLineData} />
             </div>
           </>
         ) : (
           /* Table View */
-          <div className="card-brikx overflow-hidden p-0">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Project Overzicht</h3>
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] overflow-hidden shadow-lg">
+            <div className="px-6 py-4 border-b border-[var(--zeus-border)] bg-[var(--zeus-bg-secondary)]">
+              <h3 className="text-lg font-semibold text-[var(--zeus-text)]">Project Overzicht</h3>
             </div>
             <div className="overflow-x-auto">
-              <table className="table-brikx">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>Totaal Uren</th>
-                    <th>Omzet</th>
-                    <th>Gem. Tarief</th>
-                    <th>Percentage</th>
+                  <tr className="border-b border-[var(--zeus-border)]">
+                    <th className="p-4 text-sm font-semibold text-[var(--zeus-text-secondary)]">Project</th>
+                    <th className="p-4 text-sm font-semibold text-[var(--zeus-text-secondary)]">Totaal Uren</th>
+                    <th className="p-4 text-sm font-semibold text-[var(--zeus-text-secondary)]">Omzet</th>
+                    <th className="p-4 text-sm font-semibold text-[var(--zeus-text-secondary)]">Gem. Tarief</th>
+                    <th className="p-4 text-sm font-semibold text-[var(--zeus-text-secondary)]">Percentage</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[var(--zeus-border)]">
                   {filteredProjects.map((project) => (
-                    <tr key={project.project_id}>
-                      <td>
-                        <div className="text-sm font-medium text-gray-900">{project.project_name}</div>
+                    <tr key={project.project_id} className="hover:bg-[var(--zeus-bg-secondary)]/50 transition-colors">
+                      <td className="p-4">
+                        <div className="text-sm font-medium text-[var(--zeus-text)]">{project.project_name}</div>
                       </td>
-                      <td>
-                        <div className="text-sm text-gray-900">{project.total_hours}u</div>
+                      <td className="p-4">
+                        <div className="text-sm text-[var(--zeus-text-secondary)]">{project.total_hours}u</div>
                       </td>
-                      <td>
-                        <div className="text-sm text-gray-900">{EUR(project.total_amount)}</div>
+                      <td className="p-4">
+                        <div className="text-sm text-[var(--zeus-text-secondary)]">{EUR(project.total_amount)}</div>
                       </td>
-                      <td>
-                        <div className="text-sm text-gray-900">
+                      <td className="p-4">
+                        <div className="text-sm text-[var(--zeus-text-secondary)]">
                           {project.total_hours > 0 ? EUR(project.total_amount / project.total_hours) : '-'}/u
                         </div>
                       </td>
-                      <td>
-                        <span className="badge-success">
+                      <td className="p-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-500/30">
                           {project.percentage}%
                         </span>
                       </td>
@@ -557,32 +487,32 @@ export default function Analytics() {
 
         {/* Project Phase Breakdown */}
         {selectedProject !== 'all' && filteredProjects[0] && (
-          <div className="card-brikx">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[var(--zeus-text)] mb-6 border-b border-[var(--zeus-border)] pb-2">
               Fase Distributie - {filteredProjects[0].project_name}
             </h3>
             <div className="space-y-4">
               {filteredProjects[0].phases.map((phase, index) => (
                 <div key={phase.phase_code} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded"
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                     />
-                    <span className="text-sm font-medium text-gray-900">{phase.phase_name}</span>
+                    <span className="text-sm font-medium text-[var(--zeus-text)]">{phase.phase_name}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2 w-32">
-                      <div 
+                    <div className="flex-1 bg-[var(--zeus-bg-secondary)] rounded-full h-2 w-32 overflow-hidden">
+                      <div
                         className="h-2 rounded-full transition-all"
-                        style={{ 
+                        style={{
                           width: `${phase.percentage}%`,
-                          backgroundColor: COLORS[index % COLORS.length]
+                          backgroundColor: CHART_COLORS[index % CHART_COLORS.length]
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600 w-12 text-right">{phase.hours}u</span>
-                    <span className="text-sm text-gray-500 w-8 text-right">{phase.percentage}%</span>
+                    <span className="text-sm text-[var(--zeus-text-secondary)] w-12 text-right">{phase.hours}u</span>
+                    <span className="text-sm text-[var(--zeus-text-secondary)] w-8 text-right">{phase.percentage}%</span>
                   </div>
                 </div>
               ))}

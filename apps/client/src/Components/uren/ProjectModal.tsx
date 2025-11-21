@@ -123,16 +123,16 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-brikx w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="zeus-card w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-brikx-dark">
+        <div className="sticky top-0 bg-[var(--zeus-card)] border-b border-[var(--zeus-border)] px-6 py-4 flex justify-between items-center z-10">
+          <h3 className="text-xl font-semibold text-[var(--zeus-text)]">
             {isEdit ? "Project bewerken" : "Nieuw project"}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[var(--zeus-text-secondary)] hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -140,11 +140,11 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
 
         <div className="px-6 py-6 space-y-6">
           {/* SECTIE 1: Basisgegevens */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-            <h4 className="font-semibold text-brikx-dark">Projectgegevens</h4>
-            
+          <div className="bg-[var(--zeus-bg-secondary)] rounded-lg p-4 space-y-4 border border-[var(--zeus-border)]">
+            <h4 className="font-semibold text-[var(--zeus-text)]">Projectgegevens</h4>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Projectnaam *
               </label>
               <input
@@ -152,14 +152,14 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                 placeholder="Bijv. Nieuwbouw woning Amsterdam"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                className="input-zeus"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Opdrachtgever
                 </label>
                 <input
@@ -167,11 +167,11 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                   placeholder="Naam opdrachtgever"
                   value={form.client_name}
                   onChange={(e) => setForm({ ...form, client_name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                  className="input-zeus"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                   Plaats
                 </label>
                 <input
@@ -179,22 +179,22 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                   placeholder="Stad/plaats"
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                  className="input-zeus"
                 />
               </div>
             </div>
           </div>
 
           {/* SECTIE 2: Facturatie */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-            <h4 className="font-semibold text-brikx-dark">Facturatie instellingen</h4>
-            
+          <div className="bg-[var(--zeus-bg-secondary)] rounded-lg p-4 space-y-4 border border-[var(--zeus-border)]">
+            <h4 className="font-semibold text-[var(--zeus-text)]">Facturatie instellingen</h4>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-2">
                 Facturatie methode
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer text-[var(--zeus-text)]">
                   <input
                     type="radio"
                     value="hourly"
@@ -202,11 +202,11 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                     onChange={(e) =>
                       setForm({ ...form, billing_type: e.target.value as "hourly" | "fixed" })
                     }
-                    className="w-4 h-4 text-brikx-teal"
+                    className="w-4 h-4 text-[var(--zeus-primary)] accent-[var(--zeus-primary)]"
                   />
                   <span>Op uurbasis</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer text-[var(--zeus-text)]">
                   <input
                     type="radio"
                     value="fixed"
@@ -214,7 +214,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                     onChange={(e) =>
                       setForm({ ...form, billing_type: e.target.value as "hourly" | "fixed" })
                     }
-                    className="w-4 h-4 text-brikx-teal"
+                    className="w-4 h-4 text-[var(--zeus-primary)] accent-[var(--zeus-primary)]"
                   />
                   <span>Vaste honoraria per fase</span>
                 </label>
@@ -222,7 +222,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--zeus-text-secondary)] mb-1">
                 Standaard uurtarief (€)
               </label>
               <input
@@ -230,43 +230,43 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                 step="0.01"
                 value={form.default_rate_euros}
                 onChange={(e) => setForm({ ...form, default_rate_euros: e.target.value })}
-                className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                className="input-zeus max-w-xs"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--zeus-text-secondary)] mt-1">
                 Dit tarief wordt gebruikt tenzij je per fase een afwijkend tarief instelt
               </p>
             </div>
           </div>
 
           {/* SECTIE 3: Fase instellingen */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <div className="bg-[var(--zeus-bg-secondary)] rounded-lg p-4 space-y-4 border border-[var(--zeus-border)]">
             <div>
-              <h4 className="font-semibold text-brikx-dark mb-1">Fase instellingen</h4>
-              <p className="text-sm text-gray-600">
+              <h4 className="font-semibold text-[var(--zeus-text)] mb-1">Fase instellingen</h4>
+              <p className="text-sm text-[var(--zeus-text-secondary)]">
                 Optioneel: stel per fase een afwijkend tarief of budget in
               </p>
             </div>
-            
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+            <div className="bg-[var(--zeus-card)] rounded-lg border border-[var(--zeus-border)] overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-100 border-b border-gray-200">
+                <thead className="bg-[var(--zeus-bg-secondary)] border-b border-[var(--zeus-border)]">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-700">Fase</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-700">Uurtarief (€)</th>
+                    <th className="text-left px-4 py-3 font-medium text-[var(--zeus-text-secondary)]">Fase</th>
+                    <th className="text-left px-4 py-3 font-medium text-[var(--zeus-text-secondary)]">Uurtarief (€)</th>
                     {form.billing_type === "fixed" && (
-                      <th className="text-left px-4 py-3 font-medium text-gray-700">Budget (€)</th>
+                      <th className="text-left px-4 py-3 font-medium text-[var(--zeus-text-secondary)]">Budget (€)</th>
                     )}
-                    <th className="text-center px-4 py-3 font-medium text-gray-700">Gefactureerd</th>
+                    <th className="text-center px-4 py-3 font-medium text-[var(--zeus-text-secondary)]">Gefactureerd</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-[var(--zeus-border)]">
                   {phases
                     .slice()
                     .sort((a, b) => a.sort_order - b.sort_order)
                     .map((phase) => (
-                      <tr key={phase.code} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <span className="font-medium text-gray-600 mr-2">
+                      <tr key={phase.code} className="hover:bg-[var(--zeus-card-hover)]">
+                        <td className="px-4 py-3 text-[var(--zeus-text)]">
+                          <span className="font-medium text-[var(--zeus-text-secondary)] mr-2">
                             {phaseShortcodes[phase.code]}
                           </span>
                           {phase.name}
@@ -286,7 +286,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                                 },
                               }))
                             }
-                            className="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                            className="w-28 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded px-3 py-1.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:ring-1 focus:ring-[var(--zeus-primary)] focus:border-[var(--zeus-primary)]"
                           />
                         </td>
                         {form.billing_type === "fixed" && (
@@ -305,7 +305,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                                   },
                                 }))
                               }
-                              className="w-28 border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-brikx-teal focus:border-transparent"
+                              className="w-28 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded px-3 py-1.5 text-sm text-[var(--zeus-text)] focus:outline-none focus:ring-1 focus:ring-[var(--zeus-primary)] focus:border-[var(--zeus-primary)]"
                             />
                           </td>
                         )}
@@ -314,7 +314,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                             type="checkbox"
                             checked={form.invoiced_phases.has(phase.code)}
                             onChange={() => toggleInvoiced(phase.code)}
-                            className="w-4 h-4 text-brikx-teal rounded"
+                            className="w-4 h-4 text-[var(--zeus-primary)] rounded accent-[var(--zeus-primary)]"
                           />
                         </td>
                       </tr>
@@ -324,8 +324,8 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
             </div>
 
             {form.billing_type === "fixed" && totalBudget > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="text-sm text-blue-800">
+              <div className="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3">
+                <div className="text-sm text-blue-400">
                   <span className="font-medium">Totaal project budget: </span>
                   <span className="text-lg font-bold">{EUR(totalBudget)}</span>
                 </div>
@@ -335,10 +335,10 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex gap-3">
+        <div className="sticky bottom-0 bg-[var(--zeus-card)] border-t border-[var(--zeus-border)] px-6 py-4 flex gap-3 z-10">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="flex-1 px-6 py-3 border border-[var(--zeus-border)] text-[var(--zeus-text-secondary)] rounded-lg hover:bg-[var(--zeus-card-hover)] hover:text-white transition-colors font-medium"
           >
             Annuleren
           </button>
@@ -348,7 +348,7 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
               !form.name.trim() ||
               (isEdit ? updateProject.isPending : addProject.isPending)
             }
-            className="flex-1 px-6 py-3 bg-brikx-teal text-white rounded-lg hover:bg-brikx-teal-dark disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors font-semibold shadow-lg"
+            className="flex-1 btn-zeus-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isEdit ? <Save className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
             {isEdit
@@ -356,8 +356,8 @@ export default function ProjectModal({ phases, onClose, project }: Props) {
                 ? "Opslaan..."
                 : "Wijzigingen opslaan"
               : addProject.isPending
-              ? "Toevoegen..."
-              : "Project toevoegen"}
+                ? "Toevoegen..."
+                : "Project toevoegen"}
           </button>
         </div>
       </div>

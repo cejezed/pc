@@ -13,19 +13,19 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe, onClick, onToggleFavourite }: RecipeCardProps) {
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      className="bg-[var(--zeus-card)] rounded-lg border border-[var(--zeus-border)] overflow-hidden hover:shadow-[0_0_20px_var(--zeus-primary-glow)] hover:border-[var(--zeus-primary)] transition-all cursor-pointer group"
       onClick={onClick}
     >
       {/* Image */}
-      <div className="relative h-48 bg-gray-100">
+      <div className="relative h-48 bg-[var(--zeus-bg-secondary)]">
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
             alt={recipe.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-[var(--zeus-text-secondary)]">
             <span className="text-6xl">🍽️</span>
           </div>
         )}
@@ -36,26 +36,25 @@ export function RecipeCard({ recipe, onClick, onToggleFavourite }: RecipeCardPro
             e.stopPropagation();
             onToggleFavourite?.(recipe.id, !recipe.is_favourite);
           }}
-          className="absolute top-2 right-2 p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
+          className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-colors"
         >
           <Heart
-            className={`w-5 h-5 ${
-              recipe.is_favourite
+            className={`w-5 h-5 ${recipe.is_favourite
                 ? 'fill-red-500 text-red-500'
-                : 'text-gray-400'
-            }`}
+                : 'text-[var(--zeus-text-secondary)] hover:text-white'
+              }`}
           />
         </button>
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+        <h3 className="font-semibold text-lg text-[var(--zeus-text)] mb-2 line-clamp-2 group-hover:text-[var(--zeus-primary)] transition-colors">
           {recipe.title}
         </h3>
 
         {/* Meta info */}
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+        <div className="flex items-center gap-4 text-sm text-[var(--zeus-text-secondary)] mb-3">
           {recipe.prep_time_min && (
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
@@ -74,13 +73,13 @@ export function RecipeCard({ recipe, onClick, onToggleFavourite }: RecipeCardPro
             {recipe.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
+                className={`text-xs px-2 py-0.5 rounded-full border border-[var(--zeus-border)] bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)]`}
               >
                 {tag}
               </span>
             ))}
             {recipe.tags.length > 3 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--zeus-bg-secondary)] text-[var(--zeus-text-secondary)] border border-[var(--zeus-border)]">
                 +{recipe.tags.length - 3}
               </span>
             )}

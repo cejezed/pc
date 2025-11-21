@@ -3,11 +3,11 @@ import type { Task } from "./types";
 import { useUpdateTask, useDeleteTask } from "./hooks";
 import { PriorityBadge, StatusBadge, ProjectBadge, formatDate, isOverdue, daysUntil } from "./basis-componenten";
 
-export function TaskCard({ 
-  task, 
-  onEdit 
-}: { 
-  task: Task; 
+export function TaskCard({
+  task,
+  onEdit
+}: {
+  task: Task;
   onEdit: (task: Task) => void;
 }) {
   const updateTask = useUpdateTask();
@@ -16,10 +16,10 @@ export function TaskCard({
   const handleToggleComplete = () => {
     const newStatus = task.status === "done" ? "todo" : "done";
     const completed_at = newStatus === "done" ? new Date().toISOString() : undefined;
-    updateTask.mutate({ 
-      id: task.id, 
+    updateTask.mutate({
+      id: task.id,
       status: newStatus,
-      completed_at 
+      completed_at
     });
   };
 
@@ -33,24 +33,21 @@ export function TaskCard({
   const days = daysUntil(task.due_date);
 
   // Extract project name as string
-  const projectName = typeof task.project === 'string' 
-    ? task.project 
+  const projectName = typeof task.project === 'string'
+    ? task.project
     : task.project?.name || '';
 
   return (
-    <div className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-shadow ${
-      task.status === "done" ? "border-green-200 bg-green-50/50" : 
-      overdue ? "border-red-200 bg-red-50/50" : "border-gray-200"
-    }`}>
+    <div className={`zeus-card rounded-lg border border-zeus-border p-4 hover:shadow-lg hover:border-zeus-accent transition-all ${task.status === "done" ? "opacity-75" : ""
+      }`}>
       <div className="flex items-start gap-3">
         {/* Checkbox */}
         <button
           onClick={handleToggleComplete}
-          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-            task.status === "done"
+          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${task.status === "done"
               ? "bg-green-500 border-green-500"
-              : "border-gray-300 hover:border-green-500"
-          }`}
+              : "border-gray-500 hover:border-zeus-accent"
+            }`}
         >
           {task.status === "done" && <Check className="w-3 h-3 text-white" />}
         </button>
@@ -58,22 +55,21 @@ export function TaskCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className={`font-medium ${
-              task.status === "done" ? "text-gray-500 line-through" : "text-gray-900"
-            }`}>
+            <h3 className={`font-medium transition-colors ${task.status === "done" ? "text-gray-500 line-through" : "text-white group-hover:text-zeus-accent"
+              }`}>
               {task.title}
             </h3>
-            
+
             <div className="flex gap-1 flex-shrink-0">
               <button
                 onClick={() => onEdit(task)}
-                className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
+                className="p-1 hover:text-zeus-accent rounded text-gray-500 transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
               <button
                 onClick={handleDelete}
-                className="p-1 hover:bg-red-50 rounded text-gray-500 hover:text-red-600"
+                className="p-1 hover:text-red-500 rounded text-gray-500 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -81,7 +77,7 @@ export function TaskCard({
           </div>
 
           {task.description && (
-            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+            <p className="text-sm text-gray-400 mb-2 line-clamp-2">
               {task.description}
             </p>
           )}
@@ -95,11 +91,10 @@ export function TaskCard({
 
           {/* Due Date */}
           {task.due_date && (
-            <div className={`flex items-center gap-1 text-xs ${
-              overdue ? "text-red-600 font-medium" : 
-              days !== null && days <= 3 && days >= 0 ? "text-orange-600" : 
-              "text-gray-500"
-            }`}>
+            <div className={`flex items-center gap-1 text-xs ${overdue ? "text-red-400 font-medium" :
+                days !== null && days <= 3 && days >= 0 ? "text-orange-400" :
+                  "text-gray-500"
+              }`}>
               {overdue ? (
                 <>
                   <AlertCircle className="w-3 h-3" />
@@ -121,9 +116,9 @@ export function TaskCard({
           {task.tags && task.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {task.tags.map((tag) => (
-                <span 
+                <span
                   key={tag}
-                  className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-400"
                 >
                   #{tag}
                 </span>
@@ -136,11 +131,11 @@ export function TaskCard({
   );
 }
 
-export function TaskListItem({ 
-  task, 
-  onEdit 
-}: { 
-  task: Task; 
+export function TaskListItem({
+  task,
+  onEdit
+}: {
+  task: Task;
   onEdit: (task: Task) => void;
 }) {
   const updateTask = useUpdateTask();
@@ -149,10 +144,10 @@ export function TaskListItem({
   const handleToggleComplete = () => {
     const newStatus = task.status === "done" ? "todo" : "done";
     const completed_at = newStatus === "done" ? new Date().toISOString() : undefined;
-    updateTask.mutate({ 
-      id: task.id, 
+    updateTask.mutate({
+      id: task.id,
       status: newStatus,
-      completed_at 
+      completed_at
     });
   };
 
@@ -165,23 +160,20 @@ export function TaskListItem({
   const overdue = isOverdue(task.due_date) && task.status !== "done";
 
   // Extract project name as string
-  const projectName = typeof task.project === 'string' 
-    ? task.project 
+  const projectName = typeof task.project === 'string'
+    ? task.project
     : task.project?.name || '';
 
   return (
-    <div className={`bg-white border-2 rounded-lg p-3 hover:shadow-sm transition-shadow flex items-center gap-3 ${
-      task.status === "done" ? "border-green-200 bg-green-50/50" : 
-      overdue ? "border-red-200 bg-red-50/50" : "border-gray-200"
-    }`}>
+    <div className={`zeus-card border border-zeus-border rounded-lg p-3 hover:shadow-lg hover:border-zeus-accent transition-all flex items-center gap-3 ${task.status === "done" ? "opacity-75" : ""
+      }`}>
       {/* Checkbox */}
       <button
         onClick={handleToggleComplete}
-        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-          task.status === "done"
+        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${task.status === "done"
             ? "bg-green-500 border-green-500"
-            : "border-gray-300 hover:border-green-500"
-        }`}
+            : "border-gray-500 hover:border-zeus-accent"
+          }`}
       >
         {task.status === "done" && <Check className="w-3 h-3 text-white" />}
       </button>
@@ -189,17 +181,15 @@ export function TaskListItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className={`font-medium flex-1 ${
-            task.status === "done" ? "text-gray-500 line-through" : "text-gray-900"
-          }`}>
+          <h3 className={`font-medium flex-1 transition-colors ${task.status === "done" ? "text-gray-500 line-through" : "text-white"
+            }`}>
             {task.title}
           </h3>
-          
+
           <div className="flex items-center gap-2 flex-shrink-0">
             {task.due_date && (
-              <span className={`text-xs ${
-                overdue ? "text-red-600 font-medium" : "text-gray-500"
-              }`}>
+              <span className={`text-xs ${overdue ? "text-red-400 font-medium" : "text-gray-500"
+                }`}>
                 {formatDate(task.due_date)}
               </span>
             )}
@@ -214,13 +204,13 @@ export function TaskListItem({
       <div className="flex gap-1 flex-shrink-0">
         <button
           onClick={() => onEdit(task)}
-          className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
+          className="p-1 hover:text-zeus-accent rounded text-gray-500 transition-colors"
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button
           onClick={handleDelete}
-          className="p-1 hover:bg-red-50 rounded text-gray-500 hover:text-red-600"
+          className="p-1 hover:text-red-500 rounded text-gray-500 transition-colors"
         >
           <Trash2 className="w-4 h-4" />
         </button>

@@ -24,15 +24,14 @@ function App() {
   const { user, loading, signOut } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>("home");
 
-
   // Loading state
   if (loading) {
     console.log('→ Showing LOADING screen');
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2540] to-[#1D3A5C]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--zeus-bg)]">
         <div className="text-center">
-          <div className="animate-spin text-4xl mb-4">⏳</div>
-          <p className="text-white text-lg">Laden...</p>
+          <div className="animate-spin text-4xl mb-4 text-[var(--zeus-primary)]">⏳</div>
+          <p className="text-[var(--zeus-text)] text-lg">Laden...</p>
         </div>
       </div>
     );

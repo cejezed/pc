@@ -27,12 +27,12 @@ type TabsProps = {
   children: React.ReactNode;
 };
 
-export function Tabs({ 
-  defaultValue, 
-  value, 
-  onValueChange, 
-  className, 
-  children 
+export function Tabs({
+  defaultValue,
+  value,
+  onValueChange,
+  className,
+  children
 }: TabsProps) {
   const [internal, setInternal] = useState(defaultValue);
   const idBase = useId();
@@ -60,7 +60,7 @@ export function TabsList({ className = "", ...props }: TabsListProps) {
     <div
       role="tablist"
       className={cn(
-        "inline-flex items-center gap-2 rounded-brikx bg-gray-100 p-1.5",
+        "inline-flex items-center gap-2 rounded-xl bg-[var(--zeus-bg-secondary)] p-1.5 border border-[var(--zeus-border)]",
         className
       )}
       {...props}
@@ -71,15 +71,15 @@ export function TabsList({ className = "", ...props }: TabsListProps) {
 // ============================================================
 // TabsTrigger - Individuele tab button
 // ============================================================
-type TabsTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { 
+type TabsTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   value: string;
 };
 
-export function TabsTrigger({ 
-  value, 
-  className = "", 
-  children, 
-  ...props 
+export function TabsTrigger({
+  value,
+  className = "",
+  children,
+  ...props
 }: TabsTriggerProps) {
   const { value: active, setValue, idBase } = useTabs();
   const selected = active === value;
@@ -94,24 +94,23 @@ export function TabsTrigger({
       className={cn(
         // Base styles
         "inline-flex min-w-[100px] items-center justify-center whitespace-nowrap",
-        "rounded-brikx px-4 py-2.5 text-sm font-semibold",
+        "rounded-lg px-4 py-2.5 text-sm font-semibold",
         "transition-all duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brikx-teal focus-visible:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zeus-primary)] focus-visible:ring-offset-2",
         "disabled:pointer-events-none disabled:opacity-50",
-        
+
         // Niet-actieve staat
         !selected && [
-          "bg-transparent text-gray-600",
-          "hover:bg-white hover:text-gray-900",
-          "hover:shadow-sm",
+          "bg-transparent text-[var(--zeus-text-secondary)]",
+          "hover:bg-[var(--zeus-card-hover)] hover:text-[var(--zeus-text)]",
         ],
-        
-        // Actieve staat - Brikx Teal
+
+        // Actieve staat - Zeus Primary
         selected && [
-          "bg-brikx-teal text-white",
-          "shadow-lg shadow-brikx-teal/30",
+          "bg-[var(--zeus-primary)] text-white",
+          "shadow-[0_0_15px_var(--zeus-primary-glow)]",
         ],
-        
+
         className
       )}
       {...props}
@@ -124,20 +123,20 @@ export function TabsTrigger({
 // ============================================================
 // TabsContent - Content panel voor elke tab
 // ============================================================
-type TabsContentProps = React.HTMLAttributes<HTMLDivElement> & { 
+type TabsContentProps = React.HTMLAttributes<HTMLDivElement> & {
   value: string;
 };
 
-export function TabsContent({ 
-  value, 
-  className = "", 
-  children, 
-  ...props 
+export function TabsContent({
+  value,
+  className = "",
+  children,
+  ...props
 }: TabsContentProps) {
   const { value: active, idBase } = useTabs();
-  
+
   if (active !== value) return null;
-  
+
   return (
     <div
       id={`${idBase}-panel-${value}`}
@@ -145,7 +144,7 @@ export function TabsContent({
       aria-labelledby={`${idBase}-tab-${value}`}
       tabIndex={0}
       className={cn(
-        "mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brikx-teal focus-visible:ring-offset-2 rounded-brikx",
+        "mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zeus-primary)] focus-visible:ring-offset-2 rounded-xl",
         className
       )}
       {...props}
