@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         supabase.from('time_entries').select('*, projects(name)').is('invoiced_at', null).order('occurred_on', { ascending: false }).limit(50),
         supabase.from('projects').select('*').eq('archived', false),
         supabase.from('conversations').select('role, text').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
-      ]);
+      ]) as any;
 
       // 2. Construct System Prompt
       const systemPrompt = `
@@ -71,17 +71,17 @@ Your goal is to help the user thrive in both their personal life (health, habits
 - **Proactive:** Don't just answer; offer insights based on the data.
 
 **Current Context Data:**
-- **Health (Last 14 days):** ${JSON.stringify(metrics?.map(m => ({ date: m.date, sleep: m.slaap_score, energy: m.energie_score, stress: m.stress_niveau, workout: m.workout_done })))}
-- **Habits:** ${JSON.stringify(habits?.map(h => h.name))} (Recent logs: ${habitLogs?.length} completions)
-- **Nutrition (Upcoming):** ${JSON.stringify(mealPlans?.map(m => `${m.date}: ${m.meal_type} - ${m.recipe?.title}`))}
-- **Business - Invoices:** ${JSON.stringify(invoices?.map(i => ({ amount: i.amount_cents, status: i.status, project: i.project?.name })))}
+- **Health (Last 14 days):** ${JSON.stringify(metrics?.map((m: any) => ({ date: m.date, sleep: m.slaap_score, energy: m.energie_score, stress: m.stress_niveau, workout: m.workout_done })))}
+- **Habits:** ${JSON.stringify(habits?.map((h: any) => h.name))} (Recent logs: ${habitLogs?.length} completions)
+- **Nutrition (Upcoming):** ${JSON.stringify(mealPlans?.map((m: any) => `${m.date}: ${m.meal_type} - ${m.recipe?.title}`))}
+- **Business - Invoices:** ${JSON.stringify(invoices?.map((i: any) => ({ amount: i.amount_cents, status: i.status, project: i.project?.name })))}
 - **Business - Unbilled Hours:** ${timeEntries?.length} entries waiting to be billed.
-- **Business - Active Projects:** ${projects?.map(p => p.name).join(', ')}
+- **Business - Active Projects:** ${projects?.map((p: any) => p.name).join(', ')}
 
 Respond to the user in Dutch. Be concise but meaningful.
 `;
 
-      const historyMessages = (chatHistory || []).reverse().map(msg => ({
+      const historyMessages = (chatHistory || []).reverse().map((msg: any) => ({
         role: (msg.role === 'coach' ? 'assistant' : 'user') as 'user' | 'assistant',
         content: msg.text
       }));
