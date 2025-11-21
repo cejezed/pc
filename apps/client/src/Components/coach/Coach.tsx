@@ -89,7 +89,11 @@ export default function Coach() {
                 body: JSON.stringify({ message: userMessage.content }),
             });
 
-            if (!response.ok) throw new Error('Fout bij ophalen antwoord');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('API Error:', response.status, errorData);
+                throw new Error(errorData.error || `API Error: ${response.status}`);
+            }
 
             const data = await response.json();
 
@@ -101,12 +105,12 @@ export default function Coach() {
             };
 
             setMessages((prev) => [...prev, botMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Coach error:', error);
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'CONNECTION ERROR. Retrying...',
+                content: `Error: ${error.message || 'Onbekende fout'}`,
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMessage]);
