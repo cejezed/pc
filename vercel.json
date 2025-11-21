@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
     "api/**/*.{ts,js}": {
@@ -10,10 +9,6 @@
     }
   },
   "routes": [
-    {
-      "src": "^/api/recipes/import$",
-      "dest": "/api/recipes/import.ts"
-    },
     {
       "src": "^/api/.*",
       "dest": "/api/index.ts"
