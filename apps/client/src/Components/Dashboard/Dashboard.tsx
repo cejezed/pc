@@ -355,118 +355,121 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left Column - Quick Capture & Tasks */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Tasks */}
-            <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-              <div className="flex items-center justify-between mb-6 relative z-10">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
-                  <CheckSquare className="w-5 h-5 text-zeus-accent" />
-                  Taken
-                </h3>
-                <span className="text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-2 py-1 rounded border border-zeus-accent/20">
-                  {tasks.filter(t => t.status === 'done').length}/{tasks.length}
-                </span>
-              </div>
+          <div className="md:col-span-2 space-y-6">
 
-              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-                {tasks.filter(t => t.status !== 'done').map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 p-3 hover:bg-zeus-bg rounded-lg transition-all group border border-transparent hover:border-zeus-accent/10"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={task.status === 'done'}
-                      onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
-                      className="w-5 h-5 text-zeus-accent bg-zeus-bg border-zeus-border rounded focus:ring-zeus-accent focus:ring-offset-0 transition-all cursor-pointer"
-                    />
-                    <span className={`flex-1 text-sm font-medium transition-colors ${task.status === 'done' ? 'line-through text-zeus-text-highlight/50' : 'text-zeus-text group-hover:text-white'
-                      }`}>
-                      {task.title}
-                    </span>
-                    <button
-                      onClick={() => deleteTask.mutate(task.id)}
-                      className="opacity-0 group-hover:opacity-100 text-zeus-accent hover:text-red-500 transition-all p-2 hover:bg-zeus-accent/10 rounded"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Tasks */}
+              <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="flex items-center justify-between mb-6 relative z-10">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                    <CheckSquare className="w-5 h-5 text-zeus-accent" />
+                    Taken
+                  </h3>
+                  <span className="text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-2 py-1 rounded border border-zeus-accent/20">
+                    {tasks.filter(t => t.status === 'done').length}/{tasks.length}
+                  </span>
+                </div>
+
+                <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                  {tasks.filter(t => t.status !== 'done').map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 p-3 hover:bg-zeus-bg rounded-lg transition-all group border border-transparent hover:border-zeus-accent/10"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {tasks.length === 0 && (
-                  <p className="text-sm text-zeus-text/50 text-center py-8 italic">Geen taken. Tijd voor actie?</p>
-                )}
-              </div>
+                      <input
+                        type="checkbox"
+                        checked={task.status === 'done'}
+                        onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
+                        className="w-5 h-5 text-zeus-accent bg-zeus-bg border-zeus-border rounded focus:ring-zeus-accent focus:ring-offset-0 transition-all cursor-pointer"
+                      />
+                      <span className={`flex-1 text-sm font-medium transition-colors ${task.status === 'done' ? 'line-through text-zeus-text-highlight/50' : 'text-zeus-text group-hover:text-white'
+                        }`}>
+                        {task.title}
+                      </span>
+                      <button
+                        onClick={() => deleteTask.mutate(task.id)}
+                        className="opacity-0 group-hover:opacity-100 text-zeus-accent hover:text-red-500 transition-all p-2 hover:bg-zeus-accent/10 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {tasks.length === 0 && (
+                    <p className="text-sm text-zeus-text/50 text-center py-8 italic">Geen taken. Tijd voor actie?</p>
+                  )}
+                </div>
 
-              <div className="flex gap-3 relative z-10">
-                <input
-                  type="text"
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
-                  placeholder="Nieuwe taak toevoegen..."
-                  className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
-                />
-                <button
-                  onClick={() => newTask.trim() && addTask.mutate(newTask)}
-                  disabled={!newTask.trim()}
-                  className="bg-zeus-accent hover:bg-zeus-accent/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Ideas */}
-            <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-              <div className="flex items-center justify-between mb-6 relative z-10">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
-                  <Lightbulb className="w-5 h-5 text-zeus-accent" />
-                  Ideeën
-                </h3>
-                <span className="text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-2 py-1 rounded border border-zeus-accent/20">{ideas.length}</span>
-              </div>
-
-              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
-                {ideas.map((idea) => (
-                  <div
-                    key={idea.id}
-                    className="flex items-start gap-3 p-3 hover:bg-zeus-bg rounded-lg transition-all group border border-transparent hover:border-zeus-accent/10"
+                <div className="flex gap-3 relative z-10">
+                  <input
+                    type="text"
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
+                    placeholder="Nieuwe taak..."
+                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
+                  />
+                  <button
+                    onClick={() => newTask.trim() && addTask.mutate(newTask)}
+                    disabled={!newTask.trim()}
+                    className="bg-zeus-accent hover:bg-zeus-accent/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
                   >
-                    <span className="text-zeus-accent mt-0.5 shrink-0 drop-shadow-[0_0_5px_rgba(255,107,0,0.5)]">💡</span>
-                    <span className="flex-1 text-sm text-zeus-text font-medium group-hover:text-white transition-colors">{idea.title}</span>
-                    <button
-                      onClick={() => deleteIdea.mutate(idea.id)}
-                      className="opacity-0 group-hover:opacity-100 text-zeus-accent hover:text-red-500 transition-all p-2 hover:bg-zeus-accent/10 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {ideas.length === 0 && (
-                  <p className="text-sm text-zeus-text/50 text-center py-8 italic">Geen ideeën. Laat je creativiteit stromen!</p>
-                )}
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex gap-3 relative z-10">
-                <input
-                  type="text"
-                  value={newIdea}
-                  onChange={(e) => setNewIdea(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
-                  placeholder="Nieuw idee vastleggen..."
-                  className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
-                />
-                <button
-                  onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
-                  disabled={!newIdea.trim()}
-                  className="bg-zeus-accent hover:bg-zeus-accent/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
+              {/* Ideas */}
+              <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="flex items-center justify-between mb-6 relative z-10">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                    <Lightbulb className="w-5 h-5 text-zeus-accent" />
+                    Ideeën
+                  </h3>
+                  <span className="text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-2 py-1 rounded border border-zeus-accent/20">{ideas.length}</span>
+                </div>
+
+                <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                  {ideas.map((idea) => (
+                    <div
+                      key={idea.id}
+                      className="flex items-start gap-3 p-3 hover:bg-zeus-bg rounded-lg transition-all group border border-transparent hover:border-zeus-accent/10"
+                    >
+                      <span className="text-zeus-accent mt-0.5 shrink-0 drop-shadow-[0_0_5px_rgba(255,107,0,0.5)]">💡</span>
+                      <span className="flex-1 text-sm text-zeus-text font-medium group-hover:text-white transition-colors">{idea.title}</span>
+                      <button
+                        onClick={() => deleteIdea.mutate(idea.id)}
+                        className="opacity-0 group-hover:opacity-100 text-zeus-accent hover:text-red-500 transition-all p-2 hover:bg-zeus-accent/10 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {ideas.length === 0 && (
+                    <p className="text-sm text-zeus-text/50 text-center py-8 italic">Geen ideeën. Laat je creativiteit stromen!</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 relative z-10">
+                  <input
+                    type="text"
+                    value={newIdea}
+                    onChange={(e) => setNewIdea(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
+                    placeholder="Nieuw idee..."
+                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
+                  />
+                  <button
+                    onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
+                    disabled={!newIdea.trim()}
+                    className="bg-zeus-accent hover:bg-zeus-accent/80 text-white px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,107,0,0.2)] hover:shadow-[0_0_15px_rgba(255,107,0,0.4)]"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
