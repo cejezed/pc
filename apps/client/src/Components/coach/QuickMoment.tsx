@@ -41,19 +41,16 @@ export function QuickMoment() {
     };
 
     return (
-        <div className="zeus-card rounded-3xl p-8 border border-[#2d3436] relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#FF6B00] opacity-5 rounded-full blur-3xl pointer-events-none"></div>
-
+        <div className="zeus-card rounded-3xl p-8 border border-zeus-border relative overflow-hidden bg-white">
             <div className="flex items-center gap-3 mb-6 relative z-10">
-                <div className="p-3 bg-[#FF6B00]/10 rounded-xl border border-[#FF6B00]/20">
-                    <Zap className="w-6 h-6 text-[#FF6B00]" />
+                <div className="p-3 bg-zeus-accent/10 rounded-xl border border-zeus-accent/20">
+                    <Zap className="w-6 h-6 text-zeus-accent" />
                 </div>
                 <div>
-                    <h2 className="text-xl font-bold text-white font-['Orbitron',sans-serif] tracking-wide">
-                        QUICK <span className="text-[#FF6B00]">CAPTURE</span>
+                    <h2 className="text-xl font-bold text-zeus-primary tracking-wide">
+                        QUICK <span className="text-zeus-accent">CAPTURE</span>
                     </h2>
-                    <p className="text-[#C5C6C7] text-xs uppercase tracking-widest opacity-70">
+                    <p className="text-zeus-text-secondary text-xs uppercase tracking-widest opacity-70">
                         Log thoughts • Energy • Mood
                     </p>
                 </div>
@@ -64,10 +61,10 @@ export function QuickMoment() {
                     <textarea
                         value={moment}
                         onChange={(e) => setMoment(e.target.value)}
-                        placeholder="Input data stream..."
-                        className="w-full h-32 bg-[#0B0C10] text-[#C5C6C7] border border-[#2d3436] rounded-xl p-4 focus:ring-0 focus:border-[#FF6B00] transition-all duration-300 resize-none placeholder-gray-700 font-mono text-sm shadow-inner group-hover:border-[#FF6B00]/50"
+                        placeholder="Wat houdt je bezig?"
+                        className="w-full h-32 bg-zeus-bg text-zeus-text border border-zeus-border rounded-xl p-4 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all duration-300 resize-none placeholder-zeus-text-secondary font-sans text-sm shadow-inner"
                     />
-                    <div className="absolute bottom-3 right-3 text-[10px] text-gray-600 font-mono">
+                    <div className="absolute bottom-3 right-3 text-[10px] text-zeus-text-secondary font-mono">
                         {moment.length} CHARS
                     </div>
                 </div>
@@ -75,9 +72,9 @@ export function QuickMoment() {
                 <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-2">
                         {lastSaved && (
-                            <span className="text-[#66FCF1] text-xs font-mono flex items-center gap-1 animate-fade-in">
+                            <span className="text-zeus-accent text-xs font-mono flex items-center gap-1 animate-fade-in">
                                 <Clock className="w-3 h-3" />
-                                DATA SAVED
+                                OPGESLAGEN
                             </span>
                         )}
                     </div>
@@ -85,16 +82,16 @@ export function QuickMoment() {
                     <button
                         type="submit"
                         disabled={!moment.trim() || isSubmitting}
-                        className="px-6 py-3 bg-[#FF6B00] text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-[#ff8533] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_15px_rgba(255,107,0,0.2)] hover:shadow-[0_0_25px_rgba(255,107,0,0.4)] flex items-center gap-2"
+                        className="px-6 py-3 bg-zeus-accent text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-zeus-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
                     >
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                UPLOADING...
+                                OPSLAAN...
                             </>
                         ) : (
                             <>
-                                SAVE ENTRY
+                                OPSLAAN
                                 <Send className="w-4 h-4" />
                             </>
                         )}

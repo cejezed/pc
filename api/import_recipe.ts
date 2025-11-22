@@ -123,83 +123,94 @@ async function extractRecipeWithLLM(html: string, url: string): Promise<ScrapedR
 // --- Main Handler ---
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  console.log('Recipe Import API called');
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: 'Unauthorized - No header' });
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'Unauthorized - No header' });
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(
+    authHeader.replace('Bearer ', '')
+  );
 
-    if (authError || !user) return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+  if (authError || !user) return res.status(401).json({ error: 'Unauthorized - Invalid token' });
 
-    try {
-      const { url } = req.body;
-      if (!url) return res.status(400).json({ error: 'URL is required' });
+  try {
+    const { url } = req.body;
+    console.log('Importing URL:', url);
+    if (!url) return res.status(400).json({ error: 'URL is required' });
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch URL: ${response.statusText}`);
-      const html = await response.text();
+    console.log('Fetching URL content...');
+    const response = await fetch(url);
+    console.log('Fetch status:', response.status);
+    if (!response.ok) throw new Error(`Failed to fetch URL: ${response.statusText}`);
+    const html = await response.text();
+    console.log('HTML fetched, length:', html.length);
 
-      let scrapedRecipe = await scrapeRecipeFromHTML(html);
-      if (!scrapedRecipe || scrapedRecipe.ingredients.length === 0) {
-        const llmRecipe = await extractRecipeWithLLM(html, url);
-        if (llmRecipe) scrapedRecipe = llmRecipe;
-      }
-
-      if (!scrapedRecipe) {
-        return res.status(400).json({ error: 'Could not extract recipe', success: false });
-      }
-
-      const { data: recipe, error: recipeError } = await supabase
-        .from('recipes')
-        .insert([{
-          user_id: user.id,
-          title: scrapedRecipe.title,
-          source_type: 'url',
-          source_url: url,
-          default_servings: scrapedRecipe.servings || 2,
-          prep_time_min: scrapedRecipe.prepTime,
-          instructions: scrapedRecipe.instructions,
-          tags: scrapedRecipe.tags || [],
-          image_url: scrapedRecipe.imageUrl,
-        }])
-        .select()
-        .single();
-
-      if (recipeError) throw recipeError;
-
-      if (scrapedRecipe.ingredients.length > 0) {
-        const ingredientsData = scrapedRecipe.ingredients.map((ing, index) => ({
-          recipe_id: recipe.id,
-          name: ing.name,
-          quantity: ing.quantity,
-          unit: ing.unit,
-          category: 'other',
-          sort_order: index,
-        }));
-        await supabase.from('recipe_ingredients').insert(ingredientsData);
-      }
-
-      const { data: completeRecipe } = await supabase
-        .from('recipes')
-        // @ts-ignore
-        .select('*, ingredients:recipe_ingredients(*)')
-        .eq('id', recipe.id)
-        .single();
-
-      return res.status(201).json({
-        success: true,
-        // @ts-ignore
-        recipe: completeRecipe.recipe || completeRecipe,
-        // @ts-ignore
-        ingredients: completeRecipe.ingredients || [],
-      });
-
-    } catch (error: any) {
-      console.error('Import error:', error);
-      return res.status(500).json({ error: error.message, success: false });
+    let scrapedRecipe = await scrapeRecipeFromHTML(html);
+    if (!scrapedRecipe || scrapedRecipe.ingredients.length === 0) {
+      console.log('Scraping failed or empty, trying LLM...');
+      const llmRecipe = await extractRecipeWithLLM(html, url);
+      if (llmRecipe) scrapedRecipe = llmRecipe;
     }
+
+    if (!scrapedRecipe) {
+      console.error('Could not extract recipe');
+      return res.status(400).json({ error: 'Could not extract recipe', success: false });
+    }
+
+    console.log('Recipe extracted:', scrapedRecipe.title);
+
+    const { data: recipe, error: recipeError } = await supabase
+      .from('recipes')
+      .insert([{
+        user_id: user.id,
+        title: scrapedRecipe.title,
+        source_type: 'url',
+        source_url: url,
+        default_servings: scrapedRecipe.servings || 2,
+        prep_time_min: scrapedRecipe.prepTime,
+        instructions: scrapedRecipe.instructions,
+        tags: scrapedRecipe.tags || [],
+        image_url: scrapedRecipe.imageUrl,
+      }])
+      .select()
+      .single();
+
+    if (recipeError) throw recipeError;
+
+    if (scrapedRecipe.ingredients.length > 0) {
+      const ingredientsData = scrapedRecipe.ingredients.map((ing, index) => ({
+        recipe_id: recipe.id,
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        category: 'other',
+        sort_order: index,
+      }));
+      await supabase.from('recipe_ingredients').insert(ingredientsData);
+    }
+
+    const { data: completeRecipe } = await supabase
+      .from('recipes')
+      // @ts-ignore
+      .select('*, ingredients:recipe_ingredients(*)')
+      .eq('id', recipe.id)
+      .single();
+
+    console.log('Recipe saved successfully:', recipe.id);
+
+    return res.status(201).json({
+      success: true,
+      // @ts-ignore
+      recipe: completeRecipe.recipe || completeRecipe,
+      // @ts-ignore
+      ingredients: completeRecipe.ingredients || [],
+    });
+
+  } catch (error: any) {
+    console.error('Import error:', error);
+    return res.status(500).json({ error: error.message, success: false });
+  }
 }

@@ -295,7 +295,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto space-y-8">
 
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(255,107,0,0.3)]">
+          <h1 className="text-3xl md:text-4xl font-black text-zeus-primary tracking-tight">
             DASHBOARD
           </h1>
           <button
@@ -364,7 +364,7 @@ export default function Dashboard() {
               <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                  <h3 className="text-lg font-bold text-zeus-primary flex items-center gap-2 tracking-wide">
                     <CheckSquare className="w-5 h-5 text-zeus-accent" />
                     Taken
                   </h3>
@@ -385,7 +385,7 @@ export default function Dashboard() {
                         onChange={() => toggleTask.mutate({ id: task.id, status: task.status })}
                         className="w-5 h-5 text-zeus-accent bg-zeus-bg border-zeus-border rounded focus:ring-zeus-accent focus:ring-offset-0 transition-all cursor-pointer"
                       />
-                      <span className={`flex-1 text-sm font-medium transition-colors ${task.status === 'done' ? 'line-through text-zeus-text-highlight/50' : 'text-zeus-text group-hover:text-white'
+                      <span className={`flex-1 text-sm font-medium transition-colors ${task.status === 'done' ? 'line-through text-zeus-text-secondary' : 'text-zeus-text group-hover:text-zeus-primary'
                         }`}>
                         {task.title}
                       </span>
@@ -409,7 +409,7 @@ export default function Dashboard() {
                     onChange={(e) => setNewTask(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && newTask.trim() && addTask.mutate(newTask)}
                     placeholder="Nieuwe taak..."
-                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
+                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-zeus-text placeholder-zeus-text-secondary focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
                   />
                   <button
                     onClick={() => newTask.trim() && addTask.mutate(newTask)}
@@ -425,7 +425,7 @@ export default function Dashboard() {
               <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2 tracking-wide">
+                  <h3 className="text-lg font-bold text-zeus-primary flex items-center gap-2 tracking-wide">
                     <Lightbulb className="w-5 h-5 text-zeus-accent" />
                     Ideeën
                   </h3>
@@ -438,8 +438,8 @@ export default function Dashboard() {
                       key={idea.id}
                       className="flex items-start gap-3 p-3 hover:bg-zeus-bg rounded-lg transition-all group border border-transparent hover:border-zeus-accent/10"
                     >
-                      <span className="text-zeus-accent mt-0.5 shrink-0 drop-shadow-[0_0_5px_rgba(255,107,0,0.5)]">💡</span>
-                      <span className="flex-1 text-sm text-zeus-text font-medium group-hover:text-white transition-colors">{idea.title}</span>
+                      <span className="text-zeus-accent mt-0.5 shrink-0">💡</span>
+                      <span className="flex-1 text-sm text-zeus-text font-medium group-hover:text-zeus-primary transition-colors">{idea.title}</span>
                       <button
                         onClick={() => deleteIdea.mutate(idea.id)}
                         className="opacity-0 group-hover:opacity-100 text-zeus-accent hover:text-red-500 transition-all p-2 hover:bg-zeus-accent/10 rounded"
@@ -460,7 +460,7 @@ export default function Dashboard() {
                     onChange={(e) => setNewIdea(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && newIdea.trim() && addIdea.mutate(newIdea)}
                     placeholder="Nieuw idee..."
-                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-white placeholder-zeus-text/30 focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
+                    className="flex-1 bg-zeus-bg border border-zeus-border rounded-lg px-4 py-3 text-sm text-zeus-text placeholder-zeus-text-secondary focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all shadow-inner"
                   />
                   <button
                     onClick={() => newIdea.trim() && addIdea.mutate(newIdea)}
@@ -481,7 +481,7 @@ export default function Dashboard() {
           <div className="space-y-6">
             <div className="bg-zeus-card rounded-xl border border-zeus-accent/20 p-6 shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-zeus-accent/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-              <h3 className="text-lg font-bold text-white mb-6 relative z-10 tracking-wide border-b border-zeus-accent/20 pb-2">
+              <h3 className="text-lg font-bold text-zeus-primary mb-6 relative z-10 tracking-wide border-b border-zeus-border pb-2">
                 Dagelijkse Check-in
               </h3>
 
@@ -575,7 +575,7 @@ export default function Dashboard() {
 
                 {/* Activiteiten */}
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-white mb-3 uppercase tracking-wider text-xs opacity-70">Activiteiten vandaag</p>
+                  <p className="text-sm font-bold text-zeus-text-secondary mb-3 uppercase tracking-wider text-xs opacity-70">Activiteiten vandaag</p>
                   <CheckboxItem
                     label="Ochtend workout"
                     icon={Dumbbell}
@@ -615,7 +615,7 @@ export default function Dashboard() {
 
                 {/* Gezondheid */}
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-white mb-3 uppercase tracking-wider text-xs opacity-70">Gezondheid</p>
+                  <p className="text-sm font-bold text-zeus-text-secondary mb-3 uppercase tracking-wider text-xs opacity-70">Gezondheid</p>
                   <CheckboxItem
                     label="Ogen schoonmaken"
                     icon={Eye}
@@ -685,18 +685,17 @@ function ScoreSelector({ label, icon: Icon, iconColor, value, onChange, lowLabel
           <Icon className={`w-4 h-4 ${iconColor}`} />
           {label}
         </label>
-        <span className="text-lg font-bold text-white">{value}/10</span>
+        <span className="text-lg font-bold text-zeus-primary">{value}/10</span>
       </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
           <button
             key={num}
             onClick={() => onChange(num)}
-            className={`flex-1 py-2 text-xs font-bold rounded transition-all ${
-              value === num
-                ? 'bg-zeus-accent text-white shadow-[0_0_10px_rgba(255,107,0,0.4)]'
-                : 'bg-zeus-bg text-zeus-text hover:bg-zeus-accent/20 hover:text-white border border-zeus-border'
-            }`}
+            className={`flex-1 py-2 text-xs font-bold rounded transition-all ${value === num
+                ? 'bg-zeus-accent text-white shadow-md'
+                : 'bg-zeus-bg text-zeus-text hover:bg-zeus-accent/10 hover:text-zeus-primary border border-zeus-border'
+              }`}
           >
             {num}
           </button>
@@ -719,10 +718,10 @@ function CheckboxItem({ label, icon: Icon, iconColor, checked, onChange }: any) 
         : 'bg-zeus-bg border-zeus-border hover:border-zeus-accent/30'
         }`}
     >
-      <div className={`p-2 rounded-full ${checked ? 'bg-zeus-accent/20' : 'bg-zeus-card'}`}>
-        <Icon className={`w-4 h-4 ${checked ? 'text-zeus-accent' : 'text-zeus-text'}`} />
+      <div className={`p-2 rounded-full ${checked ? 'bg-zeus-accent/20' : 'bg-zeus-bg'}`}>
+        <Icon className={`w-4 h-4 ${checked ? 'text-zeus-accent' : 'text-zeus-text-secondary'}`} />
       </div>
-      <span className={`flex-1 text-sm font-medium ${checked ? 'text-white' : 'text-zeus-text'}`}>
+      <span className={`flex-1 text-sm font-medium ${checked ? 'text-zeus-primary' : 'text-zeus-text'}`}>
         {label}
       </span>
       <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${checked
@@ -746,7 +745,7 @@ function TimeInput({ label, icon: Icon, iconColor, value, onChange, placeholder 
         type="time"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-zeus-bg border border-zeus-border rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all"
+        className="w-full bg-zeus-bg border border-zeus-border rounded-lg px-3 py-2 text-sm text-zeus-text focus:ring-2 focus:ring-zeus-accent focus:border-transparent transition-all"
         placeholder={placeholder}
       />
     </div>

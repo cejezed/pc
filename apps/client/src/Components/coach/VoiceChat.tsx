@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, Loader2, Phone, PhoneOff } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Mic, MicOff, Volume2, Loader2, X, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export function VoiceChat() {
@@ -9,6 +9,7 @@ export function VoiceChat() {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [response, setResponse] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const [conversationHistory, setConversationHistory] = useState<Array<{ role: 'user' | 'coach', text: string }>>([]);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -22,6 +23,10 @@ export function VoiceChat() {
     const silenceTimerRef = useRef<number | null>(null);
     const speechDetectedRef = useRef<boolean>(false);
 
+    // Rate limiting / Debounce
+    const lastRequestTimeRef = useRef<number>(0);
+    const MIN_REQUEST_INTERVAL = 2000; // 2 seconds between requests
+
     useEffect(() => {
         return () => {
             endConversation();
@@ -29,6 +34,7 @@ export function VoiceChat() {
     }, []);
 
     async function startConversation() {
+        setError(null);
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             streamRef.current = stream;
@@ -52,7 +58,7 @@ export function VoiceChat() {
             startRecording(stream);
         } catch (error) {
             console.error('Error starting conversation:', error);
-            alert('Kon microfoon niet starten. Geef toestemming voor microfoon toegang.');
+            setError('Geen toegang tot microfoon. Controleer je instellingen.');
         }
     }
 
@@ -75,8 +81,8 @@ export function VoiceChat() {
             const average = sum / bufferLength;
 
             // Thresholds
-            const SILENCE_THRESHOLD = 10; // Adjust based on testing
-            const SILENCE_DURATION = 2000; // 2 seconds of silence to trigger stop
+            const SILENCE_THRESHOLD = 15; // Slightly higher threshold to avoid background noise
+            const SILENCE_DURATION = 2500; // 2.5 seconds of silence
 
             if (average > SILENCE_THRESHOLD) {
                 // Speech detected
@@ -156,7 +162,13 @@ export function VoiceChat() {
 
         mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-            await processAudio(audioBlob);
+            // Only process if blob has size
+            if (audioBlob.size > 1000) { // Ignore very small clips
+                await processAudio(audioBlob);
+            } else {
+                // If audio too short, just restart listening
+                if (isConversationActive) startRecording();
+            }
         };
 
         mediaRecorder.start();
@@ -171,11 +183,21 @@ export function VoiceChat() {
     }
 
     async function processAudio(audioBlob: Blob) {
+        // Rate limiting check
+        const now = Date.now();
+        if (now - lastRequestTimeRef.current < MIN_REQUEST_INTERVAL) {
+            console.log('Rate limit hit, ignoring request');
+            if (isConversationActive) startRecording();
+            return;
+        }
+        lastRequestTimeRef.current = now;
+
         setIsProcessing(true);
+        setError(null);
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                alert('Niet ingelogd');
+                setError('Je bent niet ingelogd.');
                 endConversation();
                 return;
             }
@@ -187,57 +209,66 @@ export function VoiceChat() {
             reader.onloadend = async () => {
                 const base64Audio = reader.result as string;
 
-                // Send to /api/voice endpoint
-                const response = await fetch('/api/voice', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`,
-                    },
-                    body: JSON.stringify({
-                        audio: base64Audio
-                    }),
-                });
+                try {
+                    // Send to /api/voice endpoint
+                    const response = await fetch('/api/voice', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`,
+                        },
+                        body: JSON.stringify({
+                            audio: base64Audio
+                        }),
+                    });
 
-                if (!response.ok) {
-                    throw new Error('Fout bij verwerken audio');
-                }
+                    if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error('Te veel verzoeken. Even geduld...');
+                        }
+                        throw new Error('Fout bij verwerken audio');
+                    }
 
-                const data = await response.json();
-                const userText = data.transcript || '';
-                const coachText = data.reply || '';
+                    const data = await response.json();
+                    const userText = data.transcript || '';
+                    const coachText = data.reply || '';
 
-                setTranscript(userText);
-                setResponse(coachText);
+                    setTranscript(userText);
+                    setResponse(coachText);
 
-                // Add to conversation history
-                setConversationHistory(prev => [
-                    ...prev,
-                    { role: 'user', text: userText },
-                    { role: 'coach', text: coachText }
-                ]);
+                    // Add to conversation history
+                    setConversationHistory(prev => [
+                        ...prev,
+                        { role: 'user', text: userText },
+                        { role: 'coach', text: coachText }
+                    ]);
 
-                setIsProcessing(false);
+                    setIsProcessing(false);
 
-                // Play TTS audio if available
-                if (data.voiceUrl && isConversationActive) {
-                    playAudio(data.voiceUrl);
-                } else {
-                    // If no audio response, start listening again immediately
+                    // Play TTS audio if available
+                    if (data.voiceUrl && isConversationActive) {
+                        playAudio(data.voiceUrl);
+                    } else {
+                        // If no audio response, start listening again immediately
+                        if (isConversationActive) {
+                            startRecording();
+                        }
+                    }
+                } catch (err: any) {
+                    console.error('API Error:', err);
+                    setError(err.message || 'Er ging iets mis bij de server.');
+                    setIsProcessing(false);
+
+                    // If error, wait a bit then retry listening if active
                     if (isConversationActive) {
-                        startRecording();
+                        setTimeout(() => startRecording(), 3000);
                     }
                 }
             };
         } catch (error) {
             console.error('Error processing audio:', error);
-            // alert('Fout bij verwerken audio. Probeer opnieuw.'); // Optional: disable alert to avoid interruption
+            setError('Fout bij verwerken audio.');
             setIsProcessing(false);
-
-            // Continue conversation if still active
-            if (isConversationActive) {
-                setTimeout(() => startRecording(), 1000);
-            }
         }
     }
 
@@ -263,101 +294,105 @@ export function VoiceChat() {
     }
 
     return (
-        <div className="zeus-card rounded-3xl p-8 border border-[#2d3436] relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00] opacity-5 rounded-full blur-3xl pointer-events-none"></div>
-
+        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 w-full max-w-md mx-auto transition-all duration-300">
+            {/* Header */}
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold text-white tracking-wider font-['Orbitron',sans-serif] flex items-center gap-2">
-                    <div className="w-1 h-6 bg-[#FF6B00]"></div>
-                    VOICE <span className="text-[#FF6B00]">LINK</span>
-                </h2>
-                <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${isConversationActive ? 'bg-[#FF6B00] zeus-glow' : 'bg-gray-600'}`}></div>
-                    <span className="text-[10px] font-mono text-gray-400 tracking-widest">
-                        {isConversationActive ? 'LIVE' : 'OFFLINE'}
-                    </span>
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-zeus-accent/10 flex items-center justify-center">
+                        <Mic className="w-6 h-6 text-zeus-accent" />
+                    </div>
+                    <div>
+                        <h2 className="font-bold text-zeus-primary text-xl tracking-tight">Voice Assistant</h2>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className={`w-2 h-2 rounded-full ${isConversationActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-300'}`}></span>
+                            <span className="text-xs text-slate-500 font-medium tracking-wide uppercase">
+                                {isConversationActive ? 'Live' : 'Stand-by'}
+                            </span>
+                        </div>
+                    </div>
                 </div>
+                {isConversationActive && (
+                    <button
+                        onClick={endConversation}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
             </div>
 
-            {/* Conversation Button */}
-            <div className="flex flex-col items-center gap-6 mb-8 relative">
-                {/* Ring Animation */}
-                {isConversationActive && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-[#FF6B00]/30 rounded-full animate-ping pointer-events-none"></div>
-                )}
-
+            {/* Main Content */}
+            <div className="flex flex-col items-center justify-center py-6 min-h-[220px]">
                 {!isConversationActive ? (
                     <button
                         onClick={startConversation}
-                        className="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 bg-[#1F2833] hover:bg-[#2d3436] border-2 border-[#FF6B00] text-[#FF6B00] shadow-[0_0_20px_rgba(255,107,0,0.2)] hover:shadow-[0_0_40px_rgba(255,107,0,0.4)] group z-10"
+                        className="group relative w-24 h-24 flex items-center justify-center bg-zeus-accent hover:bg-[#1D7AAC] rounded-full shadow-lg hover:shadow-xl hover:shadow-zeus-accent/20 transition-all duration-300 transform hover:-translate-y-1"
                     >
-                        <Phone className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                        <Mic className="w-10 h-10 text-white" />
+                        <span className="absolute -bottom-10 text-sm font-medium text-slate-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            Start gesprek
+                        </span>
                     </button>
                 ) : (
-                    <button
-                        onClick={endConversation}
-                        className="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 bg-[#FF6B00]/10 hover:bg-[#FF6B00]/20 border-2 border-[#FF6B00] text-[#FF6B00] shadow-[0_0_30px_rgba(255,107,0,0.3)] z-10 relative"
-                    >
-                        <PhoneOff className="w-8 h-8" />
-                        {/* Inner glow pulse */}
-                        <div className="absolute inset-0 rounded-full bg-[#FF6B00] opacity-20 animate-pulse"></div>
-                    </button>
+                    <div className="relative">
+                        {/* Status Indicator */}
+                        <div className="w-32 h-32 rounded-full flex items-center justify-center bg-slate-50 relative">
+                            {/* Ripple effect when speaking */}
+                            {isSpeaking && (
+                                <>
+                                    <div className="absolute inset-0 rounded-full border border-zeus-accent/20 animate-ping"></div>
+                                    <div className="absolute inset-0 rounded-full border border-zeus-accent/10 animate-ping animation-delay-200"></div>
+                                </>
+                            )}
+
+                            {isProcessing ? (
+                                <Loader2 className="w-10 h-10 text-zeus-accent animate-spin" />
+                            ) : isSpeaking ? (
+                                <Volume2 className="w-10 h-10 text-zeus-accent animate-pulse" />
+                            ) : (
+                                <div className="flex gap-1.5 items-end h-8">
+                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] h-4"></div>
+                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-100 h-8"></div>
+                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-200 h-5"></div>
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-center mt-8 text-sm font-medium text-slate-500 tracking-wide uppercase">
+                            {isProcessing ? 'Denken...' : isSpeaking ? 'Spreken...' : 'Luisteren...'}
+                        </p>
+                    </div>
                 )}
 
-                <div className="text-center z-10">
-                    <p className="text-sm font-mono text-[#66FCF1] tracking-widest uppercase mb-2">
-                        {!isConversationActive
-                            ? 'INITIALIZE LINK'
-                            : isProcessing
-                                ? 'PROCESSING DATA...'
-                                : isSpeaking
-                                    ? 'INCOMING TRANSMISSION...'
-                                    : isRecording
-                                        ? 'LISTENING...'
-                                        : 'STANDBY...'}
-                    </p>
-
-                    {/* Visualizer Bars (Fake) */}
-                    {isConversationActive && (
-                        <div className="flex items-center justify-center gap-1 h-8">
-                            {[...Array(5)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`w-1 bg-[#FF6B00] rounded-full transition-all duration-100 ${(isSpeaking || isRecording) ? 'animate-[bounce_1s_infinite]' : 'h-1 opacity-30'
-                                        }`}
-                                    style={{
-                                        height: (isSpeaking || isRecording) ? `${Math.random() * 20 + 10}px` : '4px',
-                                        animationDelay: `${i * 0.1}s`
-                                    }}
-                                ></div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {/* Error Message */}
+                {error && (
+                    <div className="mt-6 flex items-center gap-2 text-red-500 bg-red-50 px-4 py-3 rounded-xl text-sm border border-red-100 animate-in fade-in slide-in-from-bottom-2">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        {error}
+                    </div>
+                )}
             </div>
 
             {/* Conversation History */}
             {conversationHistory.length > 0 && (
-                <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#FF6B00] scrollbar-track-[#0B0C10] border-t border-[#2d3436] pt-6">
+                <div className="mt-8 pt-6 border-t border-slate-100 space-y-4 max-h-64 overflow-y-auto custom-scrollbar px-1">
                     {conversationHistory.map((msg, idx) => (
                         <div
                             key={idx}
-                            className={`p-4 rounded-xl border ${msg.role === 'user'
-                                ? 'bg-[#FF6B00]/10 border-[#FF6B00]/30 ml-8 text-right'
-                                : 'bg-[#1F2833] border-[#2d3436] mr-8'
-                                }`}
+                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <p className="text-[10px] font-mono text-[#66FCF1] mb-2 uppercase tracking-wider opacity-70">
-                                {msg.role === 'user' ? 'USER INPUT' : 'AI RESPONSE'}
-                            </p>
-                            <p className="text-sm text-[#C5C6C7] leading-relaxed">{msg.text}</p>
+                            <div
+                                className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
+                                        ? 'bg-zeus-accent text-white rounded-tr-sm'
+                                        : 'bg-slate-50 text-slate-700 rounded-tl-sm border border-slate-100'
+                                    }`}
+                            >
+                                {msg.text}
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Hidden audio player for TTS */}
             <audio ref={audioRef} className="hidden" />
         </div>
     );

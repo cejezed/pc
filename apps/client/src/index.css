@@ -1,35 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* Zeus-X Theme Variables */
-  --zeus-bg: #0f172a;
-  /* Slate 900 */
-  --zeus-bg-secondary: #1e293b;
-  /* Slate 800 */
+  /* Brikx Theme Variables */
+  --zeus-bg: #F5F7FA;
+  /* Light Blue-Grey Background */
+  --zeus-bg-secondary: #FFFFFF;
+  /* White */
 
-  --zeus-card: rgba(30, 41, 59, 0.7);
-  --zeus-card-hover: rgba(51, 65, 85, 0.8);
+  --zeus-card: #FFFFFF;
+  /* White Cards */
+  --zeus-card-hover: #FFFFFF;
 
-  --zeus-border: rgba(255, 255, 255, 0.1);
-  --zeus-border-glow: rgba(99, 102, 241, 0.5);
-  /* Indigo glow */
+  --zeus-border: #F1F5F9;
+  /* Slate 100 - Very subtle */
+  --zeus-border-glow: #2D9CDB;
+  /* Teal Glow (subtle) */
 
-  --zeus-primary: #6366f1;
-  /* Indigo 500 */
-  --zeus-primary-glow: rgba(99, 102, 241, 0.5);
+  --zeus-primary: #0A2540;
+  /* Deep Blue (Primary Brand) */
+  --zeus-primary-glow: rgba(10, 37, 64, 0.1);
 
-  --zeus-text: #f8fafc;
-  /* Slate 50 */
-  --zeus-text-secondary: #94a3b8;
-  /* Slate 400 */
+  --zeus-text: #334155;
+  /* Slate 700 (Main Text) */
+  --zeus-text-secondary: #64748B;
+  /* Slate 500 */
+  --zeus-text-highlight: #0A2540;
+  /* Deep Blue */
 
-  --zeus-accent: #06b6d4;
-  /* Cyan 500 */
-  --zeus-accent-glow: rgba(6, 182, 212, 0.5);
+  --zeus-accent: #2D9CDB;
+  /* Brikx Teal */
+  --zeus-accent-glow: rgba(45, 156, 219, 0.2);
 
-  --glass-blur: 12px;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-blur: 0px;
+  /* No blur for clean look */
+  --glass-border: transparent;
+  --glass-bg: #FFFFFF;
 }
 
 /* Global resets */
@@ -55,9 +60,9 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid var(--zeus-primary);
+    outline: 2px solid var(--zeus-accent);
     outline-offset: 2px;
-    box-shadow: 0 0 15px var(--zeus-primary-glow);
+    box-shadow: 0 0 0 4px var(--zeus-accent-glow);
   }
 }
 
@@ -68,95 +73,96 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--zeus-bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--zeus-primary);
+  background: var(--zeus-accent);
 }
 
-/* Zeus-X Utility Classes */
+/* Brikx Utility Classes */
 @layer components {
   .zeus-card {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+    background: var(--zeus-card);
     border: 1px solid var(--zeus-border);
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(var(--glass-blur));
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    /* More rounded */
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    /* Softer, deeper shadow */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .zeus-card:hover {
-    border-color: var(--zeus-border-glow);
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), 0 0 10px var(--glass-border);
+    border-color: var(--zeus-accent);
+    box-shadow: 0 10px 30px -5px rgba(45, 156, 219, 0.1);
     transform: translateY(-2px);
   }
 
   .zeus-glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
+    background: #FFFFFF;
+    border: 1px solid var(--zeus-border);
   }
 
   .zeus-glow-text {
-    text-shadow: 0 0 10px var(--zeus-accent-glow);
-  }
-
-  .zeus-glow-border {
-    box-shadow: 0 0 10px var(--zeus-primary-glow);
+    text-shadow: none;
+    color: var(--zeus-primary);
+    font-weight: 700;
   }
 
   /* Button Styles */
   .btn-zeus-primary {
-    background: linear-gradient(135deg, var(--zeus-primary) 0%, #4f46e5 100%);
+    background: var(--zeus-accent);
     color: white;
     font-weight: 600;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
+    border-radius: 9999px;
+    /* Pill shape */
     border: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(45, 156, 219, 0.2);
   }
 
   .btn-zeus-primary:hover {
-    box-shadow: 0 0 20px var(--zeus-primary-glow);
+    background: #1D7AAC;
+    /* Darker Teal */
+    box-shadow: 0 6px 12px rgba(45, 156, 219, 0.3);
     transform: translateY(-1px);
   }
 
   .btn-zeus-secondary {
-    background: transparent;
+    background: white;
     border: 1px solid var(--zeus-border);
     color: var(--zeus-text);
     padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
   }
 
   .btn-zeus-secondary:hover {
-    border-color: var(--zeus-primary);
-    background: rgba(99, 102, 241, 0.1);
-    color: white;
+    border-color: var(--zeus-accent);
+    color: var(--zeus-accent);
+    background: #F0F9FF;
   }
 
   /* Input Styles */
   .input-zeus {
-    background: var(--zeus-bg-secondary);
+    background: #FFFFFF;
     border: 1px solid var(--zeus-border);
     color: var(--zeus-text);
-    border-radius: 0.75rem;
+    border-radius: 8px;
     padding: 0.75rem 1rem;
     width: 100%;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
   }
 
   .input-zeus:focus {
-    border-color: var(--zeus-primary);
-    box-shadow: 0 0 15px var(--zeus-primary-glow);
+    border-color: var(--zeus-accent);
+    box-shadow: 0 0 0 3px var(--zeus-accent-glow);
     outline: none;
   }
 }
