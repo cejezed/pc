@@ -2,55 +2,5 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
-  "framework": "vite",
-  "functions": {
-    "api/**/*.{ts,js}": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "^/api/recipes/import",
-      "dest": "/api/import_recipe.ts"
-    },
-    {
-      "src": "^/api/test",
-      "dest": "/api/test.js"
-    },
-    {
-      "src": "^/api/recipes/scan",
-      "dest": "/api/recipes/scan.ts"
-    },
-    {
-      "src": "^/api/recipes/(?<id>[^/]+)$",
-      "dest": "/api/recipes/[id].ts"
-    },
-    {
-      "src": "^/api/health",
-      "dest": "/api/index.ts"
-    },
-    {
-      "src": "^/api/coach.*",
-      "dest": "/api/index.ts"
-    },
-    {
-      "src": "^/api/checkin.*",
-      "dest": "/api/index.ts"
-    },
-    {
-      "src": "^/api/moment",
-      "dest": "/api/index.ts"
-    },
-    {
-      "src": "^/api/voice",
-      "dest": "/api/index.ts"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "apps/client/index.html"
-    }
-  ]
+  "framework": "vite"
 }
