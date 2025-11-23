@@ -15,7 +15,7 @@ export default function Coach() {
         {
             id: 'welcome',
             role: 'assistant',
-            content: 'SYSTEM ONLINE. Personal Coach v2.0 initialized. Accessing health and business metrics... Ready for input.',
+            content: 'Welkom! Ik ben je Personal Coach. Hoe kan ik je vandaag helpen?',
             timestamp: new Date(),
         },
     ]);
@@ -127,27 +127,27 @@ export default function Coach() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] max-w-6xl mx-auto p-4 text-[#C5C6C7]">
+        <div className="flex flex-col h-[calc(100vh-4rem)] max-w-6xl mx-auto p-4 text-zeus-text">
             {/* Header */}
             <div className="flex items-center justify-between mb-8 p-6 zeus-card rounded-3xl relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B00] opacity-80"></div>
+                <div className="absolute top-0 left-0 w-1 h-full bg-zeus-accent opacity-80"></div>
                 <div className="flex items-center gap-4 relative z-10">
-                    <div className="p-3 bg-[#1F2833] rounded-2xl border border-[#2d3436] shadow-[0_0_15px_rgba(255,107,0,0.2)]">
-                        <Sparkles className="w-6 h-6 text-[#FF6B00]" />
+                    <div className="p-3 bg-zeus-bg rounded-2xl border border-zeus-border shadow-lg">
+                        <Sparkles className="w-6 h-6 text-zeus-accent" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-wider text-white mb-1 font-['Orbitron',sans-serif]">
-                            AI <span className="text-[#FF6B00]">COACH</span>
+                        <h1 className="text-3xl font-bold tracking-wider text-zeus-primary mb-1 font-['Orbitron',sans-serif]">
+                            Personal <span className="text-zeus-accent">Coach</span>
                         </h1>
-                        <p className="text-[#66FCF1] text-xs uppercase tracking-[0.2em] font-semibold opacity-80">
-                            System Online • v2.0
+                        <p className="text-zeus-accent text-xs uppercase tracking-[0.2em] font-semibold opacity-80">
+                            AI-powered • Always ready
                         </p>
                     </div>
                 </div>
                 <div className="hidden md:block">
-                    <div className="flex items-center gap-2 text-xs font-mono text-[#FF6B00] bg-[#FF6B00]/10 px-3 py-1 rounded border border-[#FF6B00]/20">
-                        <div className="w-2 h-2 bg-[#FF6B00] rounded-full animate-pulse"></div>
-                        CONNECTED
+                    <div className="flex items-center gap-2 text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-3 py-1 rounded border border-zeus-accent/20">
+                        <div className="w-2 h-2 bg-zeus-accent rounded-full animate-pulse"></div>
+                        ONLINE
                     </div>
                 </div>
             </div>
@@ -162,8 +162,8 @@ export default function Coach() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={`px-6 py-3 font-bold text-sm tracking-wider rounded-xl transition-all duration-300 uppercase whitespace-nowrap ${activeTab === tab.id
-                            ? 'bg-[#FF6B00] text-white shadow-[0_0_20px_rgba(255,107,0,0.4)] translate-y-[-2px]'
-                            : 'bg-[#1F2833] text-gray-400 hover:text-white hover:bg-[#2d3436] border border-transparent hover:border-[#FF6B00]/30'
+                            ? 'bg-zeus-accent text-white shadow-lg'
+                            : 'bg-zeus-card text-zeus-text-secondary hover:text-zeus-text hover:bg-zeus-bg border border-zeus-border'
                             }`}
                     >
                         {tab.label}
@@ -172,50 +172,50 @@ export default function Coach() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto zeus-card rounded-3xl p-6 border border-[#2d3436]">
+            <div className="flex-1 overflow-y-auto zeus-card rounded-3xl p-6 border border-zeus-border">
                 {activeTab === 'chat' && (
                     <div className="flex flex-col h-full">
                         {/* Chat Area */}
-                        <div className="flex-1 overflow-y-auto mb-6 space-y-6 pr-4 scrollbar-thin scrollbar-thumb-[#FF6B00] scrollbar-track-[#0B0C10]">
+                        <div className="flex-1 overflow-y-auto mb-6 space-y-6 pr-4">
                             {messages.map((msg) => (
                                 <div
                                     key={msg.id}
                                     className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {msg.role === 'assistant' && (
-                                        <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-[#FF6B00]/30 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(255,107,0,0.1)]">
-                                            <Bot className="w-5 h-5 text-[#FF6B00]" />
+                                        <div className="w-10 h-10 rounded-xl bg-zeus-bg border border-zeus-accent/30 flex items-center justify-center flex-shrink-0 shadow-md">
+                                            <Bot className="w-5 h-5 text-zeus-accent" />
                                         </div>
                                     )}
 
                                     <div
-                                        className={`max-w-[80%] p-5 rounded-2xl backdrop-blur-sm ${msg.role === 'user'
-                                            ? 'bg-[#FF6B00] text-white rounded-tr-none shadow-[0_4px_15px_rgba(255,107,0,0.3)]'
-                                            : 'bg-[#1F2833] border border-[#2d3436] text-[#C5C6C7] rounded-tl-none'
+                                        className={`max-w-[80%] p-5 rounded-2xl ${msg.role === 'user'
+                                            ? 'bg-zeus-accent text-white rounded-tr-none shadow-lg'
+                                            : 'bg-zeus-bg border border-zeus-border text-zeus-text rounded-tl-none'
                                             }`}
                                     >
                                         <p className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</p>
-                                        <span className={`text-[10px] mt-3 block uppercase tracking-wider font-mono opacity-60 ${msg.role === 'user' ? 'text-white' : 'text-[#FF6B00]'
+                                        <span className={`text-[10px] mt-3 block uppercase tracking-wider font-mono opacity-60 ${msg.role === 'user' ? 'text-white' : 'text-zeus-accent'
                                             }`}>
                                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
 
                                     {msg.role === 'user' && (
-                                        <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-gray-700 flex items-center justify-center flex-shrink-0">
-                                            <User className="w-5 h-5 text-gray-400" />
+                                        <div className="w-10 h-10 rounded-xl bg-zeus-bg border border-zeus-border flex items-center justify-center flex-shrink-0">
+                                            <User className="w-5 h-5 text-zeus-text-secondary" />
                                         </div>
                                     )}
                                 </div>
                             ))}
                             {isLoading && (
                                 <div className="flex gap-4 justify-start">
-                                    <div className="w-10 h-10 rounded-xl bg-[#1F2833] border border-[#FF6B00]/30 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="w-5 h-5 text-[#FF6B00]" />
+                                    <div className="w-10 h-10 rounded-xl bg-zeus-bg border border-zeus-accent/30 flex items-center justify-center flex-shrink-0">
+                                        <Bot className="w-5 h-5 text-zeus-accent" />
                                     </div>
-                                    <div className="bg-[#1F2833] border border-[#2d3436] p-5 rounded-2xl rounded-tl-none flex items-center gap-3">
-                                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6B00]" />
-                                        <span className="text-xs font-mono text-[#FF6B00] tracking-widest uppercase">Processing...</span>
+                                    <div className="bg-zeus-bg border border-zeus-border p-5 rounded-2xl rounded-tl-none flex items-center gap-3">
+                                        <Loader2 className="w-4 h-4 animate-spin text-zeus-accent" />
+                                        <span className="text-xs font-mono text-zeus-accent tracking-widest uppercase">Denken...</span>
                                     </div>
                                 </div>
                             )}
@@ -223,19 +223,19 @@ export default function Coach() {
                         </div>
 
                         {/* Input Area */}
-                        <div className="bg-[#0B0C10] p-2 rounded-2xl border border-[#2d3436] shadow-inner flex items-end gap-2 relative group focus-within:border-[#FF6B00] transition-colors duration-300">
+                        <div className="bg-zeus-bg p-2 rounded-2xl border border-zeus-border shadow-inner flex items-end gap-2 relative group focus-within:border-zeus-accent transition-colors duration-300">
                             <textarea
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="TYPE COMMAND..."
-                                className="flex-1 p-4 max-h-32 min-h-[60px] bg-transparent border-none focus:ring-0 resize-none text-white placeholder-gray-600 font-mono text-sm"
+                                placeholder="Typ je bericht..."
+                                className="flex-1 p-4 max-h-32 min-h-[60px] bg-transparent border-none focus:ring-0 resize-none text-zeus-text placeholder-zeus-text-secondary text-sm"
                                 rows={1}
                             />
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || isLoading}
-                                className="p-4 bg-[#FF6B00] text-white rounded-xl hover:bg-[#ff8533] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mb-1 shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)]"
+                                className="p-4 bg-zeus-accent text-white rounded-xl hover:bg-zeus-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mb-1 shadow-lg hover:shadow-xl"
                             >
                                 <Send className="w-5 h-5" />
                             </button>
