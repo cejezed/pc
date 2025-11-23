@@ -224,47 +224,33 @@ export default function BoodschappenPage() {
   return (
     <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text-secondary)] p-4 sm:p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)] flex items-center gap-3">
-              <ShoppingBasket className="w-8 h-8 text-[var(--zeus-primary)]" />
-              BOODSCHAPPEN <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
-            </h1>
-            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
-              Bevoorrading missie
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={clearEntireList}
-              className="text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
-              title="Alles wissen (Reset)"
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Alles Wissen</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={clearCheckedOnly}
-              className="zeus-button-secondary"
-              title="Afgevinkte items verwijderen"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Opschonen</span>
-            </Button>
-            <Button
-              onClick={handlePrint}
-              className="btn-zeus-primary print:hidden"
-            >
-              <Printer className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Print</span>
-            </Button>
-          </div>
+        {/* Actions Bar */}
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={clearEntireList}
+            className="text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+            title="Alles wissen (Reset)"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Alles Wissen</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={clearCheckedOnly}
+            className="zeus-button-secondary"
+            title="Afgevinkte items verwijderen"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Opschonen</span>
+          </Button>
+          <Button
+            onClick={handlePrint}
+            className="btn-zeus-primary print:hidden"
+          >
+            <Printer className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Print</span>
+          </Button>
         </div>
 
         {/* Error Banner */}
@@ -306,51 +292,6 @@ export default function BoodschappenPage() {
           >
             <ChevronRight className="w-6 h-6" />
           </button>
-        </div>
-
-        {/* Add Manual Item */}
-        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-5 sm:p-7 print:hidden shadow-lg">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-[var(--zeus-primary)]/10 rounded-lg border border-[var(--zeus-primary)]/30">
-              <Plus className="w-5 h-5 text-[var(--zeus-primary)]" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)]">
-              Item Toevoegen
-            </h3>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
-              placeholder="Wat moet je halen? Bijv. Melk, Brood..."
-              className="flex-1 px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] placeholder-[var(--zeus-text-secondary)]/50 transition-all"
-            />
-            <select
-              value={newItemCategory}
-              onChange={(e) =>
-                setNewItemCategory(e.target.value as IngredientCategory)
-              }
-              className="px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] transition-all"
-            >
-              <option value="produce">🥬 Groente & Fruit</option>
-              <option value="meat">🥩 Vlees & Vis</option>
-              <option value="dairy">🥛 Zuivel</option>
-              <option value="pantry">🥫 Voorraad</option>
-              <option value="spices">🌿 Kruiden</option>
-              <option value="frozen">🧊 Diepvries</option>
-              <option value="other">📦 Overig</option>
-            </select>
-            <Button
-              onClick={() => addManualItem()}
-              disabled={!newItemName.trim()}
-              className="btn-zeus-primary py-6"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span>Toevoegen</span>
-            </Button>
-          </div>
         </div>
 
         {/* Shopping List - Tile Layout */}
@@ -513,6 +454,51 @@ export default function BoodschappenPage() {
             </div>
           </div>
         )}
+
+        {/* Add Manual Item */}
+        <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-5 sm:p-7 print:hidden shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-[var(--zeus-primary)]/10 rounded-lg border border-[var(--zeus-primary)]/30">
+              <Plus className="w-5 h-5 text-[var(--zeus-primary)]" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-[var(--zeus-text)]">
+              Item Toevoegen
+            </h3>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addManualItem()}
+              placeholder="Wat moet je halen? Bijv. Melk, Brood..."
+              className="flex-1 px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] placeholder-[var(--zeus-text-secondary)]/50 transition-all"
+            />
+            <select
+              value={newItemCategory}
+              onChange={(e) =>
+                setNewItemCategory(e.target.value as IngredientCategory)
+              }
+              className="px-5 py-3.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-xl focus:outline-none focus:border-[var(--zeus-primary)] text-[var(--zeus-text)] transition-all"
+            >
+              <option value="produce">🥬 Groente & Fruit</option>
+              <option value="meat">🥩 Vlees & Vis</option>
+              <option value="dairy">🥛 Zuivel</option>
+              <option value="pantry">🥫 Voorraad</option>
+              <option value="spices">🌿 Kruiden</option>
+              <option value="frozen">🧊 Diepvries</option>
+              <option value="other">📦 Overig</option>
+            </select>
+            <Button
+              onClick={() => addManualItem()}
+              disabled={!newItemName.trim()}
+              className="btn-zeus-primary py-6"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              <span>Toevoegen</span>
+            </Button>
+          </div>
+        </div>
 
         {/* Frequently Used Items */}
         {topFrequentItems.length > 0 && (

@@ -72,15 +72,8 @@ export default function Uren() {
   return (
     <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text)]">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Uren</h1>
-            <p className="text-[var(--zeus-text-secondary)] mt-1">
-              Registreer je gewerkte uren per project en fase
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+        {/* View Toggle */}
+        <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setView("entries")}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${view === "entries"

@@ -22,12 +22,6 @@ export default function Health() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-[var(--zeus-text)] mb-2">Health Tracker</h1>
-        <p className="text-[var(--zeus-text-secondary)]">Volg je energie, slaap, workouts en welzijn</p>
-      </div>
-
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {TABS.map(({ id, label, icon: Icon, color }) => (

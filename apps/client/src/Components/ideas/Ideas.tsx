@@ -87,12 +87,9 @@ export default function Ideas() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-zeus-primary font-['Orbitron',sans-serif]">Ideeën</h1>
-            <p className="text-zeus-text-secondary mt-1">
-              {filteredIdeas.length} {filteredIdeas.length === 1 ? "idee" : "ideeën"}
-            </p>
-          </div>
+          <p className="text-zeus-text-secondary">
+            {filteredIdeas.length} {filteredIdeas.length === 1 ? "idee" : "ideeën"}
+          </p>
           <button
             onClick={() => {
               setEditIdea(undefined);

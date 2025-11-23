@@ -294,10 +294,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-zeus-bg text-zeus-text p-4 md:p-8 font-sans selection:bg-zeus-accent/30">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl md:text-4xl font-black text-zeus-primary tracking-tight">
-            DASHBOARD
-          </h1>
+        <div className="flex items-center justify-end">
           <button
             onClick={() => setShowVoice(!showVoice)}
             className={`p-4 rounded-full shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-all transform hover:scale-105 ${showVoice

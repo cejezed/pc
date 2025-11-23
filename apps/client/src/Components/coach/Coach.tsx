@@ -128,29 +128,6 @@ export default function Coach() {
 
     return (
         <div className="flex flex-col h-[calc(100vh-4rem)] max-w-6xl mx-auto p-4 text-zeus-text">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8 p-6 zeus-card rounded-3xl relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-zeus-accent opacity-80"></div>
-                <div className="flex items-center gap-4 relative z-10">
-                    <div className="p-3 bg-zeus-bg rounded-2xl border border-zeus-border shadow-lg">
-                        <Sparkles className="w-6 h-6 text-zeus-accent" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-wider text-zeus-primary mb-1 font-['Orbitron',sans-serif]">
-                            Personal <span className="text-zeus-accent">Coach</span>
-                        </h1>
-                        <p className="text-zeus-accent text-xs uppercase tracking-[0.2em] font-semibold opacity-80">
-                            AI-powered • Always ready
-                        </p>
-                    </div>
-                </div>
-                <div className="hidden md:block">
-                    <div className="flex items-center gap-2 text-xs font-mono text-zeus-accent bg-zeus-accent/10 px-3 py-1 rounded border border-zeus-accent/20">
-                        <div className="w-2 h-2 bg-zeus-accent rounded-full animate-pulse"></div>
-                        ONLINE
-                    </div>
-                </div>
-            </div>
 
             {/* Tabs */}
             <div className="flex gap-4 mb-6 p-1 overflow-x-auto">

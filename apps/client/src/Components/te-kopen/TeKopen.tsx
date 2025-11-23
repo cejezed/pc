@@ -126,8 +126,7 @@ export default function TeKopen() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[var(--zeus-text)]">Te Kopen</h1>
+      <div className="flex items-center justify-end">
         <button
           onClick={handleAddClick}
           className="btn-zeus-primary flex items-center gap-2"

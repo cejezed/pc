@@ -62,14 +62,7 @@ export default function FacturenPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Facturen</h1>
-          <p className="text-gray-600 text-sm">
-            Beheer facturen, stuur ze per e-mail, exporteer PDF's en registreer betalingen.
-          </p>
-        </div>
-
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button
           onClick={() => { 
             setCreateMode("normal"); 
