@@ -1,4 +1,3 @@
-```
 // src/components/AppLayout.tsx - VOLLEDIG RESPONSIVE
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
@@ -203,4 +202,3 @@ export default function AppLayout({
     </div>
   );
 }
-```
