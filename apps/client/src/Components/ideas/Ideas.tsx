@@ -88,7 +88,7 @@ export default function Ideas() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white font-['Orbitron',sans-serif]">Ideeën</h1>
+            <h1 className="text-3xl font-bold text-zeus-primary font-['Orbitron',sans-serif]">Ideeën</h1>
             <p className="text-zeus-text-secondary mt-1">
               {filteredIdeas.length} {filteredIdeas.length === 1 ? "idee" : "ideeën"}
             </p>

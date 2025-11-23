@@ -10,13 +10,13 @@ export function SearchBar({
 }) {
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zeus-text-secondary" />
       <input
         type="text"
         placeholder="Zoek ideeën..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 bg-[#1F2833] border border-zeus-border rounded-lg focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white placeholder-gray-500"
+        className="w-full pl-10 pr-4 py-2 bg-zeus-card border border-zeus-border rounded-lg focus:outline-none focus:ring-2 focus:ring-zeus-accent text-zeus-text placeholder-zeus-text-secondary"
       />
     </div>
   );
@@ -43,7 +43,7 @@ export function FilterBar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
-        className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
+        className="bg-zeus-card border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-zeus-text"
       >
         <option value="all">Alle statussen</option>
         <option value="new">Nieuw</option>
@@ -60,7 +60,7 @@ export function FilterBar({
       <select
         value={priorityFilter}
         onChange={(e) => onPriorityChange(e.target.value)}
-        className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
+        className="bg-zeus-card border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-zeus-text"
       >
         <option value="all">Alle prioriteiten</option>
         <option value="1">Laag</option>
@@ -74,7 +74,7 @@ export function FilterBar({
       {hasActiveFilters && (
         <button
           onClick={onReset}
-          className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-zeus-text-secondary hover:text-zeus-primary text-sm transition-colors"
           title="Filters resetten"
         >
           <RotateCcw className="w-4 h-4" />
@@ -98,7 +98,7 @@ export function ViewToggle({
         onClick={() => onChange("grid")}
         className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors ${view === "grid"
             ? "bg-zeus-accent text-white"
-            : "bg-[#1F2833] text-gray-400 hover:bg-[#2d3436] hover:text-white"
+            : "bg-zeus-card text-zeus-text-secondary hover:bg-zeus-bg hover:text-zeus-text"
           }`}
         title="Grid weergave"
       >
@@ -109,7 +109,7 @@ export function ViewToggle({
         onClick={() => onChange("list")}
         className={`px-3 py-2 text-sm flex items-center gap-2 transition-colors border-l ${view === "list"
             ? "bg-zeus-accent text-white border-zeus-accent"
-            : "bg-[#1F2833] text-gray-400 hover:bg-[#2d3436] hover:text-white border-zeus-border"
+            : "bg-zeus-card text-zeus-text-secondary hover:bg-zeus-bg hover:text-zeus-text border-zeus-border"
           }`}
         title="Lijst weergave"
       >
@@ -131,7 +131,7 @@ export function SortSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-[#1F2833] border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-white"
+      className="bg-zeus-card border border-zeus-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zeus-accent text-zeus-text"
     >
       <option value="newest">Nieuwste eerst</option>
       <option value="oldest">Oudste eerst</option>

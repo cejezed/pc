@@ -42,7 +42,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h3 className="font-semibold text-white line-clamp-2 mb-2 group-hover:text-zeus-accent transition-colors">
+          <h3 className="font-semibold text-zeus-primary line-clamp-2 mb-2 group-hover:text-zeus-accent transition-colors">
             {idea.title}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -62,7 +62,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onEdit(idea)}
-            className="text-gray-400 hover:text-zeus-accent p-1 transition-colors"
+            className="text-zeus-text-secondary hover:text-zeus-accent p-1 transition-colors"
             title="Bewerken"
           >
             <Edit className="w-4 h-4" />
@@ -70,7 +70,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
           <button
             onClick={handleDelete}
             disabled={deleteIdea.isPending}
-            className="text-gray-400 hover:text-red-600 p-1 transition-colors disabled:opacity-50"
+            className="text-zeus-text-secondary hover:text-red-600 p-1 transition-colors disabled:opacity-50"
             title="Verwijderen"
           >
             <Trash2 className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
 
       {/* Note (Description) */}
       {idea.note && (
-        <p className="text-gray-400 text-sm line-clamp-3 mb-3">
+        <p className="text-zeus-text-secondary text-sm line-clamp-3 mb-3">
           {idea.note}
         </p>
       )}
@@ -91,14 +91,14 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
           {idea.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs"
+              className="inline-flex items-center gap-1 bg-zeus-bg text-zeus-text-secondary px-2 py-1 rounded text-xs"
             >
               <Tag className="w-3 h-3" />
               {tag}
             </span>
           ))}
           {idea.tags.length > 3 && (
-            <span className="text-gray-500 text-xs">
+            <span className="text-zeus-text-secondary text-xs">
               +{idea.tags.length - 3} meer
             </span>
           )}
@@ -120,7 +120,7 @@ export function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea) =>
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 text-gray-500 text-xs">
+        <div className="flex items-center gap-1 text-zeus-text-secondary text-xs">
           <Clock className="w-3 h-3" />
           {formatDate(idea.created_at)}
         </div>
@@ -152,13 +152,13 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
         {/* Content */}
         <div className="flex-1">
           <div className="flex items-start justify-between mb-2">
-            <h3 className="font-semibold text-white hover:text-zeus-accent transition-colors">
+            <h3 className="font-semibold text-zeus-primary hover:text-zeus-accent transition-colors">
               {idea.title}
             </h3>
             <div className="flex items-center gap-1 ml-2">
               <button
                 onClick={() => onEdit(idea)}
-                className="text-gray-400 hover:text-zeus-accent p-1 transition-colors"
+                className="text-zeus-text-secondary hover:text-zeus-accent p-1 transition-colors"
                 title="Bewerken"
               >
                 <Edit className="w-4 h-4" />
@@ -166,7 +166,7 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
               <button
                 onClick={handleDelete}
                 disabled={deleteIdea.isPending}
-                className="text-gray-400 hover:text-red-600 p-1 transition-colors disabled:opacity-50"
+                className="text-zeus-text-secondary hover:text-red-600 p-1 transition-colors disabled:opacity-50"
                 title="Verwijderen"
               >
                 <Trash2 className="w-4 h-4" />
@@ -175,7 +175,7 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
           </div>
 
           {idea.note && (
-            <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+            <p className="text-zeus-text-secondary text-sm mb-3 line-clamp-2">
               {idea.note}
             </p>
           )}
@@ -213,13 +213,13 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
                 {idea.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
-                    className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs"
+                    className="bg-zeus-bg text-zeus-text-secondary px-2 py-1 rounded text-xs"
                   >
                     #{tag}
                   </span>
                 ))}
                 {idea.tags.length > 2 && (
-                  <span className="text-gray-500 text-xs self-center">
+                  <span className="text-zeus-text-secondary text-xs self-center">
                     +{idea.tags.length - 2}
                   </span>
                 )}
@@ -227,7 +227,7 @@ export function IdeaListItem({ idea, onEdit }: { idea: Idea; onEdit: (idea: Idea
             )}
 
             {/* Date */}
-            <div className="flex items-center gap-1 text-gray-500 text-xs ml-auto">
+            <div className="flex items-center gap-1 text-zeus-text-secondary text-xs ml-auto">
               <Clock className="w-3 h-3" />
               {formatDate(idea.created_at)}
             </div>
