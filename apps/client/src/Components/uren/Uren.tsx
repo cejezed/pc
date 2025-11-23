@@ -109,7 +109,6 @@ export default function Uren() {
               Export
             </button>
           </div>
-        </div>
 
         {/* Content */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
