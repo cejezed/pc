@@ -98,7 +98,7 @@ export default function AppLayout({
     <div className="min-h-screen text-zeus-text bg-zeus-bg">
       {/* Topbar - RESPONSIVE */}
       <header
-        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between px-3 sm:px-4 md:px-6 bg-zeus-primary border-b border-white/10 text-white shadow-md"
+        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between px-3 sm:px-4 md:px-6 bg-brikx-dark border-b border-white/10 text-white shadow-md"
       >
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Hamburger (mobiel) */}
@@ -136,7 +136,7 @@ export default function AppLayout({
 
             {/* Sidebar (desktop only) */}
             <aside className="hidden md:block">
-              <div className="sticky top-20 bg-zeus-primary p-4 rounded-3xl border border-white/5 shadow-xl">
+              <div className="sticky top-20 bg-brikx-dark p-4 rounded-3xl border border-white/5 shadow-xl">
                 <div className="text-xs uppercase tracking-[0.2em] px-1 mb-2 text-slate-400 opacity-70 font-semibold">
                   Navigatie
                 </div>
@@ -181,7 +181,7 @@ export default function AppLayout({
           />
           {/* Drawer */}
           <div
-            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] bg-zeus-primary p-4 shadow-2xl md:hidden overflow-y-auto border-r border-white/10"
+            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] bg-brikx-dark p-4 shadow-2xl md:hidden overflow-y-auto border-r border-white/10"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="font-bold text-lg text-white font-['Orbitron',sans-serif]">
