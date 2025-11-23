@@ -1,38 +1,49 @@
 @import "tailwindcss";
 
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Brikx Colors */
+  --color-brikx-dark: #0A2540;
+  --color-brikx-dark-light: #0A3552;
+  --color-brikx-teal: #2D9CDB;
+  --color-brikx-teal-dark: #1D7AAC;
+  --color-brikx-teal-light: #56B4E9;
+  --color-brikx-border: #1D3A5C;
+  --color-brikx-bg: #F5F7FA;
+  --color-brikx-success: #27AE60;
+  --color-brikx-warning: #F2C94C;
+  --color-brikx-premium: #FFB946;
+
+  /* Zeus Colors */
+  --color-zeus-bg: #F5F7FA;
+  --color-zeus-bg-secondary: #FFFFFF;
+  --color-zeus-card: #FFFFFF;
+  --color-zeus-card-hover: #FFFFFF;
+  --color-zeus-primary: #0A2540;
+  --color-zeus-accent: #2D9CDB;
+  --color-zeus-text: #334155;
+  --color-zeus-text-secondary: #64748B;
+  --color-zeus-text-highlight: #0A2540;
+  --color-zeus-border: #F1F5F9;
+  --color-zeus-border-glow: #2D9CDB;
+}
+
 :root {
-  /* Brikx Theme Variables */
+  /* Legacy CSS Variables (for non-Tailwind usage) */
   --zeus-bg: #F5F7FA;
-  /* Light Blue-Grey Background */
   --zeus-bg-secondary: #FFFFFF;
-  /* White */
-
   --zeus-card: #FFFFFF;
-  /* White Cards */
   --zeus-card-hover: #FFFFFF;
-
   --zeus-border: #F1F5F9;
-  /* Slate 100 - Very subtle */
   --zeus-border-glow: #2D9CDB;
-  /* Teal Glow (subtle) */
-
   --zeus-primary: #0A2540;
-  /* Deep Blue (Primary Brand) */
   --zeus-primary-glow: rgba(10, 37, 64, 0.1);
-
   --zeus-text: #334155;
-  /* Slate 700 (Main Text) */
   --zeus-text-secondary: #64748B;
-  /* Slate 500 */
   --zeus-text-highlight: #0A2540;
-  /* Deep Blue */
-
   --zeus-accent: #2D9CDB;
-  /* Brikx Teal */
   --zeus-accent-glow: rgba(45, 156, 219, 0.2);
-
   --glass-blur: 0px;
-  /* No blur for clean look */
   --glass-border: transparent;
   --glass-bg: #FFFFFF;
 }
