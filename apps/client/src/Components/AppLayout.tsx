@@ -1,3 +1,4 @@
+```
 // src/components/AppLayout.tsx - VOLLEDIG RESPONSIVE
 import { useState } from "react";
 import type { PropsWithChildren } from "react";
@@ -83,7 +84,7 @@ export default function AppLayout({
             className={
               active
                 ? "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all rounded-xl bg-zeus-accent text-white shadow-[0_0_15px_rgba(45,156,219,0.4)]"
-                : "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all text-zeus-text hover:text-zeus-accent hover:bg-zeus-accent/10 rounded-xl border border-transparent hover:border-zeus-accent/30"
+                : "w-full group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all text-slate-400 hover:text-white hover:bg-white/10 rounded-xl border border-transparent"
             }
           >
             <span className="shrink-0">{item.icon}</span>
@@ -98,7 +99,7 @@ export default function AppLayout({
     <div className="min-h-screen text-zeus-text bg-zeus-bg">
       {/* Topbar - RESPONSIVE */}
       <header
-        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between px-3 sm:px-4 md:px-6 bg-zeus-primary border-b border-zeus-border text-white shadow-md"
+        className="sticky top-0 z-40 flex h-12 sm:h-14 items-center justify-between px-3 sm:px-4 md:px-6 bg-zeus-primary border-b border-white/10 text-white shadow-md"
       >
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Hamburger (mobiel) */}
@@ -136,24 +137,24 @@ export default function AppLayout({
 
             {/* Sidebar (desktop only) */}
             <aside className="hidden md:block">
-              <div className="sticky top-20 bg-white p-4 rounded-3xl border border-zeus-border shadow-sm">
-                <div className="text-xs uppercase tracking-[0.2em] px-1 mb-2 text-zeus-text-secondary opacity-70 font-semibold">
+              <div className="sticky top-20 bg-zeus-primary p-4 rounded-3xl border border-white/5 shadow-xl">
+                <div className="text-xs uppercase tracking-[0.2em] px-1 mb-2 text-slate-400 opacity-70 font-semibold">
                   Navigatie
                 </div>
                 <NavList />
-                <div className="mt-6 pt-4 border-t border-zeus-border">
+                <div className="mt-6 pt-4 border-t border-white/10">
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-white border border-zeus-accent text-zeus-accent shadow-[0_0_10px_rgba(45,156,219,0.2)]"
+                        className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-zeus-accent text-white shadow-[0_0_10px_rgba(45,156,219,0.2)]"
                       >
                         {useAuth().user?.email?.[0].toUpperCase()}
                       </div>
                       <div className="text-xs min-w-0 flex-1">
-                        <p className="font-bold truncate text-zeus-primary tracking-wide">
+                        <p className="font-bold truncate text-white tracking-wide">
                           {useAuth().user?.user_metadata?.full_name || 'User'}
                         </p>
-                        <p className="text-zeus-text-secondary truncate opacity-80">
+                        <p className="text-slate-400 truncate opacity-80">
                           {useAuth().user?.email}
                         </p>
                       </div>
@@ -181,15 +182,15 @@ export default function AppLayout({
           />
           {/* Drawer */}
           <div
-            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] bg-white p-4 shadow-2xl md:hidden overflow-y-auto border-r border-zeus-border"
+            className="fixed inset-y-0 left-0 z-50 w-[280px] sm:w-72 max-w-[85%] bg-zeus-primary p-4 shadow-2xl md:hidden overflow-y-auto border-r border-white/10"
           >
             <div className="flex items-center justify-between mb-6">
-              <div className="font-bold text-lg text-zeus-primary font-['Orbitron',sans-serif]">
+              <div className="font-bold text-lg text-white font-['Orbitron',sans-serif]">
                 MENU
               </div>
               <button
                 aria-label="Sluit menu"
-                className="rounded-md p-2 hover:bg-zeus-accent/10 text-zeus-accent focus-visible:outline-none focus-visible:ring-2"
+                className="rounded-md p-2 hover:bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2"
                 onClick={() => setMobileOpen(false)}
               >
                 <X className="w-5 h-5" />
@@ -202,3 +203,4 @@ export default function AppLayout({
     </div>
   );
 }
+```

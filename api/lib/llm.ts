@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { toFile } from 'openai/uploads';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -23,55 +24,33 @@ export async function callLLM(
 
 // Voice transcription with Whisper
 export async function transcribeAudio(audioBlob: Blob): Promise<string> {
-    // In Node.js, we need to use FormData from a library
-    const FormData = require('form-data');
-    const form = new FormData();
-
-    // Convert Blob to Buffer for Node.js
-    const buffer = Buffer.from(await audioBlob.arrayBuffer());
-    form.append('file', buffer, {
-        filename: 'audio.webm',
-        contentType: 'audio/webm',
-    });
-    form.append('model', 'whisper-1');
-
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            ...form.getHeaders(),
-        },
-        body: form,
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Whisper API error: ${response.status} - ${errorText}`);
+    if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY is not set');
     }
 
-    const data = await response.json() as { text: string };
-    return data.text;
+    // Convert Blob to File-like object for OpenAI SDK
+    const file = await toFile(audioBlob, 'audio.webm', { type: 'audio/webm' });
+
+    const response = await openai.audio.transcriptions.create({
+        file: file,
+        model: 'whisper-1',
+    });
+
+    return response.text;
 }
 
 // Text-to-speech with OpenAI TTS
 export async function generateSpeech(text: string): Promise<ArrayBuffer> {
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            model: 'tts-1',
-            voice: 'nova', // warm, natural voice
-            input: text,
-            speed: 1.0,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`TTS API error: ${response.statusText}`);
+    if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY is not set');
     }
+
+    const response = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: 'nova', // warm, natural voice
+        input: text,
+        speed: 1.0,
+    });
 
     return await response.arrayBuffer();
 }
