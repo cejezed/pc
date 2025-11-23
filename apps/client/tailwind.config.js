@@ -16,14 +16,18 @@ export default {
         'brikx-premium': '#FFB946',
         zeus: {
           bg: 'var(--zeus-bg)',
+          'bg-secondary': 'var(--zeus-bg-secondary)',
           card: 'var(--zeus-card)',
           'card-hover': 'var(--zeus-card-hover)',
+          primary: 'var(--zeus-primary)',
+          'primary-glow': 'var(--zeus-primary-glow)',
           accent: 'var(--zeus-accent)',
           'accent-glow': 'var(--zeus-accent-glow)',
           text: 'var(--zeus-text)',
           'text-secondary': 'var(--zeus-text-secondary)',
           'text-highlight': 'var(--zeus-text-highlight)',
           border: 'var(--zeus-border)',
+          'border-glow': 'var(--zeus-border-glow)',
         },
       },
       fontFamily: {
