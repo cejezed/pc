@@ -111,14 +111,14 @@ export default function StressTab() {
           title="Gem. Stress (7d)"
           value={stats.avgStress.toFixed(1)}
           unit="/ 10"
-          icon={<Brain className="h-4 w-4 text-pink-500" />}
+          icon={<Brain className="h-4 w-4 text-[var(--zeus-primary)]" />}
           subtitle={getStressLabel(stats.avgStress)}
         />
         <StatCard
           title="Relaxte Dagen (7d)"
           value={String(stats.relaxedDays)}
           unit="dagen"
-          icon={<Brain className="h-4 w-4 text-green-500" />}
+          icon={<Brain className="h-4 w-4 text-[var(--zeus-accent)]" />}
           subtitle={
             stats.relaxedDays >= 5 ? "Uitstekend!" : "Meer ontspanning nodig"
           }
@@ -127,7 +127,7 @@ export default function StressTab() {
           title="Stressvolle Dagen (7d)"
           value={String(stats.highStressDays)}
           unit="dagen"
-          icon={<Brain className="h-4 w-4 text-red-500" />}
+          icon={<Brain className="h-4 w-4 text-[var(--zeus-text-secondary)]" />}
           subtitle={
             stats.highStressDays === 0 ? "Goed bezig!" : "Let op stress management"
           }
@@ -135,18 +135,18 @@ export default function StressTab() {
       </div>
 
       {stats.avgStress <= 4 && (
-        <Card className="bg-red-900/20 border-red-800/50">
+        <Card className="zeus-card border-[var(--zeus-border)]">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2 text-red-400">
+            <CardTitle className="text-base flex items-center gap-2 text-[var(--zeus-text)]">
               ⚠️ Hoog Stress Niveau
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-red-300 mb-3">
+            <p className="text-sm text-[var(--zeus-text-secondary)] mb-3">
               Je gemiddelde stress is {stats.avgStress.toFixed(1)}/10 (waarbij 10
               = zeer relaxed). Overweeg deze stressmanagement-technieken:
             </p>
-            <ul className="text-sm text-red-300 space-y-1 ml-4">
+            <ul className="text-sm text-[var(--zeus-text-secondary)] space-y-1 ml-4">
               <li>• Meditatie of ademhalingsoefeningen</li>
               <li>• Regelmatige beweging/sport</li>
               <li>• Voldoende slaap (7–9 uur)</li>
@@ -158,14 +158,14 @@ export default function StressTab() {
       )}
 
       {stats.avgStress >= 7 && (
-        <Card className="bg-green-900/20 border-green-800/50">
+        <Card className="zeus-card border-[var(--zeus-primary)]/30">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2 text-green-400">
+            <CardTitle className="text-base flex items-center gap-2 text-[var(--zeus-text)]">
               ✅ Lage Stress Niveau
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-green-300">
+            <p className="text-sm text-[var(--zeus-text-secondary)]">
               Je gemiddelde stress is laag ({stats.avgStress.toFixed(1)}/10).
               Blijf je huidige aanpak voor stressmanagement volhouden!
             </p>
@@ -175,9 +175,9 @@ export default function StressTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stats.mostRelaxedDay && (
-          <Card className="bg-green-900/20 border-green-800/50">
+          <Card className="zeus-card border-[var(--zeus-accent)]/30">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2 text-green-400">
+              <CardTitle className="text-sm flex items-center gap-2 text-[var(--zeus-text)]">
                 😌 Meest Relaxte Dag
               </CardTitle>
             </CardHeader>
@@ -189,7 +189,7 @@ export default function StressTab() {
                   month: "long",
                 })}
               </p>
-              <p className="text-xs text-green-300 mt-2">
+              <p className="text-xs text-[var(--zeus-text-secondary)] mt-2">
                 Stress: {stats.mostRelaxedDay.stress_niveau}/10 (
                 {getStressLabel(stats.mostRelaxedDay.stress_niveau || 0)})
               </p>
@@ -198,9 +198,9 @@ export default function StressTab() {
         )}
 
         {stats.mostStressedDay && (
-          <Card className="bg-red-900/20 border-red-800/50">
+          <Card className="zeus-card border-[var(--zeus-border)]">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2 text-red-400">
+              <CardTitle className="text-sm flex items-center gap-2 text-[var(--zeus-text)]">
                 😰 Meest Stressvolle Dag
               </CardTitle>
             </CardHeader>
@@ -212,7 +212,7 @@ export default function StressTab() {
                   month: "long",
                 })}
               </p>
-              <p className="text-xs text-red-300 mt-2">
+              <p className="text-xs text-[var(--zeus-text-secondary)] mt-2">
                 Stress: {stats.mostStressedDay.stress_niveau}/10 (
                 {getStressLabel(stats.mostStressedDay.stress_niveau || 0)})
               </p>
@@ -265,10 +265,10 @@ function StressDayCard({ metric }: { metric: DailyMetric }) {
         <Badge
           variant="secondary"
           className={`text-xs border ${stress >= 7
-              ? "bg-green-900/20 text-green-400 border-green-800/50"
-              : stress >= 4
-                ? "bg-yellow-900/20 text-yellow-400 border-yellow-800/50"
-                : "bg-red-900/20 text-red-400 border-red-800/50"
+            ? "bg-[var(--zeus-card)] text-[var(--zeus-accent)] border-[var(--zeus-accent)]/30"
+            : stress >= 4
+              ? "bg-[var(--zeus-card)] text-[var(--zeus-text)] border-[var(--zeus-border)]"
+              : "bg-[var(--zeus-card)] text-[var(--zeus-text-secondary)] border-[var(--zeus-border)]"
             }`}
         >
           {getStressEmoji(stress)} {stress}/10

@@ -72,6 +72,17 @@ export default function WeekplannerPage() {
     }
   };
 
+  const handleClearWeek = async () => {
+    if (!confirm('Weet je zeker dat je alle maaltijden van deze week wilt verwijderen?')) {
+      return;
+    }
+
+    // Delete all meal plans for the current week
+    for (const plan of mealPlans) {
+      await deleteMealPlan.mutateAsync(plan.id);
+    }
+  };
+
   const handleGenerateMealPlan = async () => {
     if (!confirm('Weet je zeker dat je een weekmenu wilt genereren? Dit vult lege plekken in je weekplanning.')) {
       return;
@@ -160,17 +171,16 @@ export default function WeekplannerPage() {
     <div className="min-h-screen bg-[var(--zeus-bg)] text-[var(--zeus-text-secondary)] p-4 sm:p-6 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--zeus-card)] p-6 rounded-2xl border border-[var(--zeus-border)] shadow-[0_0_30px_rgba(0,0,0,0.3)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--zeus-primary)] to-transparent opacity-50"></div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--zeus-text)] tracking-tight mb-1 drop-shadow-[0_2px_10px_var(--zeus-primary-glow)]">
-              WEEKPLANNER <span className="text-[var(--zeus-primary)]">ZEUS-X</span>
-            </h1>
-            <p className="text-[var(--zeus-text-secondary)] font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[var(--zeus-accent)] animate-pulse"></span>
-              Plan je culinaire missies
-            </p>
-          </div>
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            onClick={handleClearWeek}
+            variant="outline"
+            className="zeus-button-secondary"
+          >
+            <Trash2 className="w-5 h-5 mr-2" />
+            <span className="hidden sm:inline">Alles wissen</span>
+            <span className="sm:hidden">Wissen</span>
+          </Button>
 
           <Button
             onClick={handleGenerateMealPlan}

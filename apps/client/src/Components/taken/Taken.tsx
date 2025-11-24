@@ -32,7 +32,18 @@ export default function Taken() {
 
   // Filter and sort tasks
   const filteredTasks = useMemo(() => {
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
     let result = tasks.filter(task => {
+      // Auto-delete completed tasks older than 10 days
+      if (task.status === 'done' && task.completed_at) {
+        const completedDate = new Date(task.completed_at);
+        if (completedDate < tenDaysAgo) {
+          return false; // Filter out old completed tasks
+        }
+      }
+
       // Search
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -57,8 +68,17 @@ export default function Taken() {
       return true;
     });
 
-    // Sort
+    // Sort: incomplete tasks first, then completed tasks
     result.sort((a, b) => {
+      // First, separate by completion status
+      const aCompleted = a.status === 'done' ? 1 : 0;
+      const bCompleted = b.status === 'done' ? 1 : 0;
+
+      if (aCompleted !== bCompleted) {
+        return aCompleted - bCompleted; // Incomplete (0) comes before completed (1)
+      }
+
+      // Within each group, apply the selected sort
       switch (sortBy) {
         case "newest":
           return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
