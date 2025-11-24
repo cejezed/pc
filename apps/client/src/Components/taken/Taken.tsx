@@ -131,8 +131,8 @@ export default function Taken() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zeus-bg flex items-center justify-center">
-        <div className="text-zeus-text-secondary flex items-center gap-2">
+      <div className="min-h-screen bg-[var(--zeus-bg)] flex items-center justify-center">
+        <div className="text-[var(--zeus-text-secondary)] flex items-center gap-2">
           <RefreshCw className="w-5 h-5 animate-spin" />
           Taken laden...
         </div>
@@ -141,11 +141,11 @@ export default function Taken() {
   }
 
   return (
-    <div className="min-h-screen bg-zeus-bg">
+    <div className="min-h-screen bg-[var(--zeus-bg)]">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-zeus-text-secondary">
+          <p className="text-[var(--zeus-text-secondary)]">
             {filteredTasks.length} {filteredTasks.length === 1 ? "taak" : "taken"}
           </p>
           <div className="flex items-center gap-3">
@@ -163,7 +163,7 @@ export default function Taken() {
                 setEditingTask(undefined);
                 setShowModal(true);
               }}
-              className="bg-zeus-accent hover:bg-zeus-accent-hover text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-zeus-accent/20 transition-all flex items-center gap-2"
+              className="bg-[var(--zeus-accent)] hover:bg-[#1D7AAC] text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-[var(--zeus-accent)]/20 transition-all flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
               Nieuwe taak
@@ -205,7 +205,7 @@ export default function Taken() {
               />
             </div>
             <div className="lg:w-auto">
-              <div className="zeus-card border border-zeus-border rounded-lg p-4 h-full flex items-center">
+              <div className="zeus-card border border-[var(--zeus-border)] rounded-lg p-4 h-full flex items-center">
                 <QuickFilters onFilterClick={handleQuickFilter} />
               </div>
             </div>
@@ -214,24 +214,24 @@ export default function Taken() {
 
         {/* Tasks Grid/List */}
         {filteredTasks.length === 0 ? (
-          <div className="zeus-card rounded-lg border border-zeus-border p-12 shadow-sm text-center">
+          <div className="zeus-card rounded-lg border border-[var(--zeus-border)] p-12 shadow-sm text-center">
             {tasks.length === 0 ? (
-              <div className="text-zeus-text-secondary">
+              <div className="text-[var(--zeus-text-secondary)]">
                 <div className="text-6xl mb-4">📝</div>
-                <p className="text-xl font-semibold mb-2">Nog geen taken</p>
+                <p className="text-xl font-semibold mb-2 text-[var(--zeus-text)]">Nog geen taken</p>
                 <p className="text-sm mb-6">Maak je eerste taak aan om te beginnen!</p>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="bg-zeus-accent hover:bg-zeus-accent-hover text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-zeus-accent/20 transition-all inline-flex items-center gap-2"
+                  className="bg-[var(--zeus-accent)] hover:bg-[#1D7AAC] text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-[var(--zeus-accent)]/20 transition-all inline-flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   Eerste taak maken
                 </button>
               </div>
             ) : (
-              <div className="text-zeus-text-secondary">
+              <div className="text-[var(--zeus-text-secondary)]">
                 <div className="text-6xl mb-4">🔍</div>
-                <p className="text-xl font-semibold mb-2">Geen taken gevonden</p>
+                <p className="text-xl font-semibold mb-2 text-[var(--zeus-text)]">Geen taken gevonden</p>
                 <p className="text-sm">Pas je filters aan om meer resultaten te zien</p>
               </div>
             )}
