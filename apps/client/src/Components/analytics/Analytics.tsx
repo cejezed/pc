@@ -28,7 +28,7 @@ import {
 } from "./basis-componenten";
 import { Button } from "@/Components/ui/button";
 import { FinanceDashboard } from "./finance-dashboard";
-import { FinanceTaxCockpit } from "./finance-tax-cockpit";
+import { FinanceTaxCockpit } from "./FinanceTaxCockpit";
 
 // Types
 type TimeEntry = {
@@ -391,7 +391,7 @@ export default function Analytics() {
           </h2>
           <FinanceDashboard userId={userId} />
           
-<FinanceTaxCockpit userId={user?.id} />
+<FinanceTaxCockpit userId="1952170a-a2f8-4658-9c03-975677366e65" />
         </div>
 
         {/* Filters */}

@@ -40,44 +40,15 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
-  const overlay = useMemo(() => buildTaxOverlay(reports), [reports]);
-
-  const years = overlay.map((o) => o.year).sort((a, b) => a - b);
-
-  const currentYear =
-    selectedYear && years.includes(selectedYear)
-      ? selectedYear
-      : years[years.length - 1];
-
-  const current = overlay.find((o) => o.year === currentYear) || overlay[overlay.length - 1];
-  const previous = overlay
-    .slice()
-    .sort((a, b) => a.year - b.year)
-    .findLast((o) => o.year < currentYear) || null;
-
-  const mainChartData = overlay
-    .slice()
-    .sort((a, b) => a.year - b.year)
-    .map((o) => ({
-      year: o.year,
-      winst: o.netProfit,
-      belasting: o.totalTax ?? 0,
-      netto: o.netAfterTaxAndPrivate ?? 0,
-    }));
-
-  const taxPressureData = overlay
-    .slice()
-    .sort((a, b) => a.year - b.year)
-    .map((o) => ({
-      year: o.year,
-      belastingdruk: (o.effectiveTaxRate ?? 0) * 100,
-      priveOpnamen: o.privateWithdrawals,
-    }));
+  const overlay: TaxOverlayYear[] = useMemo(
+    () => buildTaxOverlay(reports),
+    [reports]
+  );
 
   if (!userId) {
     return (
       <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 text-sm text-[var(--zeus-text-secondary)]">
-        Geen gebruiker gevonden – log in om je Finance & Tax cockpit te zien.
+        Geen gebruiker gevonden – log in om je Finance &amp; Tax cockpit te zien.
       </div>
     );
   }
@@ -90,7 +61,7 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
     );
   }
 
-  if (error || !reports.length) {
+  if (error || !reports.length || !overlay.length) {
     return (
       <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 text-sm text-red-400">
         Er ging iets mis bij het laden van de financiële gegevens of er zijn
@@ -98,6 +69,35 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
       </div>
     );
   }
+
+  // Eén keer sorteren, overal hergebruiken
+  const sortedOverlay = overlay.slice().sort((a, b) => a.year - b.year);
+  const years = sortedOverlay.map((o) => o.year);
+
+  const currentYear: number =
+    selectedYear && years.includes(selectedYear)
+      ? selectedYear
+      : years[years.length - 1];
+
+  const currentIndex = sortedOverlay.findIndex((o) => o.year === currentYear);
+  const current: TaxOverlayYear =
+    sortedOverlay[currentIndex] ?? sortedOverlay[sortedOverlay.length - 1];
+
+  const previous: TaxOverlayYear | null =
+    currentIndex > 0 ? sortedOverlay[currentIndex - 1] : null;
+
+  const mainChartData = sortedOverlay.map((o) => ({
+    year: o.year,
+    winst: o.netProfit,
+    belasting: o.totalTax ?? 0,
+    netto: o.netAfterTaxAndPrivate ?? 0,
+  }));
+
+  const taxPressureData = sortedOverlay.map((o) => ({
+    year: o.year,
+    belastingdruk: (o.effectiveTaxRate ?? 0) * 100,
+    priveOpnamen: o.privateWithdrawals,
+  }));
 
   return (
     <div className="space-y-6">
@@ -107,11 +107,13 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
           <div className="flex items-center gap-2 mb-1">
             <Banknote className="w-6 h-6 text-[var(--zeus-primary)]" />
             <h2 className="text-xl md:text-2xl font-black tracking-tight text-[var(--zeus-text)]">
-              FINANCE & TAX <span className="text-[var(--zeus-primary)]">COCKPIT</span>
+              FINANCE &amp; TAX{" "}
+              <span className="text-[var(--zeus-primary)]">COCKPIT</span>
             </h2>
           </div>
           <p className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">
-            Eén overzicht voor omzet, winst, belastingdruk, privé-opnamen en je huis.
+            Eén overzicht voor omzet, winst, belastingdruk, privé-opnamen en je
+            huis.
           </p>
         </div>
 
@@ -197,7 +199,8 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
             Winst, belasting en netto per jaar
           </h3>
           <p className="text-xs text-[var(--zeus-text-secondary)] mb-4">
-            Geeft de verhouding tussen winst, belasting en wat er netto overblijft.
+            Geeft de verhouding tussen winst, belasting en wat er netto
+            overblijft.
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -241,7 +244,8 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
             Belastingdruk en privé-opnamen
           </h3>
           <p className="text-xs text-[var(--zeus-text-secondary)] mb-4">
-            Hoeveel procent gaat naar belasting, en hoeveel haal je privé uit je bedrijf?
+            Hoeveel procent gaat naar belasting, en hoeveel haal je privé uit je
+            bedrijf?
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -277,7 +281,7 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
           <div className="flex items-center gap-2 mb-3">
             <Home className="w-4 h-4 text-[var(--zeus-primary)]" />
             <h3 className="text-sm md:text-base font-semibold text-[var(--zeus-text)]">
-              Woning & hypotheek ({currentYear})
+              Woning &amp; hypotheek ({currentYear})
             </h3>
           </div>
           {current.houseWOZ == null &&
@@ -289,7 +293,9 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
           ) : (
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs md:text-sm">
               <div>
-                <dt className="text-[var(--zeus-text-secondary)]">WOZ-waarde</dt>
+                <dt className="text-[var(--zeus-text-secondary)]">
+                  WOZ-waarde
+                </dt>
                 <dd className="font-medium text-[var(--zeus-text)]">
                   {current.houseWOZ != null
                     ? formatEUR(current.houseWOZ)
@@ -350,37 +356,48 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
 /**
  * Bouwt per jaar een overlay van finance + tax + huis
  */
-function buildTaxOverlay(reports: FinancialYearReportRow[]): TaxOverlayYear[] {
+function buildTaxOverlay(
+  reports: FinancialYearReportRow[]
+): TaxOverlayYear[] {
   return reports.map((r) => {
     const revenue = toNum(r.revenue);
     const netProfit = toNum(r.net_profit);
     const privateWithdrawals = toNum(r.private_withdrawals);
 
-    const tax = (r.raw_json as any)?.tax;
-    const house = (r.raw_json as any)?.house;
+    const raw: any = r.raw_json || {};
+    const tax = raw.tax || {};
+    const house = raw.house || {};
 
-    const taxableIncome = tax?.taxable_income_box1 ?? null;
-    const incomeTax = tax?.income_tax_due ?? null;
-    const zvw = tax?.zvw_due ?? null;
-    const totalTax =
-      incomeTax != null && zvw != null ? incomeTax + zvw : incomeTax ?? zvw ?? null;
+    const taxableIncome: number | null =
+      typeof tax.taxable_income_box1 === "number"
+        ? tax.taxable_income_box1
+        : null;
+
+    const incomeTax: number | null =
+      typeof tax.income_tax_due === "number" ? tax.income_tax_due : null;
+
+    const zvw: number | null =
+      typeof tax.zvw_due === "number" ? tax.zvw_due : null;
+
+    const totalTax: number | null =
+      incomeTax != null && zvw != null
+        ? incomeTax + zvw
+        : incomeTax ?? zvw ?? null;
 
     let effectiveTaxRate: number | null = null;
-    if (tax?.effective_tax_rate != null) {
+    if (typeof tax.effective_tax_rate === "number") {
       effectiveTaxRate = tax.effective_tax_rate;
-    } else if (totalTax != null && taxableIncome) {
+    } else if (totalTax != null && taxableIncome && taxableIncome !== 0) {
       effectiveTaxRate = totalTax / taxableIncome;
     }
 
-    const netAfterTaxAndPrivate =
-      totalTax != null
-        ? netProfit - totalTax - privateWithdrawals
-        : null;
+    const netAfterTaxAndPrivate: number | null =
+      totalTax != null ? netProfit - totalTax - privateWithdrawals : null;
 
     const mortgages: { principal?: number; interest_paid?: number }[] =
-      house?.mortgages ?? [];
+      Array.isArray(house.mortgages) ? house.mortgages : [];
 
-    const houseMortgageTotal =
+    const houseMortgageTotal: number | null =
       mortgages.length > 0
         ? mortgages.reduce(
             (sum, m) => sum + (m.principal ?? 0),
@@ -388,7 +405,7 @@ function buildTaxOverlay(reports: FinancialYearReportRow[]): TaxOverlayYear[] {
           )
         : null;
 
-    const houseInterestPaid =
+    const houseInterestPaid: number | null =
       mortgages.length > 0
         ? mortgages.reduce(
             (sum, m) => sum + (m.interest_paid ?? 0),
@@ -396,16 +413,19 @@ function buildTaxOverlay(reports: FinancialYearReportRow[]): TaxOverlayYear[] {
           )
         : null;
 
+    const houseWOZ: number | null =
+      typeof house.woz === "number" ? house.woz : null;
+
     return {
       year: r.year,
       revenue,
       netProfit,
       privateWithdrawals,
-      taxableIncome: taxableIncome ?? null,
+      taxableIncome,
       totalTax,
       effectiveTaxRate,
       netAfterTaxAndPrivate,
-      houseWOZ: house?.woz ?? null,
+      houseWOZ,
       houseMortgageTotal,
       houseInterestPaid,
     };
@@ -447,7 +467,7 @@ interface TaxInsightsBlockProps {
 function TaxInsightsBlock({ current, previous }: TaxInsightsBlockProps) {
   const bullets: string[] = [];
 
-  const delta = (now: number, prev: number | null) => {
+  const delta = (now: number, prev: number | null): number | null => {
     if (prev == null || prev === 0) return null;
     return Math.round(((now - prev) / prev) * 100);
   };
