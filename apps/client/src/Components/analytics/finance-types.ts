@@ -24,7 +24,7 @@ export interface FinancialYearRawJson {
   year: number;
   vat?: VatInfo;
   cost_details?: CostDetails;
-  // overige velden laten we flexibel
+  // overige velden laten we flexibel (hier kunnen we bijv. profit_loss etc. in stoppen)
   [key: string]: unknown;
 }
 
@@ -41,6 +41,10 @@ export interface FinancialYearReportRow {
   general_expenses: number | string | null;
 
   private_withdrawals: number | string | null;
+
+  // ✅ Nieuwe velden die je in finance-dashboard.tsx gebruikt:
+  cost_of_goods?: number | string | null;
+  depreciation?: number | string | null;
 
   raw_json: FinancialYearRawJson | null;
 }

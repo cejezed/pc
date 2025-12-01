@@ -90,7 +90,7 @@ export function FinanceDashboard({ userId }: FinanceDashboardProps) {
             <span className="font-semibold text-[var(--zeus-text)]">
               {lastYear.year} – omzet {formatEUR(kpis.lastYearBruto)} ·
               vrij besteedbaar{" "}
-              {formatEUR(kpis.lastYearVrijBesteedbaar)}
+              {formatEUR(kpis.lastVrijBesteedbaar)}
             </span>
           </div>
         )}
@@ -266,7 +266,7 @@ function buildFinanceSummary(reports: FinancialYearReportRow[]) {
         avgTaxRatePct: null as number | null,
         avgVrijBesteedbaarPerYear: 0,
         lastYearBruto: 0,
-        lastYearVrijBesteedbaar: 0,
+        lastVrijBesteedbaar: 0,
       },
       revenueCostData: [] as {
         year: number;
@@ -390,7 +390,7 @@ function buildFinanceSummary(reports: FinancialYearReportRow[]) {
       avgTaxRatePct,
       avgVrijBesteedbaarPerYear,
       lastYearBruto: toNum(lastYear.revenue),
-      lastYearVrijBesteedbaar,
+      lastVrijBesteedbaar,
     },
     revenueCostData,
     incomeChartHasData,
