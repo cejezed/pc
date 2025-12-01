@@ -1,13 +1,19 @@
 // src/Components/analytics/tax-engine.ts
 //
-// Eenvoudige Nederlandse ondernemers-belastingengine (benadering).
-// Doel: inzicht & planning, niet 100% fiscale nauwkeurigheid.
+// Volledige NL-fiscale engine voor zzp/IB-ondernemer,
+// geschikt voor jaarprojecties en kwartaalprognoses.
 //
-// Berekeningen:
-// - winst → zelfstandigenaftrek → MKB-vrijstelling → belastbaar inkomen Box 1
-// - box 1 schijven → inkomstenbelasting (zonder detailkortingen)
-// - Zvw over winst (t/m een max)
-// - totale belasting + effectieve druk
+// Features:
+// - Zelfstandigenaftrek
+// - MKB-vrijstelling
+// - Netto woning-effect (eigen woning forfait + hypotheekrenteaftrek)
+// - Overige aftrekposten (lijfrente, giften, zorg, etc.)
+// - Algemene heffingskorting
+// - Arbeidskorting (benadering)
+// - Zvw (met max-grondslag)
+// - Persoonlijke per-jaar-profielen om te kalibreren op je echte IB-aangiftes.
+//
+// Doel: planning & coaching. Voor definitieve aangiftes altijd de Belastingdienst/boekhouder gebruiken.
 
 export interface TaxBracket {
   /** Bovenkant van de schijf; null = onbeperkt (laatste schijf) */
@@ -16,16 +22,44 @@ export interface TaxBracket {
   rate: number;
 }
 
+/**
+ * Extra persoonlijke parameters per jaar.
+ * Hiermee kun je de engine kalibreren op basis van eerdere IB-aangiftes.
+ */
+export interface PersonalYearProfile {
+  year: number;
+
+  /** Netto woning-effect (EWF - hypotheekrente, Hillen etc.) */
+  netHousingAdjustment?: number; // positief = extra belastbaar, negatief = aftrek
+
+  /** Overige aftrekposten Box 1 (lijfrente, zorg, giften, etc.) */
+  otherDeductions?: number;
+
+  /** Overig box 1 inkomen naast winst uit onderneming (loon, resultaat, etc.) */
+  otherBox1Income?: number;
+
+  /**
+   * Custom offset op heffingskortingen (bijv. partnerverdeling e.d.).
+   * Positief = méér korting, negatief = minder.
+   */
+  creditsCorrection?: number;
+}
+
 export interface TaxYearParams {
   year: number;
+
   /** Zelfstandigenaftrek in euro's (vast bedrag) */
   selfEmployedDeduction: number;
+
   /** MKB-vrijstelling als fractie (bijv. 0.1331 = 13,31%) */
   mkbRate: number;
+
   /** Tarieven Box 1 */
   box1Brackets: TaxBracket[];
+
   /** Zvw-percentage over winst */
   zvwRate: number;
+
   /** Maximaal inkomen waarover Zvw wordt geheven (mag null zijn voor "geen max") */
   zvwMaxIncome: number | null;
 }
@@ -33,63 +67,137 @@ export interface TaxYearParams {
 export interface TaxComputationInput {
   /** Jaarwinst vóór belasting (winst uit onderneming) */
   businessProfit: number;
-  /** Jaar waar de parameters voor gelden */
+  /** Jaar waarvoor we rekenen */
   year: number;
-  /** Optioneel: FOR-dotatie (wordt hier niet automatisch berekend) */
+  /** Optioneel: dotatie oudedagsreserve (oude jaren) */
   forDotation?: number;
+  /** Persoonlijk profiel voor dit jaar (woning, overige aftrek, etc.) */
+  profile?: PersonalYearProfile | null;
 }
 
 export interface TaxComputationResult {
   year: number;
+
+  // Basis
   businessProfit: number;
+  otherBox1Income: number;
+  totalBox1IncomeBeforeDeductions: number;
 
-  // Aftrek & grondslag
+  // Ondernemersaftrek & MKB
   selfEmployedDeduction: number;
-  profitAfterSelfEmployed: number;
+  forDotation: number;
+  profitAfterEntrepreneurDeductions: number;
   mkbDeduction: number;
-  taxableIncomeBox1: number;
+  profitAfterMkb: number;
 
-  // Belastingen
+  // Woning & overige aftrek
+  netHousingAdjustment: number;
+  otherDeductions: number;
+  taxableIncomeBox1BeforeCredits: number;
+
+  // Box 1 belasting bruto
+  grossBox1Tax: number;
+
+  // Heffingskortingen
+  generalCredit: number;
+  labourCredit: number;
+  otherCredits: number; // eventueel aangevuld in profile
+  totalCredits: number;
+
+  // Inkomstenbelasting na kortingen
   incomeTax: number;
-  zvwContribution: number;
-  totalTax: number;
 
-  // Kengetallen
+  // Zvw
+  zvwContribution: number;
+
+  // Totaal
+  totalTax: number;
   effectiveTaxRate: number; // totale belasting / winst
 }
 
 /**
- * Simpele default parameters voor NL zzp / IB-ondernemer (globale benadering).
- * Pas hier de cijfers aan als de wetgeving wijzigt.
+ * Default parameters per jaar.
+ * Je kunt deze functie uitbreiden met exacte cijfers per jaar.
  */
-export function getDefaultTaxYearParams(year: number): TaxYearParams {
-  // Voor nu gebruiken we één set voor recente jaren (2022+).
-  // Je kunt dit later differentiëren per jaar.
-  const brackets: TaxBracket[] = [
-    {
-      // Schijf 1: tot ~73k, tarief (IB + volksverzekeringen) samengenomen.
-      upto: 73031,
-      rate: 0.3697,
-    },
-    {
-      // Schijf 2: boven deze grens
-      upto: null,
-      rate: 0.495,
-    },
-  ];
-
-  return {
+function getTaxYearDefaults(year: number): TaxYearParams {
+  // Voor nu: zelfde structuur voor recente jaren; later per jaar verfijnen.
+  const base: TaxYearParams = {
     year,
-    selfEmployedDeduction: 3750, // kan per jaar aangepast worden
-    mkbRate: 0.1331,
-    box1Brackets: brackets,
+    selfEmployedDeduction: 3750, // approx 2024-niveau
+    mkbRate: 0.1331, // ~13,31%
+    box1Brackets: [
+      {
+        upto: 73_031,
+        rate: 0.3697, // schijf 1 (incl. premies)
+      },
+      {
+        upto: null,
+        rate: 0.495, // schijf 2
+      },
+    ],
     zvwRate: 0.0586,
-    zvwMaxIncome: 71000,
+    zvwMaxIncome: 71_000,
   };
+
+  // Voorbeeld hoe je per jaar zou kunnen tweaken:
+  // switch (year) {
+  //   case 2020: return { ...base, selfEmployedDeduction: 7030, mkbRate: 0.14 };
+  // }
+
+  return base;
 }
 
 /**
- * Past box 1-tarieven toe op de belastbare grondslag.
+ * Algemene heffingskorting (benadering, 2024-achtig).
+ */
+function calculateGeneralCredit(taxableIncomeBox1: number, year: number): number {
+  if (taxableIncomeBox1 <= 0) return 0;
+
+  // Zeer grove benadering:
+  const maxCredit = 3362;
+  const startPhaseOut = 25_000;
+  const endPhaseOut = 75_000;
+
+  if (taxableIncomeBox1 <= startPhaseOut) {
+    return maxCredit;
+  }
+  if (taxableIncomeBox1 >= endPhaseOut) {
+    return 0;
+  }
+
+  const ratio =
+    1 - (taxableIncomeBox1 - startPhaseOut) / (endPhaseOut - startPhaseOut);
+
+  return Math.max(0, maxCredit * ratio);
+}
+
+/**
+ * Arbeidskorting (benadering, 2024-achtig).
+ */
+function calculateLabourCredit(workIncome: number, year: number): number {
+  if (workIncome <= 0) return 0;
+
+  // Piecewise lineaire benadering.
+  if (workIncome <= 12_000) {
+    return workIncome * 0.08; // 8% opbouw
+  }
+  if (workIncome <= 35_000) {
+    return 960 + (workIncome - 12_000) * 0.27;
+  }
+  if (workIncome <= 77_000) {
+    const maxCredit = 5000;
+    const phaseOutStart = 35_000;
+    const phaseOutEnd = 77_000;
+    const ratio =
+      1 - (workIncome - phaseOutStart) / (phaseOutEnd - phaseOutStart);
+    return Math.max(0, maxCredit * ratio);
+  }
+
+  return 0;
+}
+
+/**
+ * Toepassen van schijven voor Box 1.
  */
 export function applyBox1Brackets(
   taxableIncome: number,
@@ -102,13 +210,13 @@ export function applyBox1Brackets(
 
   for (let i = 0; i < brackets.length; i++) {
     const bracket = brackets[i];
+
     if (bracket.upto == null) {
       tax += remaining * bracket.rate;
       break;
     }
 
-    const span =
-      remaining > bracket.upto ? bracket.upto : remaining;
+    const span = remaining > bracket.upto ? bracket.upto : remaining;
 
     if (span > 0) {
       tax += span * bracket.rate;
@@ -122,59 +230,101 @@ export function applyBox1Brackets(
 }
 
 /**
- * Kernfunctie: van jaarwinst → belastingdruk (IB + Zvw).
- *
- * Let op: dit is een benadering – heffingskortingen en andere
- * details worden hier niet expliciet meegenomen. Doel = planning.
+ * Kernfunctie: bereken belasting voor een jaar op basis van winst en persoonlijk profiel.
  */
 export function computeTaxForYear(
   input: TaxComputationInput,
-  params?: TaxYearParams
+  overrideParams?: TaxYearParams
 ): TaxComputationResult {
-  const effectiveParams = params ?? getDefaultTaxYearParams(input.year);
-  const profit = Math.max(0, input.businessProfit);
+  const params = overrideParams ?? getTaxYearDefaults(input.year);
+  const profile = input.profile || null;
 
-  // 1. Zelfstandigenaftrek toepassen
+  const profit = Math.max(0, input.businessProfit);
+  const forDotation =
+    input.forDotation && input.forDotation > 0 ? input.forDotation : 0;
+
+  // Overig box 1 inkomen naast winst
+  const otherBox1Income = profile?.otherBox1Income || 0;
+
+  // 1. Totaal box 1 inkomen vóór aftrekposten
+  const totalBox1IncomeBeforeDeductions = profit + otherBox1Income;
+
+  // 2. Ondernemersaftrek + FOR
   const selfEmployedDeduction = Math.max(
     0,
-    Math.min(effectiveParams.selfEmployedDeduction, profit)
+    Math.min(params.selfEmployedDeduction, profit)
   );
-  const profitAfterSelfEmployed = Math.max(
+  const profitAfterEntrepreneurDeductions = Math.max(
     0,
-    profit - selfEmployedDeduction
+    profit - selfEmployedDeduction - forDotation
   );
 
-  // 2. MKB-vrijstelling
-  const mkbDeduction =
-    profitAfterSelfEmployed * effectiveParams.mkbRate;
-  const taxableIncomeBox1 = Math.max(
+  // 3. MKB-vrijstelling
+  const mkbDeduction = profitAfterEntrepreneurDeductions * params.mkbRate;
+  const profitAfterMkb = Math.max(
     0,
-    profitAfterSelfEmployed - mkbDeduction
+    profitAfterEntrepreneurDeductions - mkbDeduction
   );
 
-  // 3. Box 1 belasting
-  const incomeTax = applyBox1Brackets(
-    taxableIncomeBox1,
-    effectiveParams.box1Brackets
+  // 4. Netto woning-effect + overige aftrekposten
+  const netHousingAdjustment = profile?.netHousingAdjustment || 0;
+  const otherDeductions = profile?.otherDeductions || 0;
+
+  // Netto Box 1 grondslag vóór credits:
+  const taxableIncomeBox1BeforeCredits = Math.max(
+    0,
+    profitAfterMkb + otherBox1Income + netHousingAdjustment - otherDeductions
   );
 
-  // 4. Zvw over winst (t/m max)
-  const zvwBase = effectiveParams.zvwMaxIncome
-    ? Math.min(profit, effectiveParams.zvwMaxIncome)
+  // 5. Bruto Box 1 belasting
+  const grossBox1Tax = applyBox1Brackets(
+    taxableIncomeBox1BeforeCredits,
+    params.box1Brackets
+  );
+
+  // 6. Heffingskortingen (algemeen + arbeid)
+  const generalCredit = calculateGeneralCredit(
+    taxableIncomeBox1BeforeCredits,
+    params.year
+  );
+  const labourCredit = calculateLabourCredit(
+    totalBox1IncomeBeforeDeductions,
+    params.year
+  );
+  const otherCredits = profile?.creditsCorrection || 0;
+
+  const totalCredits = generalCredit + labourCredit + otherCredits;
+
+  const incomeTax = Math.max(0, grossBox1Tax - totalCredits);
+
+  // 7. Zvw over winst (t/m max)
+  const zvwBase = params.zvwMaxIncome
+    ? Math.min(profit, params.zvwMaxIncome)
     : profit;
-  const zvwContribution = zvwBase * effectiveParams.zvwRate;
+  const zvwContribution = zvwBase * params.zvwRate;
 
+  // 8. Totaal en effectieve druk
   const totalTax = incomeTax + zvwContribution;
-  const effectiveTaxRate =
-    profit > 0 ? totalTax / profit : 0;
+  const effectiveTaxRate = profit > 0 ? totalTax / profit : 0;
 
   return {
-    year: effectiveParams.year,
+    year: params.year,
     businessProfit: profit,
+    otherBox1Income,
+    totalBox1IncomeBeforeDeductions,
     selfEmployedDeduction,
-    profitAfterSelfEmployed,
+    forDotation,
+    profitAfterEntrepreneurDeductions,
     mkbDeduction,
-    taxableIncomeBox1,
+    profitAfterMkb,
+    netHousingAdjustment,
+    otherDeductions,
+    taxableIncomeBox1BeforeCredits,
+    grossBox1Tax,
+    generalCredit,
+    labourCredit,
+    otherCredits,
+    totalCredits,
     incomeTax,
     zvwContribution,
     totalTax,
@@ -183,8 +333,7 @@ export function computeTaxForYear(
 }
 
 /**
- * Input voor kwartaalprojectie: je vult t/m een bepaalde kwartaal
- * de inkomens & uitgaven in, en de engine projecteert het jaar.
+ * Input voor kwartaalprojectie.
  */
 export interface QuarterProjectionInput {
   year: number;
@@ -195,33 +344,27 @@ export interface QuarterProjectionInput {
     income: number;
     expenses: number;
   }[];
+  /** Optioneel: persoonlijk profiel voor dit jaar */
+  profile?: PersonalYearProfile | null;
 }
 
-export interface QuarterProjectionResult
-  extends TaxComputationResult {
+export interface QuarterProjectionResult extends TaxComputationResult {
   currentQuarter: number;
   /** Winst t/m huidig kwartaal */
   yearToDateProfit: number;
-  /** Projectie van de jaarwinst (op basis van huidige tempo) */
+  /** Geprojecteerde jaarwinst (op basis van huidige tempo) */
   projectedYearProfit: number;
 }
 
 /**
- * Maakt een jaarprojectie op basis van de ingevulde kwartalen.
- * Voorbeeld:
- * - Na Q1 → winst * 4
- * - Na Q2 → winst * 2
- * - Na Q3 → winst * (4 / 3)
- * - Na Q4 → winst * 1 (feitelijk jaarresultaat)
+ * Jaarprojectie op basis van ingevulde kwartalen.
+ * Q1 → factor 4; Q2 → factor 2; Q3 → factor 4/3; Q4 → factor 1.
  */
 export function projectTaxFromQuarters(
   input: QuarterProjectionInput,
-  params?: TaxYearParams
+  overrideParams?: TaxYearParams
 ): QuarterProjectionResult {
-  const qCount = Math.max(
-    1,
-    Math.min(4, input.currentQuarter || 1)
-  );
+  const qCount = Math.max(1, Math.min(4, input.currentQuarter || 1));
 
   let ytdProfit = 0;
   for (let i = 0; i < qCount; i++) {
@@ -230,16 +373,16 @@ export function projectTaxFromQuarters(
     ytdProfit += profitQ;
   }
 
-  const factor =
-    qCount === 4 ? 1 : 4 / qCount;
+  const factor = qCount === 4 ? 1 : 4 / qCount;
   const projectedProfit = ytdProfit * factor;
 
   const tax = computeTaxForYear(
     {
       year: input.year,
       businessProfit: projectedProfit,
+      profile: input.profile || null,
     },
-    params
+    overrideParams
   );
 
   return {
@@ -248,4 +391,11 @@ export function projectTaxFromQuarters(
     yearToDateProfit: ytdProfit,
     projectedYearProfit: projectedProfit,
   };
+}
+
+/**
+ * Public helper om de default jaarparameters op te vragen.
+ */
+export function getDefaultTaxYearParams(year: number): TaxYearParams {
+  return getTaxYearDefaults(year);
 }

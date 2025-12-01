@@ -3,7 +3,7 @@
 // UI-paneel om per kwartaal inkomsten & uitgaven in te voeren,
 // en direct te zien:
 // - geprojecteerde jaarwinst
-// - IB + Zvw
+// - IB + Zvw (incl. heffingskortingen, woning, aftrek via profiel)
 // - effectieve belastingdruk
 // - alerts als je richting ~50% belastingdruk gaat.
 
@@ -14,10 +14,8 @@ import {
   projectTaxFromQuarters,
   QuarterProjectionResult,
 } from "./tax-engine";
-import {
-  buildTaxAlertsFromProjection,
-  TaxAlert,
-} from "./finance-alerts";
+import { buildTaxAlertsFromProjection, TaxAlert } from "./finance-alerts";
+import { getProfileForYear } from "./tax-profiles";
 
 interface QuarterProjectionPanelProps {
   /** Optionele initiele jaarwaarde, bv. laatste jaar + 1 of huidig jaar */
@@ -31,9 +29,7 @@ type QuarterState = {
 
 const QUARTER_LABELS = ["Q1", "Q2", "Q3", "Q4"];
 
-export function QuarterProjectionPanel({
-  initialYear,
-}: QuarterProjectionPanelProps) {
+export function QuarterProjectionPanel({ initialYear }: QuarterProjectionPanelProps) {
   const now = new Date();
   const defaultYear = initialYear || now.getFullYear();
 
@@ -47,26 +43,24 @@ export function QuarterProjectionPanel({
     { income: 0, expenses: 0 },
   ]);
 
-  const params = useMemo(
-    () => getDefaultTaxYearParams(year),
-    [year]
-  );
+  const params = useMemo(() => getDefaultTaxYearParams(year), [year]);
+  const profile = useMemo(() => getProfileForYear(year), [year]);
 
-  const projection: QuarterProjectionResult | null =
-    useMemo(() => {
-      try {
-        return projectTaxFromQuarters(
-          {
-            year,
-            currentQuarter,
-            quarters,
-          },
-          params
-        );
-      } catch {
-        return null;
-      }
-    }, [year, currentQuarter, quarters, params]);
+  const projection: QuarterProjectionResult | null = useMemo(() => {
+    try {
+      return projectTaxFromQuarters(
+        {
+          year,
+          currentQuarter,
+          quarters,
+          profile: profile ?? undefined,
+        },
+        params
+      );
+    } catch {
+      return null;
+    }
+  }, [year, currentQuarter, quarters, profile, params]);
 
   const alerts: TaxAlert[] = useMemo(
     () => buildTaxAlertsFromProjection(projection, params),
@@ -89,11 +83,7 @@ export function QuarterProjectionPanel({
     return sum;
   }, [quarters, currentQuarter]);
 
-  const handleQuarterChange = (
-    index: number,
-    field: keyof QuarterState,
-    value: string
-  ) => {
+  const handleQuarterChange = (index: number, field: keyof QuarterState, value: string) => {
     const numeric = parseFloat(value.replace(",", "."));
     const safe = isNaN(numeric) ? 0 : numeric;
     setQuarters((prev) => {
@@ -119,31 +109,31 @@ export function QuarterProjectionPanel({
             </h3>
           </div>
           <p className="text-xs text-[var(--zeus-text-secondary)]">
-            Vul per kwartaal je omzet en kosten in en zie direct de geprojecteerde jaarwinst en belastingdruk
-            (IB + Zvw). Dit is een benadering voor planning, geen officiële aangifte.
+            Vul per kwartaal je omzet en kosten in en zie direct de geprojecteerde jaarwinst en
+            belastingdruk (IB + Zvw). Dit is een benadering voor planning, geen officiële aangifte.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-[var(--zeus-text-secondary)]">
-            Jaar
-          </label>
-          <select
-            value={year}
-            onChange={(e) => {
-              const y = parseInt(e.target.value, 10);
-              setYear(isNaN(y) ? defaultYear : y);
-            }}
-            className="px-3 py-1.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-xs md:text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
-          >
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col md:flex-row md:items-center gap-2">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-[var(--zeus-text-secondary)]">Jaar</label>
+            <select
+              value={year}
+              onChange={(e) => {
+                const y = parseInt(e.target.value, 10);
+                setYear(isNaN(y) ? defaultYear : y);
+              }}
+              className="px-3 py-1.5 bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] rounded-lg text-xs md:text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
+            >
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-1 md:ml-2">
             {QUARTER_LABELS.map((label, idx) => {
               const q = idx + 1;
               const active = q === currentQuarter;
@@ -167,8 +157,9 @@ export function QuarterProjectionPanel({
         </div>
       </div>
 
-      {/* Kwartaal invoer */}
+      {/* Kwartaal invoer + samenvatting */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Kwartaal invoer */}
         <div>
           <table className="w-full text-xs border-collapse">
             <thead>
@@ -181,29 +172,19 @@ export function QuarterProjectionPanel({
             <tbody>
               {quarters.map((q, idx) => {
                 const quarterLabel = QUARTER_LABELS[idx];
-                const disabled = idx + 1 > currentQuarter;
                 return (
                   <tr
                     key={quarterLabel}
                     className="border-b border-[var(--zeus-border)]/60 last:border-0"
                   >
-                    <td className="py-1.5 pr-2 text-[var(--zeus-text)]">
-                      {quarterLabel}
-                    </td>
+                    <td className="py-1.5 pr-2 text-[var(--zeus-text)]">{quarterLabel}</td>
                     <td className="py-1.5 pr-2 text-right">
                       <input
                         type="number"
                         inputMode="decimal"
                         className="w-full text-right px-2 py-1 rounded bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] text-xs"
                         value={q.income || ""}
-                        disabled={false}
-                        onChange={(e) =>
-                          handleQuarterChange(
-                            idx,
-                            "income",
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleQuarterChange(idx, "income", e.target.value)}
                       />
                     </td>
                     <td className="py-1.5 pr-0 text-right">
@@ -212,14 +193,7 @@ export function QuarterProjectionPanel({
                         inputMode="decimal"
                         className="w-full text-right px-2 py-1 rounded bg-[var(--zeus-bg-secondary)] border border-[var(--zeus-border)] text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)] text-xs"
                         value={q.expenses || ""}
-                        disabled={false}
-                        onChange={(e) =>
-                          handleQuarterChange(
-                            idx,
-                            "expenses",
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleQuarterChange(idx, "expenses", e.target.value)}
                       />
                     </td>
                   </tr>
@@ -229,7 +203,8 @@ export function QuarterProjectionPanel({
           </table>
 
           <div className="mt-2 text-[10px] text-[var(--zeus-text-secondary)]">
-            Tip: begin met schattingen voor komende kwartalen. Naarmate het jaar vordert vul je de werkelijke cijfers in voor een scherpere prognose.
+            Tip: begin met schattingen voor komende kwartalen. Naarmate het jaar vordert vul je de
+            werkelijke cijfers in voor een scherpere prognose.
           </div>
         </div>
 
@@ -245,42 +220,30 @@ export function QuarterProjectionPanel({
           />
           <SummaryRow
             label="Winst t/m nu (YTD)"
-            value={formatEUR(
-              (projection && projection.yearToDateProfit) || 0
-            )}
+            value={formatEUR((projection && projection.yearToDateProfit) || 0)}
           />
           <div className="h-px bg-[var(--zeus-border)] my-1" />
           <SummaryRow
             label="Geprojecteerde jaarwinst"
-            value={formatEUR(
-              (projection && projection.projectedYearProfit) || 0
-            )}
+            value={formatEUR((projection && projection.projectedYearProfit) || 0)}
             strong
           />
           <SummaryRow
-            label="Inkomstenbelasting (box 1, indicatie)"
+            label="Inkomstenbelasting (indicatie)"
             value={formatEUR((projection && projection.incomeTax) || 0)}
           />
           <SummaryRow
             label="Zvw-bijdrage (indicatie)"
-            value={formatEUR(
-              (projection && projection.zvwContribution) || 0
-            )}
+            value={formatEUR((projection && projection.zvwContribution) || 0)}
           />
           <SummaryRow
-            label="Totale belasting (IB + Zvw, indicatie)"
-            value={formatEUR(
-              (projection && projection.totalTax) || 0
-            )}
+            label="Totale belasting (IB + Zvw)"
+            value={formatEUR((projection && projection.totalTax) || 0)}
           />
           <SummaryRow
             label="Effectieve belastingdruk"
             value={
-              projection
-                ? `${Math.round(
-                    projection.effectiveTaxRate * 100
-                  )}%`
-                : "—"
+              projection ? `${Math.round(projection.effectiveTaxRate * 100)}%` : "—"
             }
           />
         </div>
@@ -299,8 +262,8 @@ export function QuarterProjectionPanel({
         <div className="mt-2 flex items-start gap-2 text-[10px] md:text-xs text-[var(--zeus-text-secondary)]">
           <Info className="w-3 h-3 mt-0.5 text-[var(--zeus-primary)]" />
           <p>
-            Op basis van je huidige invoer lijkt je belastingdruk stabiel en zijn er geen opvallende drempels. Als je cijfers wijzigen,
-            kun je hier snel opnieuw checken wat dat betekent.
+            Op basis van je huidige invoer lijkt je belastingdruk stabiel en zijn er geen opvallende
+            drempels. Als je cijfers wijzigen, kun je hier snel opnieuw checken wat dat betekent.
           </p>
         </div>
       )}
@@ -314,21 +277,13 @@ interface SummaryRowProps {
   strong?: boolean;
 }
 
-function SummaryRow({
-  label,
-  value,
-  strong,
-}: SummaryRowProps) {
+function SummaryRow({ label, value, strong }: SummaryRowProps) {
   return (
     <div className="flex items-center justify-between text-xs md:text-sm">
-      <span className="text-[var(--zeus-text-secondary)]">
-        {label}
-      </span>
+      <span className="text-[var(--zeus-text-secondary)]">{label}</span>
       <span
         className={
-          strong
-            ? "font-semibold text-[var(--zeus-text)]"
-            : "text-[var(--zeus-text)]"
+          strong ? "font-semibold text-[var(--zeus-text)]" : "text-[var(--zeus-text)]"
         }
       >
         {value}
@@ -356,9 +311,7 @@ function AlertBadge({ alert }: { alert: TaxAlert }) {
     >
       <Icon className="w-3 h-3 mt-0.5 shrink-0" />
       <div>
-        <div className="font-semibold mb-0.5">
-          {alert.title}
-        </div>
+        <div className="font-semibold mb-0.5">{alert.title}</div>
         <div>{alert.description}</div>
       </div>
     </div>

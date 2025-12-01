@@ -1,117 +1,147 @@
 // src/Components/analytics/finance-alerts.ts
 //
-// Kleine "coach/alert" laag bovenop de tax-engine.
-// Detecteert o.a. wanneer je richting ~50% belastingdruk gaat.
+// Bouwt waarschuwingen ("alerts") op basis van de
+// kwartaalprojectie + belastingberekening.
+//
+// Doel: geen exacte fiscale diagnose, maar:
+// - signaleren wanneer je belastingdruk hard oploopt
+// - aangeven wanneer je in de hoge schijf zit
+// - je bewust maken van "extra euro = dure euro"-zones.
 
-import {
+import type {
   QuarterProjectionResult,
   TaxYearParams,
 } from "./tax-engine";
 
-export type AlertLevel = "info" | "warning" | "critical";
+export type TaxAlertLevel = "info" | "warning" | "critical";
 
 export interface TaxAlert {
   id: string;
-  level: AlertLevel;
+  level: TaxAlertLevel;
   title: string;
   description: string;
 }
 
 /**
- * Bouwt een set alerts op basis van een kwartaalprojectie.
- * Heuristieken zijn bewust simpel & uitlegbaar.
+ * Bouw een set alerts op basis van de huidige projectie.
+ * Dit is expliciet heuristisch: bedoeld als coaching, niet als formeel advies.
  */
 export function buildTaxAlertsFromProjection(
   proj: QuarterProjectionResult | null,
   params: TaxYearParams
 ): TaxAlert[] {
-  if (!proj || proj.businessProfit <= 0) return [];
-
   const alerts: TaxAlert[] = [];
 
-  const taxRate = proj.effectiveTaxRate; // 0–1
-  const taxable = proj.taxableIncomeBox1;
+  if (!proj || proj.projectedYearProfit <= 0) {
+    return alerts;
+  }
+
   const profit = proj.projectedYearProfit;
-  const freeAfterTax = profit - proj.totalTax;
+  const effectiveRate = proj.effectiveTaxRate;
+  const incomeTax = proj.incomeTax;
+  const zvw = proj.zvwContribution;
+  const totalTax = proj.totalTax;
 
-  // 1. Drempel richting 50% belastingdruk
-  if (taxRate >= 0.5) {
+  // Let op: nieuwe tax-engine gebruikt taxableIncomeBox1BeforeCredits.
+  const taxable =
+    proj.taxableIncomeBox1BeforeCredits ?? proj.businessProfit;
+
+  // 1️⃣ Alert: hoge effectieve belastingdruk
+  if (effectiveRate >= 0.5) {
     alerts.push({
-      id: "near-50-critical",
+      id: "high-effective-rate-critical",
       level: "critical",
-      title: "Je effectieve belastingdruk ligt rond of boven 50%",
+      title: "Je totale belastingdruk nadert 50%",
       description:
-        "Op basis van je huidige tempo kom je uit op een totale belastingdruk (IB + Zvw) van ongeveer " +
-        Math.round(taxRate * 100) +
-        "%. Dit is erg hoog; het is zinvol om te kijken naar spreiding, investeringen of timing van inkomsten en kosten.",
+        `Op basis van de huidige prognose betaal je ongeveer ` +
+        `${Math.round(effectiveRate * 100)}% belasting over je winst (IB + Zvw). ` +
+        `Dit is het niveau waarop elke extra euro winst relatief duur wordt. ` +
+        `Overweeg om bewust investeringen, reserveringen of privé-opnames te plannen.`,
     });
-  } else if (taxRate >= 0.45) {
+  } else if (effectiveRate >= 0.4) {
     alerts.push({
-      id: "near-50-warning",
+      id: "high-effective-rate-warning",
       level: "warning",
-      title: "Je belastingdruk komt in de buurt van 50%",
+      title: "Je belastingdruk loopt stevig op",
       description:
-        "De geprojecteerde belastingdruk is ongeveer " +
-        Math.round(taxRate * 100) +
-        "%. Je zit in de zone waar afbouw van kortingen en hogere tarieven samen optellen. Extra winst wordt relatief zwaar belast.",
+        `Je effectieve belastingdruk ligt rond de ` +
+        `${Math.round(effectiveRate * 100)}%. ` +
+        `Een groot deel van extra winst valt hiermee in een relatief hoge schijf. ` +
+        `Het kan zinvol zijn om vooruit te plannen: investeringen, pensioeninleg ` +
+        `of schuiven met uitgaven over jaren heen.`,
     });
   }
 
-  // 2. Hoog inkomen → afbouw-zone heffingskortingen (globale drempel)
-  if (taxable >= 80000 && taxable < 110000) {
+  // 2️⃣ Alert: je zit (grotendeels) in de hoge schijf
+  const firstBracket = params.box1Brackets[0];
+  const highBracketThreshold =
+    typeof firstBracket.upto === "number" ? firstBracket.upto : 73_031;
+
+  if (taxable > highBracketThreshold) {
     alerts.push({
-      id: "kortingen-phaseout",
+      id: "high-bracket-warning",
+      level: "warning",
+      title: "Je valt (deels) in de hoogste inkomstenbelastingschijf",
+      description:
+        `Je belastbaar inkomen in box 1 wordt geschat op ongeveer ` +
+        `€${formatNumber(taxable)}. Daarmee kom je (deels) in de hoogste ` +
+        `inkomstenbelastingschijf terecht. Dat betekent dat een deel van je ` +
+        `extra winst belast wordt tegen circa 49,5%.`,
+    });
+  }
+
+  // 3️⃣ Alert: totale belasting in euro's is substantieel
+  if (totalTax > 0) {
+    alerts.push({
+      id: "total-tax-info",
       level: "info",
-      title: "Je zit in de afbouw-zone van kortingen",
+      title: "Indicatie totale belasting dit jaar",
       description:
-        "Je belastbare inkomen Box 1 ligt rond " +
-        formatEUR(taxable) +
-        ". In deze regionen worden arbeids- en algemene heffingskortingen flink afgebouwd, waardoor extra inkomen relatief zwaar wordt belast.",
-    });
-  } else if (taxable >= 110000) {
-    alerts.push({
-      id: "high-income",
-      level: "warning",
-      title: "Zeer hoog belastbaar inkomen",
-      description:
-        "Je belastbare inkomen Box 1 ligt boven ongeveer € 110.000. Vrijwel alle kortingen zijn dan afgebouwd en je extra inkomen wordt bijna volledig tegen toptarief belast.",
+        `Op basis van je huidige invoer komt de totale belasting (IB + Zvw) uit op ` +
+        `ongeveer €${formatNumber(totalTax)} bij een geprojecteerde winst van ` +
+        `circa €${formatNumber(profit)}. Dit is een indicatie om tijdig te ` +
+        `reserveren, geen definitieve aanslag.`,
     });
   }
 
-  // 3. Vrije cash na belasting relatief laag t.o.v. winst
-  if (profit > 0) {
-    const freeRatio = freeAfterTax / profit;
-    if (freeRatio < 0.4) {
+  // 4️⃣ Alert: relatief lage winst
+  if (profit > 0 && profit < 40_000) {
+    alerts.push({
+      id: "low-profit-info",
+      level: "info",
+      title: "Relatief bescheiden winst",
+      description:
+        `Je geprojecteerde jaarwinst ligt rond de €${formatNumber(profit)}. ` +
+        `Controleer of dit past bij je gewenste privé-uitgaven en reserveringen ` +
+        `voor belasting, vakanties en buffer. Dit is geen waardeoordeel, maar een ` +
+        `check of je cijfers overeenkomen met je plannen.`,
+    });
+  }
+
+  // 5️⃣ Alert: verhouding IB vs. Zvw
+  if (zvw > 0 && incomeTax > 0) {
+    const zvwShare = zvw / totalTax;
+    if (zvwShare > 0.2) {
       alerts.push({
-        id: "low-free-cash",
-        level: "warning",
-        title: "Relatief weinig vrije cash na belasting",
+        id: "zvw-share-info",
+        level: "info",
+        title: "Zvw-bijdrage is een zichtbaar deel van je belasting",
         description:
-          "Van je geprojecteerde winst blijft na IB en Zvw minder dan 40% over als vrije cash. Overweeg of je buffer, investeringen en privé-uitgaven hiermee in balans zijn.",
+          `Van je totale belasting van ongeveer €${formatNumber(
+            totalTax
+          )} bestaat circa ` +
+          `${Math.round(zvwShare * 100)}% uit Zvw-bijdrage. Dit wordt vaak vergeten ` +
+          `in reserveringen, maar is wel een echte cash-out. Neem dit mee in je ` +
+          `bufferplanning.`,
       });
     }
-  }
-
-  // 4. Heel forse winst → algemene reflectie
-  if (profit >= 150000) {
-    alerts.push({
-      id: "very-high-profit",
-      level: "info",
-      title: "Zeer hoge geprojecteerde jaarwinst",
-      description:
-        "Je huidige tempo wijst op een jaarwinst van ongeveer " +
-        formatEUR(profit) +
-        ". Dit is een goed moment om expliciet na te denken over pensioen, reserves, investeringen en risicospreiding.",
-    });
   }
 
   return alerts;
 }
 
-function formatEUR(value: number): string {
+function formatNumber(value: number): string {
   return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
     maximumFractionDigits: 0,
   }).format(value);
 }
