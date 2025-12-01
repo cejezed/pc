@@ -28,6 +28,7 @@ import {
 } from "./basis-componenten";
 import { Button } from "@/Components/ui/button";
 import { FinanceDashboard } from "./finance-dashboard";
+import { FinanceTaxCockpit } from "./finance-tax-cockpit";
 
 // Types
 type TimeEntry = {
@@ -389,6 +390,8 @@ export default function Analytics() {
             Financieel overzicht (jaarrekeningen)
           </h2>
           <FinanceDashboard userId={userId} />
+          
+<FinanceTaxCockpit userId={user?.id} />
         </div>
 
         {/* Filters */}
