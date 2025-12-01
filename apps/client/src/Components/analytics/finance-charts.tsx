@@ -1,8 +1,27 @@
-// components/analytics/finance-charts.tsx
+// src/Components/analytics/finance-charts.tsx
 
-import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import React from "react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
+import type {
+  RevenueProfitPoint,
+  CostStructurePoint,
+} from "./finance-types";
 
-export function RevenueChart({ data }) {
+interface RevenueChartProps {
+  data: RevenueProfitPoint[];
+}
+
+export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={data}>
@@ -17,7 +36,11 @@ export function RevenueChart({ data }) {
   );
 }
 
-export function CostStructureChart({ data }) {
+interface CostStructureChartProps {
+  data: CostStructurePoint[];
+}
+
+export function CostStructureChart({ data }: CostStructureChartProps) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data}>

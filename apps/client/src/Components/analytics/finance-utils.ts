@@ -1,69 +1,81 @@
-// components/analytics/finance-utils.ts
+// src/Components/analytics/finance-utils.ts
 
-import {
-  FinancialYearReport,
+import type {
+  FinancialYearReportRow,
   RevenueProfitPoint,
   CostStructurePoint,
   PrivateWithdrawalsPoint,
   VatQuarterPoint,
-} from "./types";
+  SalesCostItem,
+} from "./finance-types";
 
-export const toNum = (v: any) =>
-  typeof v === "number" ? v : v ? Number(v) : 0;
+export function toNum(value: unknown): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
 
-export function buildRevenueSeries(reports: FinancialYearReport[]): RevenueProfitPoint[] {
-  return reports.map(r => ({
+export function formatEUR(value: number): string {
+  return new Intl.NumberFormat("nl-NL", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function sumSalesCosts(items: SalesCostItem[] | undefined): number {
+  if (!items) return 0;
+  return items.reduce((sum: number, item: SalesCostItem) => sum + item.amount, 0);
+}
+
+export function buildRevenueSeries(
+  reports: FinancialYearReportRow[]
+): RevenueProfitPoint[] {
+  return reports.map((r) => ({
     year: r.year,
     revenue: toNum(r.revenue),
     net_profit: toNum(r.net_profit),
   }));
 }
 
-export function buildCostSeries(reports: FinancialYearReport[]): CostStructurePoint[] {
-  return reports.map(r => {
-    const sales =
-      r.raw_json?.cost_details?.sales_costs?.reduce(
-        (sum, item) => sum + item.amount,
-        0
-      ) ?? 0;
-
-    return {
-      year: r.year,
-      office: toNum(r.office_costs),
-      vehicle: toNum(r.vehicle_costs),
-      general: toNum(r.general_expenses),
-      sales,
-    };
-  });
+export function buildCostSeries(
+  reports: FinancialYearReportRow[]
+): CostStructurePoint[] {
+  return reports.map((r) => ({
+    year: r.year,
+    office: toNum(r.office_costs),
+    vehicle: toNum(r.vehicle_costs),
+    general: toNum(r.general_expenses),
+    sales: sumSalesCosts(r.raw_json?.cost_details?.sales_costs),
+  }));
 }
 
-export function buildPrivateSeries(reports: FinancialYearReport[]): PrivateWithdrawalsPoint[] {
-  return reports.map(r => ({
+export function buildPrivateSeries(
+  reports: FinancialYearReportRow[]
+): PrivateWithdrawalsPoint[] {
+  return reports.map((r) => ({
     year: r.year,
     withdrawals: toNum(r.private_withdrawals),
   }));
 }
 
-export function buildVatSeries(reports: FinancialYearReport[]): VatQuarterPoint[] {
+export function buildVatSeries(
+  reports: FinancialYearReportRow[]
+): VatQuarterPoint[] {
   const points: VatQuarterPoint[] = [];
 
   for (const r of reports) {
-    const v = r.raw_json?.vat;
-    if (!v) continue;
+    const vat = r.raw_json?.vat;
+    if (!vat) continue;
 
-    if (v.q1 != null) points.push({ year: r.year, quarter: "Q1", amount: v.q1 });
-    if (v.q2 != null) points.push({ year: r.year, quarter: "Q2", amount: v.q2 });
-    if (v.q3 != null) points.push({ year: r.year, quarter: "Q3", amount: v.q3 });
-    if (v.q4 != null) points.push({ year: r.year, quarter: "Q4", amount: v.q4 });
+    if (vat.q1 != null) points.push({ year: r.year, quarter: "Q1", amount: vat.q1 ?? 0 });
+    if (vat.q2 != null) points.push({ year: r.year, quarter: "Q2", amount: vat.q2 ?? 0 });
+    if (vat.q3 != null) points.push({ year: r.year, quarter: "Q3", amount: vat.q3 ?? 0 });
+    if (vat.q4 != null) points.push({ year: r.year, quarter: "Q4", amount: vat.q4 ?? 0 });
   }
 
   return points;
-}
-
-export function formatEUR(value: number) {
-  return new Intl.NumberFormat("nl-NL", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
 }

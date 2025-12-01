@@ -1,13 +1,25 @@
-// components/analytics/finance-kpis.tsx
+// src/Components/analytics/finance-kpis.tsx
 
+import React from "react";
+import type { FinancialYearReportRow } from "./finance-types";
 import { formatEUR, toNum } from "./finance-utils";
 
-export function FinanceKpis({ selected }) {
-  if (!selected) return null;
+interface FinanceKpisProps {
+  selected?: FinancialYearReportRow;
+}
+
+export function FinanceKpis({ selected }: FinanceKpisProps) {
+  if (!selected) {
+    return (
+      <div className="text-sm text-[var(--zeus-text-secondary)]">
+        Nog geen jaar geselecteerd / geen financiële data gevonden.
+      </div>
+    );
+  }
 
   const salesCosts =
     selected.raw_json?.cost_details?.sales_costs?.reduce(
-      (s, i) => s + (i.amount ?? 0),
+      (sum: number, item) => sum + item.amount,
       0
     ) ?? 0;
 
@@ -17,21 +29,38 @@ export function FinanceKpis({ selected }) {
     toNum(selected.general_expenses) +
     salesCosts;
 
+  const revenue = toNum(selected.revenue);
+  const netProfit = toNum(selected.net_profit);
+  const profitMargin =
+    revenue > 0 ? Math.round((netProfit / revenue) * 100) : null;
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <Kpi label="Omzet" value={formatEUR(toNum(selected.revenue))} />
-      <Kpi label="Winst" value={formatEUR(toNum(selected.net_profit))} />
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Kpi label="Omzet" value={formatEUR(revenue)} />
+      <Kpi label="Netto winst" value={formatEUR(netProfit)} />
       <Kpi label="Totale kosten" value={formatEUR(totalCosts)} />
-      <Kpi label="Privé-opnamen" value={formatEUR(toNum(selected.private_withdrawals))} />
+      <Kpi
+        label="Winstmarge"
+        value={profitMargin != null ? `${profitMargin}%` : "–"}
+      />
     </div>
   );
 }
 
-function Kpi({ label, value }) {
+interface KpiProps {
+  label: string;
+  value: string;
+}
+
+function Kpi({ label, value }: KpiProps) {
   return (
-    <div className="bg-white shadow rounded-xl p-4 border border-slate-200">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className="text-lg font-bold">{value}</div>
+    <div className="bg-[var(--zeus-card)] border border-[var(--zeus-border)] rounded-xl p-4 shadow-sm">
+      <div className="text-xs text-[var(--zeus-text-secondary)] mb-1">
+        {label}
+      </div>
+      <div className="text-lg font-semibold text-[var(--zeus-text)]">
+        {value}
+      </div>
     </div>
   );
 }
