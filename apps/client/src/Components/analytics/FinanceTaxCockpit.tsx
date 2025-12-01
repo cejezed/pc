@@ -29,6 +29,8 @@ type TaxOverlayYear = {
   houseWOZ: number | null;
   houseMortgageTotal: number | null;
   houseInterestPaid: number | null;
+  forOpening: number | null;
+  forClosing: number | null;
 };
 
 interface FinanceTaxCockpitProps {
@@ -93,11 +95,24 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
     netto: o.netAfterTaxAndPrivate ?? 0,
   }));
 
-  const taxPressureData = sortedOverlay.map((o) => ({
-    year: o.year,
-    belastingdruk: (o.effectiveTaxRate ?? 0) * 100,
-    priveOpnamen: o.privateWithdrawals,
-  }));
+  // Uitgebreidere dataset: euro's én percentages t.o.v. omzet
+  const taxPressureData = sortedOverlay.map((o) => {
+    const belastingdrukPct = (o.effectiveTaxRate ?? 0) * 100;
+    const privePct =
+      o.revenue > 0 ? (o.privateWithdrawals / o.revenue) * 100 : 0;
+    const belastingOmzetPct =
+      o.revenue > 0 && o.totalTax != null
+        ? (o.totalTax / o.revenue) * 100
+        : 0;
+
+    return {
+      year: o.year,
+      priveOpnamen: o.privateWithdrawals,
+      belastingdruk: belastingdrukPct,
+      privePct,
+      belastingOmzetPct,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -112,8 +127,8 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
             </h2>
           </div>
           <p className="text-xs md:text-sm text-[var(--zeus-text-secondary)]">
-            Eén overzicht voor omzet, winst, belastingdruk, privé-opnamen en je
-            huis.
+            Eén overzicht voor omzet, winst, belastingdruk, privé-opnamen, FOR
+            en je huis.
           </p>
         </div>
 
@@ -199,8 +214,7 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
             Winst, belasting en netto per jaar
           </h3>
           <p className="text-xs text-[var(--zeus-text-secondary)] mb-4">
-            Geeft de verhouding tussen winst, belasting en wat er netto
-            overblijft.
+            Verhouding tussen winst, belasting en wat er netto overblijft.
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -238,34 +252,70 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
           </div>
         </div>
 
-        {/* Belastingdruk & privé-opnamen */}
+        {/* Belastingdruk & privé-opnamen t.o.v. omzet */}
         <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 md:p-6 shadow-sm">
           <h3 className="text-sm md:text-base font-semibold text-[var(--zeus-text)] mb-2">
-            Belastingdruk en privé-opnamen
+            Belastingdruk &amp; privé-opnamen (relatief & absoluut)
           </h3>
           <p className="text-xs text-[var(--zeus-text-secondary)] mb-4">
-            Hoeveel procent gaat naar belasting, en hoeveel haal je privé uit je
-            bedrijf?
+            Balk: privé-opnamen in euro&apos;s. Lijnen: percentages t.o.v. inkomen en omzet.
+            Klik op een balk om dat jaar te kiezen.
           </p>
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={taxPressureData}>
                 <XAxis dataKey="year" />
-                <YAxis />
+                {/* Linker Y-as = euro's */}
+                <YAxis
+                  yAxisId="left"
+                  tickFormatter={(v) =>
+                    v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`
+                  }
+                />
+                {/* Rechter Y-as = percentages */}
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tickFormatter={(v) => `${Math.round(v)}%`}
+                />
                 <Tooltip />
                 <Legend />
                 <Bar
+                  yAxisId="left"
                   dataKey="priveOpnamen"
-                  name="Privé-opnamen"
+                  name="Privé-opnamen (€)"
                   fill="#e11d48"
+                  onClick={(entry: any) => {
+                    if (entry && typeof entry.year === "number") {
+                      setSelectedYear(entry.year);
+                    }
+                  }}
                 />
                 <Line
+                  yAxisId="right"
                   type="monotone"
                   dataKey="belastingdruk"
-                  name="Belastingdruk (%)"
+                  name="Belastingdruk (% inkomen)"
                   stroke="#facc15"
                   strokeWidth={2}
-                  yAxisId={0}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="privePct"
+                  name="Privé-opnamen (% omzet)"
+                  stroke="#22c55e"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="belastingOmzetPct"
+                  name="Belasting (% omzet)"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
                   dot={false}
                 />
               </BarChart>
@@ -354,7 +404,7 @@ export function FinanceTaxCockpit({ userId }: FinanceTaxCockpitProps) {
 }
 
 /**
- * Bouwt per jaar een overlay van finance + tax + huis
+ * Bouwt per jaar een overlay van finance + tax + huis + FOR
  */
 function buildTaxOverlay(
   reports: FinancialYearReportRow[]
@@ -416,6 +466,12 @@ function buildTaxOverlay(
     const houseWOZ: number | null =
       typeof house.woz === "number" ? house.woz : null;
 
+    const forOpening: number | null =
+      typeof tax.for_opening === "number" ? tax.for_opening : null;
+
+    const forClosing: number | null =
+      typeof tax.for_closing === "number" ? tax.for_closing : null;
+
     return {
       year: r.year,
       revenue,
@@ -428,6 +484,8 @@ function buildTaxOverlay(
       houseWOZ,
       houseMortgageTotal,
       houseInterestPaid,
+      forOpening,
+      forClosing,
     };
   });
 }
@@ -567,6 +625,31 @@ function TaxInsightsBlock({ current, previous }: TaxInsightsBlockProps) {
     } else {
       bullets.push(
         `Je loan-to-value op de woning ligt rond de ${ltv}%. Dat is een prima middenmoot qua risico.`
+      );
+    }
+  }
+
+  if (current.forClosing != null) {
+    if (previous?.forClosing != null) {
+      const forDelta = delta(current.forClosing, previous.forClosing);
+      if (forDelta != null) {
+        if (forDelta > 5) {
+          bullets.push(
+            `Je FOR (fiscale oudedagsreserve) is met ongeveer ${forDelta}% gegroeid t.o.v. ${previous.year}. Denk eraan: dit is uitgestelde belasting, geen vrij besteedbare buffer.`
+          );
+        } else if (forDelta < -5) {
+          bullets.push(
+            `Je FOR (fiscale oudedagsreserve) is ongeveer ${Math.abs(
+              forDelta
+            )}% lager dan in ${previous.year}. Mogelijk heb je afgebouwd of omgezet naar een andere pensioenvoorziening.`
+          );
+        }
+      }
+    } else {
+      bullets.push(
+        `Je FOR (fiscale oudedagsreserve) eindigt dit jaar rond de ${formatEUR(
+          current.forClosing
+        )}. Zie dit als uitgestelde belasting, niet als direct beschikbare spaarpot.`
       );
     }
   }
