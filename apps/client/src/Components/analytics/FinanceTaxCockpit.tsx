@@ -53,14 +53,16 @@ function formatEUR(value: number): string {
 }
 
 interface FinanceTaxCockpitProps {
+  userId: string;
   /** Optioneel: initieel jaar forceren (bijv. huidig jaar) */
   initialYear?: number;
 }
 
 export const FinanceTaxCockpit: React.FC<FinanceTaxCockpitProps> = ({
+  userId,
   initialYear,
 }) => {
-  const { reports, isLoading, error } = useFinancialReports();
+  const { reports, isLoading, error } = useFinancialReports(userId);
 
   // Bepaal beschikbare jaren op basis van de reports
   const availableYears = useMemo(() => {

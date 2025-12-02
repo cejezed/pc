@@ -45,3 +45,8 @@ export function useFinanceAnalytics(userId: string | null) {
     error: query.error,
   };
 }
+
+// Alias voor FinanceTaxCockpit component
+export function useFinancialReports(userId?: string) {
+  return useFinanceAnalytics(userId ?? null);
+}
