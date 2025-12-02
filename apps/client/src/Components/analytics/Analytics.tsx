@@ -389,9 +389,8 @@ export default function Analytics() {
           <h2 className="text-lg font-semibold text-[var(--zeus-text)] mb-4 border-b border-[var(--zeus-border)] pb-2">
             Financieel overzicht (jaarrekeningen)
           </h2>
-          <FinanceDashboard userId={userId} />
-          
-<FinanceTaxCockpit userId="1952170a-a2f8-4658-9c03-975677366e65" />
+<FinanceDashboard userId={userId} />
+<FinanceTaxCockpit userId={userId} />
         </div>
 
         {/* Filters */}

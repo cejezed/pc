@@ -3,7 +3,7 @@
 // "Definance cockpit" – jaaroverzicht van winst, belasting en netto
 // op basis van financial_year_reports + tax-engine.
 //
-// - Haalt alle jaarrekeningen op via useFinancialReports
+// - Haalt alle jaarrekeningen op via useFinanceAnalytics
 // - Laat je een jaar kiezen
 // - Toont KPI's voor dat jaar (omzet, winst, belasting, netto)
 // - Toont multi-year grafiek (omzet / winst / netto na belasting)
@@ -11,7 +11,7 @@
 
 import React, { useMemo, useState } from "react";
 import { BarChart3, Calendar, Info } from "lucide-react";
-import { useFinancialReports } from "./finance-hooks";
+import { useFinanceAnalytics } from "./finance-hooks";
 import type { FinancialYearReportRow } from "./finance-types";
 import {
   computeTaxForYear,
@@ -53,7 +53,8 @@ function formatEUR(value: number): string {
 }
 
 interface FinanceTaxCockpitProps {
-  userId: string;
+  /** Ingelogde gebruiker (auth user id). */
+  userId: string | null | undefined;
   /** Optioneel: initieel jaar forceren (bijv. huidig jaar) */
   initialYear?: number;
 }
@@ -62,7 +63,17 @@ export const FinanceTaxCockpit: React.FC<FinanceTaxCockpitProps> = ({
   userId,
   initialYear,
 }) => {
-  const { reports, isLoading, error } = useFinancialReports(userId);
+  // Geen user → geen cockpit
+  if (!userId) {
+    return (
+      <div className="bg-[var(--zeus-card)] rounded-xl border border-[var(--zeus-border)] p-4 text-sm text-[var(--zeus-text-secondary)]">
+        Geen gebruiker gevonden – log in om je belastingcockpit te zien.
+      </div>
+    );
+  }
+
+  // Haal jaarrekeningen + tax-json op via dezelfde hook als het FinanceDashboard
+  const { reports, isLoading, error } = useFinanceAnalytics(userId ?? null);
 
   // Bepaal beschikbare jaren op basis van de reports
   const availableYears = useMemo(() => {
@@ -75,7 +86,9 @@ export const FinanceTaxCockpit: React.FC<FinanceTaxCockpitProps> = ({
 
   const defaultYear =
     initialYear ??
-    (availableYears.length ? availableYears[availableYears.length - 1] : new Date().getFullYear());
+    (availableYears.length
+      ? availableYears[availableYears.length - 1]
+      : new Date().getFullYear());
 
   const [selectedYear, setSelectedYear] = useState<number>(defaultYear);
 
