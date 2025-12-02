@@ -6,8 +6,12 @@
 // - IB + Zvw (incl. heffingskortingen, woning, aftrek via profiel)
 // - effectieve belastingdruk
 // - alerts als je richting ~50% belastingdruk gaat.
+//
+// NIEUW:
+// - Per jaar worden de kwartaalwaarden bewaard in localStorage,
+//   zodat je invoer niet verdwijnt bij refresh of tabwissel.
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Calendar, AlertTriangle, Info } from "lucide-react";
 import {
   getDefaultTaxYearParams,
@@ -29,19 +33,90 @@ type QuarterState = {
 
 const QUARTER_LABELS = ["Q1", "Q2", "Q3", "Q4"];
 
+// Helpers voor localStorage -----------------------------------------
+
+const STORAGE_KEY_PREFIX = "pc_quarter_plan_";
+
+function storageKeyForYear(year: number) {
+  return `${STORAGE_KEY_PREFIX}${year}`;
+}
+
+function loadQuartersFromStorage(year: number): QuarterState[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(storageKeyForYear(year));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    // Zorg dat we altijd 4 kwartalen hebben
+    const result: QuarterState[] = [];
+    for (let i = 0; i < 4; i++) {
+      const item = parsed[i] || {};
+      result.push({
+        income: typeof item.income === "number" ? item.income : 0,
+        expenses: typeof item.expenses === "number" ? item.expenses : 0,
+      });
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+function saveQuartersToStorage(year: number, quarters: QuarterState[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const payload = quarters.map((q) => ({
+      income: q.income || 0,
+      expenses: q.expenses || 0,
+    }));
+    window.localStorage.setItem(
+      storageKeyForYear(year),
+      JSON.stringify(payload)
+    );
+  } catch {
+    // fail silently; storage is nice-to-have
+  }
+}
+
+// Component ---------------------------------------------------------
+
 export function QuarterProjectionPanel({ initialYear }: QuarterProjectionPanelProps) {
   const now = new Date();
   const defaultYear = initialYear || now.getFullYear();
 
-  // Simpel startpunt: huidige jaar & lege kwartalen
+  // Jaar & kwartalen
   const [year, setYear] = useState<number>(defaultYear);
-  const [currentQuarter, setCurrentQuarter] = useState<number>(1);
+
+  // Start met 4 lege kwartalen; bij mount of jaarwissel laden we ze uit storage
   const [quarters, setQuarters] = useState<QuarterState[]>([
     { income: 0, expenses: 0 },
     { income: 0, expenses: 0 },
     { income: 0, expenses: 0 },
     { income: 0, expenses: 0 },
   ]);
+
+  const [currentQuarter, setCurrentQuarter] = useState<number>(1);
+
+  // Bij eerste render + wanneer het jaar wijzigt → laad uit localStorage
+  useEffect(() => {
+    const stored = loadQuartersFromStorage(year);
+    if (stored) {
+      setQuarters(stored);
+    } else {
+      setQuarters([
+        { income: 0, expenses: 0 },
+        { income: 0, expenses: 0 },
+        { income: 0, expenses: 0 },
+        { income: 0, expenses: 0 },
+      ]);
+    }
+  }, [year]);
+
+  // Wanneer kwartalen veranderen → opslaan in localStorage
+  useEffect(() => {
+    saveQuartersToStorage(year, quarters);
+  }, [year, quarters]);
 
   const params = useMemo(() => getDefaultTaxYearParams(year), [year]);
   const profile = useMemo(() => getProfileForYear(year), [year]);
@@ -204,7 +279,8 @@ export function QuarterProjectionPanel({ initialYear }: QuarterProjectionPanelPr
 
           <div className="mt-2 text-[10px] text-[var(--zeus-text-secondary)]">
             Tip: begin met schattingen voor komende kwartalen. Naarmate het jaar vordert vul je de
-            werkelijke cijfers in voor een scherpere prognose.
+            werkelijke cijfers in voor een scherpere prognose. De waarden worden per jaar lokaal
+            opgeslagen in je browser.
           </div>
         </div>
 
@@ -270,6 +346,8 @@ export function QuarterProjectionPanel({ initialYear }: QuarterProjectionPanelPr
     </div>
   );
 }
+
+// Kleine hulpfuncties ------------------------------------------------
 
 interface SummaryRowProps {
   label: string;
