@@ -81,8 +81,8 @@ export function VoiceChat() {
             const average = sum / bufferLength;
 
             // Thresholds
-            const SILENCE_THRESHOLD = 15; // Slightly higher threshold to avoid background noise
-            const SILENCE_DURATION = 2500; // 2.5 seconds of silence
+            const SILENCE_THRESHOLD = 20; // Increased to avoid background noise
+            const SILENCE_DURATION = 1500; // Reduced for faster turn-taking
 
             if (average > SILENCE_THRESHOLD) {
                 // Speech detected
@@ -123,6 +123,7 @@ export function VoiceChat() {
         }
         if (audioRef.current) {
             audioRef.current.pause();
+            audioRef.current.currentTime = 0;
         }
         if (audioContextRef.current) {
             audioContextRef.current.close();
@@ -139,6 +140,46 @@ export function VoiceChat() {
         speechDetectedRef.current = false;
     }
 
+    // Allow user to interrupt the AI
+    function interruptSpeech() {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            setIsSpeaking(false);
+            // Start listening immediately
+            if (isConversationActive) {
+                startRecording();
+            }
+        }
+    }
+
+    // Allow user to force send if silence detection fails
+    function forceStopRecording() {
+        if (isRecording) {
+            if (silenceTimerRef.current) {
+                clearTimeout(silenceTimerRef.current);
+                silenceTimerRef.current = null;
+            }
+            stopRecording();
+        }
+    }
+
+    function getSupportedMimeType() {
+        const types = [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/mp4',
+            'audio/ogg',
+            'audio/wav'
+        ];
+        for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+        return '';
+    }
+
     function startRecording(stream?: MediaStream) {
         const activeStream = stream || streamRef.current;
         if (!activeStream) return;
@@ -150,39 +191,52 @@ export function VoiceChat() {
             silenceTimerRef.current = null;
         }
 
-        const mediaRecorder = new MediaRecorder(activeStream);
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
+        const mimeType = getSupportedMimeType();
+        const options = mimeType ? { mimeType } : undefined;
 
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunksRef.current.push(event.data);
-            }
-        };
+        try {
+            const mediaRecorder = new MediaRecorder(activeStream, options);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
 
-        mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-            // Only process if blob has size
-            if (audioBlob.size > 1000) { // Ignore very small clips
-                await processAudio(audioBlob);
-            } else {
-                // If audio too short, just restart listening
-                if (isConversationActive) startRecording();
-            }
-        };
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
 
-        mediaRecorder.start();
-        setIsRecording(true);
+            mediaRecorder.onstop = async () => {
+                const actualMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
+                const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
+
+                // Only process if blob has size and we actually detected speech or it was forced
+                // If forced (manual click), we process even if short. 
+                // But here we don't know if it was forced easily. 
+                // Let's just check size.
+                if (audioBlob.size > 1000) {
+                    await processAudio(audioBlob, actualMimeType);
+                } else {
+                    // If audio too short, just restart listening
+                    if (isConversationActive) startRecording();
+                }
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error('Error starting MediaRecorder:', err);
+            setError('Kon opname niet starten. Mogelijk niet ondersteund.');
+        }
     }
 
     function stopRecording() {
-        if (mediaRecorderRef.current && isRecording) {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
     }
 
-    async function processAudio(audioBlob: Blob) {
+    async function processAudio(audioBlob: Blob, mimeType: string) {
         // Rate limiting check
         const now = Date.now();
         if (now - lastRequestTimeRef.current < MIN_REQUEST_INTERVAL) {
@@ -218,7 +272,8 @@ export function VoiceChat() {
                             'Authorization': `Bearer ${session.access_token}`,
                         },
                         body: JSON.stringify({
-                            audio: base64Audio
+                            audio: base64Audio,
+                            mimeType: mimeType
                         }),
                     });
 
@@ -334,7 +389,7 @@ export function VoiceChat() {
                         </span>
                     </button>
                 ) : (
-                    <div className="relative">
+                    <div className="relative flex flex-col items-center gap-6">
                         {/* Status Indicator */}
                         <div className="w-32 h-32 rounded-full flex items-center justify-center bg-slate-50 relative">
                             {/* Ripple effect when speaking */}
@@ -348,18 +403,43 @@ export function VoiceChat() {
                             {isProcessing ? (
                                 <Loader2 className="w-10 h-10 text-zeus-accent animate-spin" />
                             ) : isSpeaking ? (
-                                <Volume2 className="w-10 h-10 text-zeus-accent animate-pulse" />
+                                <button
+                                    onClick={interruptSpeech}
+                                    className="w-full h-full rounded-full flex flex-col items-center justify-center hover:bg-red-50 transition-colors group cursor-pointer z-10"
+                                >
+                                    <Volume2 className="w-10 h-10 text-zeus-accent group-hover:text-red-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-red-400 opacity-0 group-hover:opacity-100 absolute bottom-6 uppercase tracking-wider">Stop</span>
+                                </button>
                             ) : (
-                                <div className="flex gap-1.5 items-end h-8">
-                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] h-4"></div>
-                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-100 h-8"></div>
-                                    <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-200 h-5"></div>
-                                </div>
+                                <button
+                                    onClick={forceStopRecording}
+                                    className="w-full h-full rounded-full flex flex-col items-center justify-center hover:bg-green-50 transition-colors group cursor-pointer z-10"
+                                >
+                                    <div className="flex gap-1.5 items-end h-8 group-hover:opacity-50 transition-opacity">
+                                        <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] h-4"></div>
+                                        <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-100 h-8"></div>
+                                        <div className="w-1.5 bg-zeus-accent rounded-full animate-[bounce_1s_infinite] animation-delay-200 h-5"></div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-green-500 opacity-0 group-hover:opacity-100 absolute bottom-6 uppercase tracking-wider">Verzend</span>
+                                </button>
                             )}
                         </div>
-                        <p className="text-center mt-8 text-sm font-medium text-slate-500 tracking-wide uppercase">
-                            {isProcessing ? 'Denken...' : isSpeaking ? 'Spreken...' : 'Luisteren...'}
-                        </p>
+
+                        <div className="text-center space-y-2">
+                            <p className="text-sm font-medium text-slate-500 tracking-wide uppercase">
+                                {isProcessing ? 'Denken...' : isSpeaking ? 'Spreken...' : 'Luisteren...'}
+                            </p>
+                            {!isProcessing && !isSpeaking && (
+                                <p className="text-xs text-slate-400">
+                                    Spreek nu • Klik om te verzenden
+                                </p>
+                            )}
+                            {isSpeaking && (
+                                <p className="text-xs text-slate-400">
+                                    Klik om te onderbreken
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -382,8 +462,8 @@ export function VoiceChat() {
                         >
                             <div
                                 className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                                        ? 'bg-zeus-accent text-white rounded-tr-sm'
-                                        : 'bg-slate-50 text-slate-700 rounded-tl-sm border border-slate-100'
+                                    ? 'bg-zeus-accent text-white rounded-tr-sm'
+                                    : 'bg-slate-50 text-slate-700 rounded-tl-sm border border-slate-100'
                                     }`}
                             >
                                 {msg.text}
