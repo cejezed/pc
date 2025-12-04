@@ -359,7 +359,7 @@ export function VoiceChat() {
                     <div>
                         <h2 className="font-bold text-zeus-primary text-xl tracking-tight flex items-center gap-2">
                             Voice Assistant
-                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">v2.1</span>
+                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">v2.2</span>
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
                             <span className={`w-2 h-2 rounded-full ${isConversationActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-slate-300'}`}></span>
