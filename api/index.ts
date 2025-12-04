@@ -272,7 +272,8 @@ Respond to the user in Dutch. Be concise but meaningful.
       }
 
       // Convert base64 to buffer
-      const base64Data = audio.replace(/^data:audio\/\w+;base64,/, '');
+      // Fix: Regex must handle complex mime types like 'audio/webm;codecs=opus'
+      const base64Data = audio.replace(/^data:.*?;base64,/, '');
       const audioBuffer = Buffer.from(base64Data, 'base64');
 
       // Create a Blob-like object for Whisper
