@@ -28,26 +28,30 @@ export async function transcribeAudio(audioBlob: Blob, mimeType: string = 'audio
         throw new Error('OPENAI_API_KEY is not set');
     }
 
-    // Determine extension from mimeType
-    // e.g. audio/webm -> webm, audio/mp4 -> mp4
+    // Determine extension
     const extension = mimeType.split('/')[1]?.split(';')[0] || 'webm';
     const filename = `audio.${extension}`;
-    const simpleType = mimeType.split(';')[0];
 
-    try {
-        // Convert Blob to File-like object for OpenAI SDK
-        const file = await toFile(audioBlob, filename, { type: simpleType });
+    const formData = new FormData();
+    formData.append('file', audioBlob, filename);
+    formData.append('model', 'whisper-1');
 
-        const response = await openai.audio.transcriptions.create({
-            file: file,
-            model: 'whisper-1',
-        });
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: formData,
+    });
 
-        return response.text;
-    } catch (error: any) {
-        console.error('OpenAI Whisper Error:', error);
-        throw new Error(`Whisper failed: ${error.message}`);
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI Whisper API Error:', errorText);
+        throw new Error(`Whisper API failed: ${response.status} - ${errorText}`);
     }
+
+    const data = await response.json();
+    return data.text;
 }
 
 // Text-to-speech with OpenAI TTS
