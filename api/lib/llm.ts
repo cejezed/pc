@@ -32,16 +32,22 @@ export async function transcribeAudio(audioBlob: Blob, mimeType: string = 'audio
     // e.g. audio/webm -> webm, audio/mp4 -> mp4
     const extension = mimeType.split('/')[1]?.split(';')[0] || 'webm';
     const filename = `audio.${extension}`;
+    const simpleType = mimeType.split(';')[0];
 
-    // Convert Blob to File-like object for OpenAI SDK
-    const file = await toFile(audioBlob, filename, { type: mimeType });
+    try {
+        // Convert Blob to File-like object for OpenAI SDK
+        const file = await toFile(audioBlob, filename, { type: simpleType });
 
-    const response = await openai.audio.transcriptions.create({
-        file: file,
-        model: 'whisper-1',
-    });
+        const response = await openai.audio.transcriptions.create({
+            file: file,
+            model: 'whisper-1',
+        });
 
-    return response.text;
+        return response.text;
+    } catch (error: any) {
+        console.error('OpenAI Whisper Error:', error);
+        throw new Error(`Whisper failed: ${error.message}`);
+    }
 }
 
 // Text-to-speech with OpenAI TTS
