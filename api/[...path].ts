@@ -228,7 +228,7 @@ Respond to the user in Dutch. Be concise but meaningful.
     if (authError || !user) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-      const { audio } = req.body;
+      const { audio, mimeType } = req.body;
 
       if (!audio) {
         return res.status(400).json({ error: 'Audio data required' });
@@ -272,15 +272,17 @@ Respond to the user in Dutch. Be concise but meaningful.
       }
 
       // Convert base64 to buffer
-      const base64Data = audio.replace(/^data:audio\/\w+;base64,/, '');
+      // Fix: Regex must handle complex mime types like 'audio/webm;codecs=opus'
+      const base64Data = audio.replace(/^data:.*?;base64,/, '');
       const audioBuffer = Buffer.from(base64Data, 'base64');
 
       // Create a Blob-like object for Whisper
-      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+      const type = mimeType || 'audio/webm';
+      const audioBlob = new Blob([audioBuffer], { type });
 
       // Transcribe with Whisper
       const { transcribeAudio } = await import('./lib/llm');
-      const transcript = await transcribeAudio(audioBlob);
+      const transcript = await transcribeAudio(audioBlob, type);
 
       if (!transcript) {
         return res.status(400).json({ error: 'Could not transcribe audio' });
