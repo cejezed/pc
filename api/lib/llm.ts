@@ -23,7 +23,7 @@ export async function callLLM(
 }
 
 // Voice transcription with Whisper
-export async function transcribeAudio(audioBlob: Blob, mimeType: string = 'audio/webm'): Promise<string> {
+export async function transcribeAudio(audioBuffer: Buffer, mimeType: string = 'audio/webm'): Promise<string> {
     if (!process.env.OPENAI_API_KEY) {
         throw new Error('OPENAI_API_KEY is not set');
     }
@@ -31,27 +31,21 @@ export async function transcribeAudio(audioBlob: Blob, mimeType: string = 'audio
     // Determine extension
     const extension = mimeType.split('/')[1]?.split(';')[0] || 'webm';
     const filename = `audio.${extension}`;
+    const simpleType = mimeType.split(';')[0];
 
-    const formData = new FormData();
-    formData.append('file', audioBlob, filename);
-    formData.append('model', 'whisper-1');
+    try {
+        const file = await toFile(audioBuffer, filename, { type: simpleType });
 
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: formData,
-    });
+        const response = await openai.audio.transcriptions.create({
+            file: file,
+            model: 'whisper-1',
+        });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('OpenAI Whisper API Error:', errorText);
-        throw new Error(`Whisper API failed: ${response.status} - ${errorText}`);
+        return response.text;
+    } catch (error: any) {
+        console.error('OpenAI Whisper Error:', error);
+        throw new Error(`Whisper failed: ${error.message}`);
     }
-
-    const data = await response.json();
-    return data.text;
 }
 
 // Text-to-speech with OpenAI TTS
