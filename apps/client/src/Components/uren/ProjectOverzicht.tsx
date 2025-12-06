@@ -145,7 +145,7 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
           <h2 className="text-2xl font-bold text-[var(--zeus-text)]">Projecten</h2>
           <button
             onClick={openCreate}
-            className="btn-zeus-primary flex items-center gap-2"
+            className="bg-[var(--zeus-accent)] text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-[var(--zeus-accent)]/80 transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:shadow-[0_0_25px_rgba(255,107,0,0.5)]"
           >
             <Plus className="w-4 h-4" />
             Project toevoegen
