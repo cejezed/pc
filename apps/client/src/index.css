@@ -128,36 +128,34 @@
   /* Button Styles */
   .btn-zeus-primary {
     background: var(--zeus-accent);
-    color: white;
+    color: #ffffff;
     font-weight: 600;
     padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    /* Pill shape */
+    border-radius: 0.5rem;
     border: none;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(45, 156, 219, 0.2);
+    box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
   }
 
   .btn-zeus-primary:hover {
-    background: #1D7AAC;
-    /* Darker Teal */
-    box-shadow: 0 6px 12px rgba(45, 156, 219, 0.3);
+    background: rgba(255, 107, 0, 0.8);
+    box-shadow: 0 0 25px rgba(255, 107, 0, 0.5);
     transform: translateY(-1px);
   }
 
   .btn-zeus-secondary {
-    background: white;
+    background: var(--zeus-card);
     border: 1px solid var(--zeus-border);
     color: var(--zeus-text);
     padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
+    border-radius: 0.5rem;
     transition: all 0.2s ease;
   }
 
   .btn-zeus-secondary:hover {
     border-color: var(--zeus-accent);
     color: var(--zeus-accent);
-    background: #F0F9FF;
+    background: var(--zeus-bg-secondary);
   }
 
   /* Input Styles */
