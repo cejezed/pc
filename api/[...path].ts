@@ -276,13 +276,10 @@ Respond to the user in Dutch. Be concise but meaningful.
       const base64Data = audio.replace(/^data:.*?;base64,/, '');
       const audioBuffer = Buffer.from(base64Data, 'base64');
 
-      // Create a Blob-like object for Whisper
+      // Transcribe with Whisper using raw buffer (toFile already handles Buffer)
       const type = mimeType || 'audio/webm';
-      const audioBlob = new Blob([audioBuffer], { type });
-
-      // Transcribe with Whisper
       const { transcribeAudio } = await import('./lib/llm');
-      const transcript = await transcribeAudio(audioBlob, type);
+      const transcript = await transcribeAudio(audioBuffer, type);
 
       if (!transcript) {
         return res.status(400).json({ error: 'Could not transcribe audio' });
