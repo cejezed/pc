@@ -1,3 +1,18 @@
 node_modules
 pnpm-lock.yaml
 package-lock.json
+
+# Ignore all API route files except index.ts to stay within Vercel Hobby 12-function limit
+api/[...path].ts
+api/calendar.ts
+api/export.ts
+api/health.ts
+api/import.ts
+api/ping.ts
+api/tasks.ts
+api/test-chat-connection.ts
+api/invoices/**/*.ts
+api/meal-plans/**/*.ts
+api/recipes/**/*.ts
+api/shopping-lists/**/*.ts
+api/time-entries/**/*.ts

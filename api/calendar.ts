@@ -49,7 +49,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (start < startDate || start > endDate) continue;
 
       // Detecteer all-day (geen tijd component)
-      const allDay = typeof ev.start === "string" && ev.start.length === 8; // YYYYMMDD
+      const rawStart = ev.start as unknown;
+      const allDay = typeof rawStart === "string" && rawStart.length === 8; // YYYYMMDD
 
       parsedEvents.push({
         id: ev.uid || k,
