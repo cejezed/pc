@@ -44,12 +44,13 @@ function toNumber(v: unknown): number {
   return isNaN(n) ? 0 : n;
 }
 
-function formatEUR(value: number): string {
+function formatEUR(value: number | null | undefined): string {
+  const safeValue = typeof value === "number" ? value : 0;
   return new Intl.NumberFormat("nl-NL", {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(safeValue);
 }
 
 interface FinanceTaxCockpitProps {
@@ -280,7 +281,7 @@ export const FinanceTaxCockpit: React.FC<FinanceTaxCockpitProps> = ({
                 }
               />
               <Tooltip
-                formatter={(v: number) => formatEUR(v)}
+                formatter={(v) => formatEUR(typeof v === "number" ? v : undefined)}
                 labelFormatter={(label) => `Jaar ${label}`}
               />
               <Legend />

@@ -81,7 +81,7 @@ export function BudgetPieChart({
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) => EUR(value)}
+          formatter={(value) => EUR(typeof value === "number" ? value : 0)}
           contentStyle={chartTheme.tooltip}
           itemStyle={{ color: "#f3f4f6" }}
         />
