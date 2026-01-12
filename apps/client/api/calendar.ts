@@ -32,12 +32,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const endDate = endParam ? new Date(endParam) : defaultEnd;
 
     // Fetch ICS
-    const events = await ical.async.fromURL(ICS_URL);
+    const events = await ical.async.fromURL(ICS_URL) as Record<string, any>;
 
     const parsedEvents: CalendarEvent[] = [];
 
     for (const k in events) {
-      const ev = events[k];
+      const ev = events[k] as any;
       if (ev.type !== "VEVENT") continue;
 
       const start = ev.start ? new Date(ev.start) : null;

@@ -1,7 +1,7 @@
 // api/_lib/recipeScanAI.ts
 // AI Vision helper for extracting recipe data from images
 
-import type { ScannedRecipeDraft, ScannedIngredient } from '../../apps/client/src/features/eten/types';
+import type { ScannedRecipeDraft, ScannedIngredient } from '../../src/Components/eten/types';
 
 const RECIPE_SCAN_MODE = process.env.RECIPE_SCAN_MODE || 'stub'; // 'stub' or 'ai'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;

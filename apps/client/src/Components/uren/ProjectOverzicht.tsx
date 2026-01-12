@@ -17,6 +17,7 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
   const [showArchivedProjects, setShowArchivedProjects] = React.useState(false);
   const [showProjectModal, setShowProjectModal] = React.useState(false);
   const [editProject, setEditProject] = React.useState<Project | null>(null);
+  const [entryFilters, setEntryFilters] = React.useState<Record<string, { from?: string }>>({});
 
   const deleteProject = useDeleteProject();
   const archiveProject = useArchiveProject();
@@ -72,6 +73,7 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
 
       return {
         project,
+        entries: projectEntries,
         totalHours,
         totalAmount,
         billedHours,
@@ -153,8 +155,16 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
         </div>
 
         <div className="space-y-4">
-          {sortedActiveProjects.map(({ project, totalHours, totalAmount, billedAmount, unbilledAmount, billedHours, unbilledHours, phaseBreakdown, hasEntries }) => {
+        {sortedActiveProjects.map(({ project, entries, totalHours, totalAmount, billedAmount, unbilledAmount, billedHours, unbilledHours, phaseBreakdown, hasEntries }) => {
             const isExpanded = expandedProjects.has(project.id);
+            const filterFrom = entryFilters[project.id]?.from;
+            const filteredEntries = filterFrom
+              ? entries.filter((entry) => new Date(entry.occurred_on) >= new Date(filterFrom))
+              : entries;
+            const filteredHours = filteredEntries.reduce((sum, entry) => {
+              const hours = entry.minutes ? entry.minutes / 60 : entry.hours || 0;
+              return sum + hours;
+            }, 0);
             return (
               <div key={project.id} className="zeus-card overflow-hidden">
                 <div className="p-4 flex items-center justify-between">
@@ -308,6 +318,90 @@ export default function ProjectOverzicht({ projects, phases, timeEntries }: Prop
                     {!hasEntries && (
                       <div className="text-center py-4 text-[var(--zeus-text-secondary)] text-sm">
                         Nog geen uren geregistreerd voor dit project
+                      </div>
+                    )}
+
+                    {hasEntries && (
+                      <div className="mt-6">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-3">
+                          <div>
+                            <h4 className="text-base font-semibold text-[var(--zeus-text)]">Alle invoeren</h4>
+                            <p className="text-xs text-[var(--zeus-text-secondary)]">
+                              {filteredEntries.length} entries, {filteredHours.toFixed(1)} uur
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <label className="text-xs text-[var(--zeus-text-secondary)]">Vanaf datum</label>
+                            <input
+                              type="date"
+                              value={filterFrom || ""}
+                              onChange={(e) =>
+                                setEntryFilters((prev) => ({
+                                  ...prev,
+                                  [project.id]: { from: e.target.value || undefined },
+                                }))
+                              }
+                              className="bg-[var(--zeus-card)] border border-[var(--zeus-border)] rounded-md px-2 py-1 text-sm text-[var(--zeus-text)] focus:outline-none focus:border-[var(--zeus-primary)]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="border-b border-[var(--zeus-border)]">
+                              <tr>
+                                <th className="text-left py-2 font-medium text-[var(--zeus-text-secondary)]">Datum</th>
+                                <th className="text-left py-2 font-medium text-[var(--zeus-text-secondary)]">Fase</th>
+                                <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Uren</th>
+                                <th className="text-left py-2 font-medium text-[var(--zeus-text-secondary)]">Omschrijving</th>
+                                <th className="text-right py-2 font-medium text-[var(--zeus-text-secondary)]">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredEntries.length === 0 ? (
+                                <tr>
+                                  <td colSpan={5} className="py-3 text-center text-[var(--zeus-text-secondary)] text-sm">
+                                    Geen uren gevonden vanaf deze datum
+                                  </td>
+                                </tr>
+                              ) : (
+                                filteredEntries
+                                  .slice()
+                                  .sort((a, b) => new Date(b.occurred_on).getTime() - new Date(a.occurred_on).getTime())
+                                  .map((entry) => {
+                                    const phase = entry.phases || entry.phase;
+                                    const hours = entry.minutes ? entry.minutes / 60 : entry.hours || 0;
+                                    const isBilled = !!entry.invoiced_at;
+                                    return (
+                                      <tr key={entry.id} className="border-b border-[var(--zeus-border)] last:border-0">
+                                        <td className="py-2 text-[var(--zeus-text)]">
+                                          {new Date(entry.occurred_on).toLocaleDateString("nl-NL")}
+                                        </td>
+                                        <td className="py-2 text-[var(--zeus-text-secondary)]">
+                                          {phase?.name || entry.phase_code}
+                                        </td>
+                                        <td className="py-2 text-right text-[var(--zeus-text)]">
+                                          {hours.toFixed(2)}
+                                        </td>
+                                        <td className="py-2 text-[var(--zeus-text-secondary)]">
+                                          {entry.notes || "-"}
+                                        </td>
+                                        <td className="py-2 text-right">
+                                          {isBilled ? (
+                                            <span className="text-xs text-green-400">
+                                              Gefactureerd{entry.invoice_number ? ` (${entry.invoice_number})` : ""}
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-[var(--zeus-text-secondary)]/60">Open</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     )}
                   </div>
