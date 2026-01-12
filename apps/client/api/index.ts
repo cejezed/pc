@@ -208,7 +208,7 @@ Respond to the user in Dutch. Be concise but meaningful.
 
     try {
       // Dynamic import to avoid top-level await issues in some envs
-      const { coachCore } = await import('./lib/coachCore');
+      const { coachCore } = await import('../server/lib/coachCore');
       const { cards } = await coachCore({ userId: user.id });
       return res.status(200).json({ cards });
     } catch (error: any) {
@@ -278,7 +278,7 @@ Respond to the user in Dutch. Be concise but meaningful.
 
       // Transcribe with Whisper using raw buffer (toFile already handles Buffer)
       const type = mimeType || 'audio/webm';
-      const { transcribeAudio } = await import('./lib/llm');
+      const { transcribeAudio } = await import('../server/lib/llm');
       const transcript = await transcribeAudio(audioBuffer, type);
 
       if (!transcript) {
@@ -293,8 +293,8 @@ Respond to the user in Dutch. Be concise but meaningful.
       });
 
       // Generate response
-      const { coachCore } = await import('./lib/coachCore');
-      const { generateSpeech } = await import('./lib/llm');
+      const { coachCore } = await import('../server/lib/coachCore');
+      const { generateSpeech } = await import('../server/lib/llm');
 
       const { reply, cards } = await coachCore({
         userId: user.id,

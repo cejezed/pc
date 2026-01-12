@@ -1,5 +1,5 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,10 +19,16 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing invoice id' });
+  }
+
   try {
     // Fetch invoice with all related data
     const { data: invoice, error } = await supabase
@@ -32,11 +38,11 @@ export async function GET(
         project:projects(name, client_name, city),
         items:factuur_items(*)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !invoice) {
-      return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+      return res.status(404).json({ error: 'Invoice not found' });
     }
 
     // Calculate totals
@@ -342,18 +348,12 @@ export async function GET(
 </html>`;
 
     // Return HTML response that can be printed/saved as PDF
-    return new Response(html, {
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `inline; filename="factuur-${invoice.invoice_number}.html"`,
-      },
-    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Content-Disposition', `inline; filename="factuur-${invoice.invoice_number}.html"`);
+    return res.status(200).send(html);
 
   } catch (err) {
     console.error('PDF generation error:', err);
-    return NextResponse.json(
-      { error: 'Failed to generate PDF' },
-      { status: 500 }
-    );
+    return res.status(500).json({ error: 'Failed to generate PDF' });
   }
 }
