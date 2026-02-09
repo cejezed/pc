@@ -9,7 +9,10 @@
       "Bash(git fetch:*)",
       "Bash(npm run build:*)",
       "Bash(cat:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(head:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm --filter client build:*)"
     ],
     "deny": [],
     "ask": []

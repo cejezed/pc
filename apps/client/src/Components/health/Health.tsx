@@ -5,9 +5,10 @@ import { WorkoutTab } from './workout-componenten';
 import { SlaapTab } from './slaap-componenten';
 import { PijnTab } from './pijn-componenten';
 import StressTab from './stress-componenten';
-import { Zap, Dumbbell, Moon, Heart, Brain } from 'lucide-react';
+import { Zap, Dumbbell, Moon, Heart, Brain, CalendarCheck } from 'lucide-react';
+import { DagschemaTab } from './dagschema-componenten';
 
-type TabType = 'energie' | 'workout' | 'slaap' | 'pijn' | 'stress';
+type TabType = 'energie' | 'workout' | 'slaap' | 'pijn' | 'stress' | 'dagschema';
 
 const TABS = [
   { id: 'energie' as TabType, label: 'Energie', icon: Zap, color: 'text-orange-500' },
@@ -15,6 +16,7 @@ const TABS = [
   { id: 'slaap' as TabType, label: 'Slaap', icon: Moon, color: 'text-blue-500' },
   { id: 'pijn' as TabType, label: 'Pijn', icon: Heart, color: 'text-red-500' },
   { id: 'stress' as TabType, label: 'Stress', icon: Brain, color: 'text-pink-500' },
+  { id: 'dagschema' as TabType, label: 'Dagschema', icon: CalendarCheck, color: 'text-teal-500' },
 ];
 
 export default function Health() {
@@ -46,6 +48,7 @@ export default function Health() {
         {activeTab === 'slaap' && <SlaapTab />}
         {activeTab === 'pijn' && <PijnTab />}
         {activeTab === 'stress' && <StressTab />}
+        {activeTab === 'dagschema' && <DagschemaTab />}
       </div>
     </div>
   );
